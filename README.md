@@ -17,7 +17,7 @@ You are welcome to put up Pull Requests to add new scripts to the "Community" se
 Example metadata.json
  ```javascript
  {
-  "display_name": "SD Ultimate Upscale",
+  "displayName": "SD Ultimate Upscale",
   "author": "",
   "file": "sd-ultimate-upscale.js",
   "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures."
