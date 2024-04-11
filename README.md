@@ -14,6 +14,16 @@ You are welcome to put up Pull Requests to add new scripts to the "Community" se
 
  3. Add a `metadata.json` file that contains the metadata including name and other information. If metadata.json is not provided, the default metadata will be generated based on the name of the js file.
 
+Example metadata.json
+ ```javascript
+ {
+  "display_name": "SD Ultimate Upscale",
+  "author": "",
+  "file": "sd-ultimate-upscale.js",
+  "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures."
+}
+ ```
+
 Then add the directory name for your script into the `scripts.txt` file at the top level of the repository.
 
 # How It Works
