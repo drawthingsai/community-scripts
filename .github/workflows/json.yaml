@@ -17,7 +17,7 @@ jobs:
 
       - name: Run JSON generation.
         run: |
-          python3 scripts/script_json.py
+          python3 worker-scripts/script_json.py
           git config --global user.email "docbot@github.com"
           git config --global user.name "docbot"
           git commit -a -m "Update metadata with new script." || true
