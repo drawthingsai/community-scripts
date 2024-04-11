@@ -1,0 +1,43 @@
+name: json
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+      - name: Run JSON generation.
+        run: |
+          python3 scripts/script_json.py
+          git config --global user.email "docbot@github.com"
+          git config --global user.name "docbot"
+          git commit -a -m "Update metadata with new script." || true
+          git pull --rebase && git push || true
+
+      - name: Clean up json branch
+        run: |
+          git branch -D json || true
+          git checkout -b json
+          mkdir -p docs
+          mkdir -p docs/scripts
+          mv *.json ./docs
+          find scripts -type f -name "*.js" -exec cp {} ./docs/scripts \;
+          echo "scripts.drawthings.ai" > ./docs/CNAME
+    
+      - name: Add and commit documentation
+        run: |
+          git add "docs/*" && git commit -m "Update docs."
+
+      - name: Push the new branch
+        run: |
+          git push --force origin json:json
+
