@@ -1,6 +1,6 @@
 {
-  "displayName": "SD Ultimate Upscale",
-  "author": "Draw Things",
+  "name": "SD Ultimate Upscale",
   "file": "sd-ultimate-upscale.js",
+  "author": "Draw Things",
   "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures."
 }
