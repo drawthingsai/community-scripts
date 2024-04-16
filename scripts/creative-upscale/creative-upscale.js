@@ -1,0 +1,60 @@
+//@api-1.0
+
+const configuration = pipeline.configuration;
+
+pipeline.downloadBuiltin("4x_ultrasharp_f16.ckpt");
+
+configuration.strength = 0;
+configuration.upscaler = "4x UltraSharp";
+pipeline.run({configuration: configuration});
+
+const tileSrc = canvas.saveImageSrc(true);
+
+pipeline.downloadBuiltin("controlnet_tile_1.x_v1.1_f16.ckpt");
+pipeline.downloadBuiltin("juggernaut_reborn_q6p_q8p.ckpt");
+pipeline.downloadBuiltin("more_details_lora_f16.ckpt");
+pipeline.downloadBuiltin("sdxl_render_lora_f16.ckpt");
+pipeline.downloadBuiltin("tcd_sd_v1.5_lora_f16.ckpt");
+
+const imageRect = canvas.boundingBox;
+
+const baseZoom = canvas.canvasZoom;
+
+configuration.width = configuration.width * 2;
+configuration.height = configuration.height * 2;
+canvas.updateCanvasSize(configuration);
+canvas.canvasZoom = baseZoom * 2;
+canvas.moveCanvas(imageRect.x, imageRect.y);
+
+configuration.steps = 8;
+configuration.tiledDecoding = true;
+configuration.decodingTileWidth = 1024;
+configuration.decodingTileHeight = 1024;
+configuration.decodingTileOverlap = 128;
+configuration.tiledDiffusion = true;
+configuration.diffusionTileWidth = 1024;
+configuration.diffusionTileHeight = 1024;
+configuration.diffusionTileOverlap = 128;
+configuration.sampler = SamplerType.TCD;
+configuration.stochasticSamplingGamma = 0.3;
+configuration.upscaler = null;
+
+configuration.model = "juggernaut_reborn_q6p_q8p.ckpt";
+configuration.strength = 0.4;
+configuration.loras = [{"file": "more_details_lora_f16.ckpt", "weight": 0.6}, {"file": "sdxl_render_lora_f16.ckpt", "weight": 1}, {"file": "tcd_sd_v1.5_lora_f16.ckpt", "weight": 1}];
+const tile = pipeline.findControlByName("Tile (SD v1.x, ControlNet 1.1)");
+tile.weight = 0.5;
+configuration.controls = [tile];
+
+pipeline.run({configuration: configuration, prompt: "masterpiece, best quality, highres"});
+
+configuration.width = configuration.width * 2;
+configuration.height = configuration.height * 2;
+canvas.updateCanvasSize(configuration);
+canvas.canvasZoom = baseZoom * 4;
+canvas.moveCanvas(imageRect.x, imageRect.y);
+
+canvas.loadCustomLayerFromSrc(tileSrc);
+
+pipeline.run({configuration: configuration, prompt: "masterpiece, best quality, highres"});
+
