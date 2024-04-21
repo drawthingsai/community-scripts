@@ -6,7 +6,7 @@ This repository maintains the source material and publish mechanism for "Communi
 
 You are welcome to put up Pull Requests to add new scripts to the "Community Scripts" section within the app. To add a new script, first create a directory under `./scripts` and add the following files:
 
- 1. add LICENSE.md (optional);
+ 1. add LICENSE (optional);
 
  2. add the js file;
 

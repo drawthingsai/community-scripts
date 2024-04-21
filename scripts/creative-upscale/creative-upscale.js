@@ -49,7 +49,7 @@ configuration.upscaler = null;
 
 configuration.model = "juggernaut_reborn_q6p_q8p.ckpt";
 configuration.strength = 0.4;
-configuration.loras = [{"file": "more_details_lora_f16.ckpt", "weight": 0.6}, {"file": "sdxl_render_lora_f16.ckpt", "weight": 1}, {"file": "tcd_sd_v1.5_lora_f16.ckpt", "weight": 1}];
+configuration.loras = [{"file": "add_more_details__detail_enhancer___tweaker__lora_f16.ckpt", "weight": 0.6}, {"file": "sdxl_render_v2.0_lora_f16.ckpt", "weight": 1}, {"file": "tcd_sd_v1.5_lora_f16.ckpt", "weight": 1}];
 const tile = pipeline.findControlByName("Tile (SD v1.x, ControlNet 1.1)");
 tile.weight = 0.5;
 configuration.controls = [tile];
