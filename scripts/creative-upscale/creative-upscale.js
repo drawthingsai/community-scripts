@@ -1,5 +1,13 @@
 //@api-1.0
 
+const userSelection = requestFromUser("User Selection", "", function() {
+  return [
+    this.section("Upscale Factor", "This determines many times we should upscale the image. For example, 400% requires us to upscale the image twice.", [
+      this.segmented(1, ["200%", "400%"])
+    ])
+  ];
+});
+
 const configuration = pipeline.configuration;
 
 pipeline.downloadBuiltin("4x_ultrasharp_f16.ckpt");
@@ -48,13 +56,14 @@ configuration.controls = [tile];
 
 pipeline.run({configuration: configuration, prompt: "masterpiece, best quality, highres"});
 
-configuration.width = configuration.width * 2;
-configuration.height = configuration.height * 2;
-canvas.updateCanvasSize(configuration);
-canvas.canvasZoom = baseZoom * 4;
-canvas.moveCanvas(imageRect.x, imageRect.y);
+if (userSelection[0] > 0) { // This allows us to upscale again to 400%.
+  configuration.width = configuration.width * 2;
+  configuration.height = configuration.height * 2;
+  canvas.updateCanvasSize(configuration);
+  canvas.canvasZoom = baseZoom * 4;
+  canvas.moveCanvas(imageRect.x, imageRect.y);
 
-canvas.loadCustomLayerFromSrc(tileSrc);
+  canvas.loadCustomLayerFromSrc(tileSrc);
 
-pipeline.run({configuration: configuration, prompt: "masterpiece, best quality, highres"});
-
+  pipeline.run({configuration: configuration, prompt: "masterpiece, best quality, highres"});
+}
