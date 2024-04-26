@@ -2,28 +2,30 @@
 
 This repository maintains the source material and publish mechanism for "Community Scripts" section of the Scripts feature in the Draw Things app.
 
-# How to Contribute
+## How to Contribute
 
-We welcome Pull Requests for adding new scripts to the "Community Scripts" section within the app. To contribute a script, please follow these steps:
+To contribute a new script to the "Community Scripts" section, please follow these steps:
 
- 1. Create a directory under `./scripts`.
- 2. Include the following files:
-    * `LICENSE` (optional).
-    * The JavaScript file.
-    * A `metadata.json` file containing the script's metadata such as name and other relevant information.
+ 1. **Create a Script Directory**: Make a new directory under `./scripts`.
+ 2. **Add Necessary Files**:
+    * **JavaScript File**: This is the main script file.
+    * **Metadata File (`metadata.json`)**: This file should contain essential metadata about the script, including the name, author, and description.
+    * **License File (`LICENSE`)**: Optionally, include a license file if you want your script to be licensed under terms different from GPL-v3.
 
- Example of `metadata.json`:
+ **Example of a Complete `metadata.json` File**:
  ```javascript
  {
   "name": "SD Ultimate Upscale",
-  "author": "",
+  "author": "Your Name",
   "file": "sd-ultimate-upscale.js",
   "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures."
 }
  ```
 
-The `scripts.txt` file at the top level of the repository lists the scripts in the order they will appear in the app.
+### Scripts List:
 
-# License
+The `scripts.txt` file at the top level of the repository organizes the scripts in the order they will be displayed in the app.
 
-Unless specified otherwise, contributed scripts are licensed under GPL-v3. Contributors may opt to license their scripts under more permissive licenses as indicated in a per-script `LICENSE` file.
+## Licensing
+
+Default licensing for scripts is GPL-v3. If you prefer a more permissive license, please include a specific `LICENSE` file with your script to indicate this choice.
