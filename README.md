@@ -1,18 +1,18 @@
 # Community Scripts
 
-This repository maintains the source material and publish mechanism for "Community Scripts" section of Scripts in the Draw Things app.
+This repository maintains the source material and publish mechanism for "Community Scripts" section of the Scripts feature in the Draw Things app.
 
 # How to Contribute
 
-You are welcome to put up Pull Requests to add new scripts to the "Community Scripts" section within the app. To add a new script, first create a directory under `./scripts` and add the following files:
+We welcome Pull Requests for adding new scripts to the "Community Scripts" section within the app. To contribute a script, please follow these steps:
 
- 1. add LICENSE (optional);
+ 1. Create a directory under `./scripts`.
+ 2. Include the following files:
+    * `LICENSE` (optional).
+    * The JavaScript file.
+    * A `metadata.json` file containing the script's metadata such as name and other relevant information.
 
- 2. add the js file;
-
- 3. Add a `metadata.json` file that contains the metadata including name and other information. If metadata.json is not provided, the default metadata will be generated based on the name of the js file.
-
-Example metadata.json
+ Example of `metadata.json`:
  ```javascript
  {
   "name": "SD Ultimate Upscale",
@@ -22,8 +22,8 @@ Example metadata.json
 }
  ```
 
-The `scripts.txt` file at the top level of the repository maintains the order of available list that will be shown in the app.e
+The `scripts.txt` file at the top level of the repository lists the scripts in the order they will appear in the app.
 
 # License
 
-Unless otherwise specified, contributed scripts are licensed under GPL-v3. Contributors are free to license their scripts under more permissive licenses (per script LICENSE.md file).
+Unless specified otherwise, contributed scripts are licensed under GPL-v3. Contributors may opt to license their scripts under more permissive licenses as indicated in a per-script `LICENSE` file.
