@@ -10,7 +10,7 @@ const userSelection = requestFromUser("User Selection", "", function() {
 
 const configuration = pipeline.configuration;
 
-pipeline.downloadBuiltin("4x_ultrasharp_f16.ckpt");
+pipeline.downloadBuiltins(["4x_ultrasharp_f16.ckpt"]);
 
 configuration.strength = 0;
 configuration.upscaler = "4x UltraSharp";
@@ -18,11 +18,7 @@ pipeline.run({configuration: configuration});
 
 const tileSrc = canvas.saveImageSrc(true);
 
-pipeline.downloadBuiltin("controlnet_tile_1.x_v1.1_f16.ckpt");
-pipeline.downloadBuiltin("juggernaut_reborn_q6p_q8p.ckpt");
-pipeline.downloadBuiltin("add_more_details__detail_enhancer___tweaker__lora_f16.ckpt");
-pipeline.downloadBuiltin("sdxl_render_v2.0_lora_f16.ckpt");
-pipeline.downloadBuiltin("tcd_sd_v1.5_lora_f16.ckpt");
+pipeline.downloadBuiltins(["controlnet_tile_1.x_v1.1_f16.ckpt", "juggernaut_reborn_q6p_q8p.ckpt", "add_more_details__detail_enhancer___tweaker__lora_f16.ckpt", "sdxl_render_v2.0_lora_f16.ckpt", "tcd_sd_v1.5_lora_f16.ckpt"]);
 
 const imageRect = canvas.boundingBox;
 
