@@ -2,5 +2,8 @@
   "name": "Creative Upscale",
   "file": "creative-upscale.js",
   "author": "Liu Liu",
-  "description": "Generate up to 4x upscaled image from the input with crisp details."
+  "description": "Generate up to 4x upscaled image from the input with crisp details.",
+  "tags": [
+    "image-to-image"
+  ]
 }
