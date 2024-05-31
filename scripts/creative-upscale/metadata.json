@@ -5,5 +5,12 @@
   "description": "Generate up to 4x upscaled image from the input with crisp details.",
   "tags": [
     "image-to-image"
+  ],
+  "baseColor": "0x00CC82",
+  "images": [
+    {"url": "https://raw.githubusercontent.com/drawthingsai/community-scripts/main/asset/dog-before.jpg", "tags":["id:dog", "view:left"] },
+    {"url": "https://raw.githubusercontent.com/drawthingsai/community-scripts/main/asset/dog-after.jpeg", "tags":["id:dog", "view:right"] },
+    {"url": "https://raw.githubusercontent.com/drawthingsai/community-scripts/main/asset/tree-before.jpeg", "tags":["id:tree", "tree:left"] },
+    {"url": "https://raw.githubusercontent.com/drawthingsai/community-scripts/main/asset/tree-after.jpeg", "tags":["id:tree", "tree:right"] }
   ]
 }
