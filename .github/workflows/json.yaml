@@ -30,7 +30,7 @@ jobs:
           mkdir -p docs
           mkdir -p docs/scripts
           mv *.json ./docs
-          find scripts -type f -name "*.js" -exec cp {} ./docs/scripts \;
+          python3 utils/copy_js_and_assets.py
           echo "scripts.drawthings.ai" > ./docs/CNAME
     
       - name: Add and commit documentation
