@@ -27,10 +27,7 @@ jobs:
         run: |
           git branch -D json || true
           git checkout -b json
-          mkdir -p docs
-          mkdir -p docs/scripts
-          mv *.json ./docs
-          find scripts -type f -name "*.js" -exec cp {} ./docs/scripts \;
+          python3 utils/copy_files.py
           echo "scripts.drawthings.ai" > ./docs/CNAME
     
       - name: Add and commit documentation
