@@ -32,7 +32,8 @@ for subdir in os.listdir(scripts_dir):
                 
                 # Copy the assets directory
                 assets_src_dir = os.path.join(subdir_path, 'assets')
-                assets_dst_dir = os.path.join(docs_dir, js_file_name.replace('.js', ''), 'assets')
+                sub_script_name = subdir_path.replace('scripts/', '')
+                assets_dst_dir = os.path.join(docs_dir, sub_script_name, 'assets')
                 
                 if os.path.isdir(assets_src_dir):
                     # Create the destination directory if it doesn't exist
