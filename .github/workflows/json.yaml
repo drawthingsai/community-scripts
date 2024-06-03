@@ -29,7 +29,6 @@ jobs:
           git checkout -b json
           mkdir -p docs
           mv scripts docs/
-          mv *.json ./docs
           echo "scripts.drawthings.ai" > ./docs/CNAME
     
       - name: Add and commit documentation
