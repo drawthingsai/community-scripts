@@ -28,11 +28,11 @@ for subdir in os.listdir(scripts_dir):
                 
                 # Copy the .js file to docs directory
                 if os.path.isfile(js_file_path):
-                    shutil.copy(js_file_path, docs_dir)
+                    shutil.copy(js_file_path, os.path.join(docs_dir, 'scripts'))
                 
                 # Copy the assets directory
                 assets_src_dir = os.path.join(subdir_path, 'assets')
-                assets_dst_dir = os.path.join(docs_dir, subdir, 'assets')
+                assets_dst_dir = os.path.join(docs_dir, 'scripts', subdir, 'assets')
                 
                 if os.path.isdir(assets_src_dir):
                     # Create the destination directory if it doesn't exist
