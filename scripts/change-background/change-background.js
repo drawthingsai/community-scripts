@@ -29,10 +29,6 @@ if (imageSrc.length > 0 && referenceImageSrc.length > 0) {
   configuration = pipeline.configuration
 
   const zoom = Math.min(imageMetadata.width / configuration.width, imageMetadata.height / configuration.height);
-
-  const x = (imageMetadata.width - configuration.width) / 2 / zoom
-  const y = (imageMetadata.height - configuration.height) / 2 / zoom
-
   configuration.width = imageMetadata.width
   configuration.height = imageMetadata.height
   canvas.updateCanvasSize(configuration)
