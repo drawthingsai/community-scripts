@@ -30,17 +30,14 @@ if (imageSrc.length > 0 && referenceImageSrc.length > 0) {
 
   const zoom = Math.min(imageMetadata.width / configuration.width, imageMetadata.height / configuration.height);
 
-  canvas.canvasZoom = zoom
-
   const x = (imageMetadata.width - configuration.width) / 2 / zoom
   const y = (imageMetadata.height - configuration.height) / 2 / zoom
 
-  canvas.moveCanvas(x, y)
-
   configuration.width = imageMetadata.width
   configuration.height = imageMetadata.height
-
   canvas.updateCanvasSize(configuration)
+
+  canvas.canvasZoom = zoom
 
   configuration.strength = 1;
   configuration.seed = -1;
