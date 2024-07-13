@@ -1,0 +1,6 @@
+{
+ "name": "SingleDetailer",
+ "author": "ClarkCheekyKent",
+ "file": "SingleDetailer.js",
+ "description": "Zooms in to detail faces on current image on the canvas."
+}
