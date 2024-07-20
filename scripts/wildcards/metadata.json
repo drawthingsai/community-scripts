@@ -2,5 +2,5 @@
  "name": "Wildcards",
  "author": "wetcircuit",
  "file": "wildcards.js",
- "description": "generate a batch of images using inline wildcards to randomize elements within the Prompt."
+ "description": "Generate a batch of images using inline wildcards to randomize elements within the prompt."
 }

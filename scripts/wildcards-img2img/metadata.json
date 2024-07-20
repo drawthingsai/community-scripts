@@ -1,0 +1,6 @@
+{
+ "name": "Wildcards Img2Img",
+ "author": "wetcircuit",
+ "file": "wildcards-img2img.js",
+ "description": "Generate a batch of image2image using inline wildcards to randomize elements within the prompt."
+}
