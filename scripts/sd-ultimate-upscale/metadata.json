@@ -1,7 +1,7 @@
 {
   "name": "SD Ultimate Upscale",
   "file": "sd-ultimate-upscale.js",
-  "author": "Gong Chen",
+  "author": "Gongster",
   "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures.",
   "tags": [
     "image-to-image"

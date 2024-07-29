@@ -3,3 +3,4 @@ detailer
 single-detailer
 creative-upscale
 sd-ultimate-upscale
+wallpaper

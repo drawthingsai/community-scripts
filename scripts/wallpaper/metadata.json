@@ -1,0 +1,22 @@
+{
+  "name": "Wallpaper",
+  "author": "Gongster",
+  "file": "wallpaper.js",
+  "description": "Generate a wallpaper based on device screen size with a few provided editable prompts.",
+  "tags": [
+    "text-to-image"
+  ],
+  "baseColor": "0x57B17A",
+  "images": [
+    {
+      "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/car-neonlights.jpg"
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/mountain-flowers.jpeg"
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/underwater-castle.jpeg"
+    }
+  ],
+  "favicon": "data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABIBAMAAACnw650AAAAG1BMVEUAAAD////////////////////////////////rTT7CAAAACXRSTlMA/rebJRBsRd+IYbvdAAABRklEQVR4nO2VPU/DMBRFrcSwu+VrTEFijifWdGOECUbo0L1C/AAk+N8kvs+p30eijh1yh1TPPT1x4lfbuSXnm9090qH0VD6WzGWgXKN+z3VbQFUevEV9yHVjQX+oX6eglZzTxoDW8mGidbuWM7U5J6GKGlpthKoX9WMCqoSqFzUKclw1iJyGuGoQGRBTJZEFlaoksqBCBZEJHVUQmdCoIpGA/M8VWPTKJ73q59AVkHt7cfjpGlASuYtvZ6QKybhlt1HZJ79/mmOWnJivbrj6/RxT52VprW9pgWO4wQf6ii+wD78QATpQX23vugKipqOGHFvU6szckGOLWlAc//ukMqCjKKsMKBabCFQaKkWk0lBku1FSKYiLoFIQF0EloSBESWXsmQ2H1FilRVAp6JTN3jyATGjuAKqnDqCPcpITh+KDfJglZ5R/PoY5CcXic14AAAAASUVORK5CYII="
+}
