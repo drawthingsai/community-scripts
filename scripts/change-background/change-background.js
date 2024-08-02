@@ -25,15 +25,16 @@ function bestFitRatio(inputRatio) {
   return closestMatchValue;
 }
 
+const modelScale = 8
 const ratio = canvas.boundingBox.width / canvas.boundingBox.height;
 const bestFitValue = bestFitRatio(ratio);
 configuration = pipeline.configuration
 if (bestFitValue < 1) {
-  configuration.width = Math.round(8 * bestFitValue) * 64
+  configuration.width = Math.round(modelScale * bestFitValue) * 64
   configuration.height = 512
 } else {
   configuration.width = 512 
-  configuration.height = Math.round(8 / bestFitValue) * 64
+  configuration.height = Math.round(modelScale / bestFitValue) * 64
 }
 
 canvas.updateCanvasSize(configuration)
