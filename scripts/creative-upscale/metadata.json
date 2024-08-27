@@ -4,7 +4,8 @@
   "author": "Liu Liu",
   "description": "Generate up to 4x upscaled image from the input with crisp details.",
   "tags": [
-    "image-to-image"
+    "image-to-image",
+    "wz"
   ],
   "baseColor": "0x00CC82",
   "images": [
