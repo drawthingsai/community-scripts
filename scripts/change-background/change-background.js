@@ -49,16 +49,11 @@ if (bestFitValue < 1) {
   canvas.moveCanvas(0, y)
 }
 
-
 configuration.strength = 1;
 configuration.seed = -1;
 
-console.log("Change Background");
 pipeline.downloadBuiltins(["juggernaut_reborn_f16.ckpt", "ip_adapter_plus_sd_v1.x_open_clip_h14_f16.ckpt", "controlnet_depth_1.x_v1.1_f16.ckpt", "is_net_v1.1_fp16.ckpt"]);
 configuration.model = "juggernaut_reborn_f16.ckpt";
-
-const backgroundMask = canvas.backgroundMask;
-canvas.loadMaskFromSrc(backgroundMask.src)
 
 canvas.extractDepthMap();
 depthMapControl = pipeline.findControlByName("Depth Map (SD v1.x, ControlNet 1.1)");
@@ -70,4 +65,4 @@ ipAdapterControl.weight = 1;
 ipAdapterControl.guidanceEnd = 0.6;
 
 configuration.controls = [depthMapControl, ipAdapterControl];
-pipeline.run({ configuration: configuration, prompt: "a (cosmetic product: 0.8) photograph, high quality, highly detailed, 4k, cinematic, ((product shoot beautiful)), product at center", mask:backgroundMask });
+pipeline.run({ configuration: configuration, prompt: "a (cosmetic product: 0.8) photograph, high quality, highly detailed, 4k, cinematic, ((product shoot beautiful)), product at center", mask: backgroundMask });

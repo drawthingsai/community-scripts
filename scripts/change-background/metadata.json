@@ -8,9 +8,9 @@
   ],
   "baseColor": "#F5D01D",
   "images": [
-    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-after.jpeg", "tags":["id:elsku", "view:after"] },
-    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-before.jpeg", "tags":["id:elsku", "view:before"] }
-    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-after-pure.jpeg", "tags":["id:elsku-pure"] }
+    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-after.jpg", "tags":["id:elsku", "view:after"] },
+    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-before.jpg", "tags":["id:elsku", "view:before"] }
+    {"url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/elsku-after-pure.jpg", "tags":["id:elsku-pure"] }
   ],
   "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAQlBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////8IX9KGAAAAFXRSTlMAQN8gEL+AYO8wcH+vn1DPkKBfj2+aASq3AAACeklEQVR4nO2YyYKDIAxADSCLW3U6/f9fHQ0oa1DbOTZHiQ/Irk3zlU9FGCVXUSA+oZi+fR3SSv4mBgKKY6l3TpNhEHX7VL8lzCb9LYwY3Gt6VlxsJp8W5h4NN8wuHu4iED6d3GUfl0mOwyBdUOweaUT1paAuFlwar3F6VJblRYmL3RUOr3EcSV+JgvHk8OjQ9uKBWGVHoTeNzBGZGm5YTQV1JcR73I7VlTCeWC3EuQvEk9xUVou+/4+2Gkud4460+m4iOG6Z9LwX6RLvp8KZs4AWncouwReSxIn8ahpWtD7gobTJtmWU/WBbyPTXne0b6QV60g9AxZ8lJRa1Fyv6kwQ1pvDSSCdqDFo7gg9qmaUlr8RzCLKNZd6X0LA6tJKqxLMH7f3Jp75Mi9OmocucA+TbnN8RK0FYUmolyII8JuoIQ3wCU8tUBLEipmm6OMimNOZEMDPAy0ubhkFyBOQGxud6LTe7k4HGOHd7a6Pxk5sfKKAxjbWuj78iaEdBBZOC0quZ3bYbCmqeEPHVVGpsLj1KRSmSCO7iC2XB/R5V7T6J+xtdCEiPqoCGxLqYIlmNDVAEKEuRLrZZjiJAWbIjuVhGHIoA4VpU2eY4HkKZaBDW59i2XKcRcMi9UmuD+x+K/1k7KoBcO8qf2zkkf4MAAeqXRrfJOnpMlmxHZUmyiafVLo4R+7QSoMQ+W8ffIaZ3cwvVL/ZAfjw7AFCy1a9A9CAngKl7HllIzn+cvW5IdfpTl1H6ZNbmKaq1TXBIMPLCZwTMrVNnQyd293M1uC30Yz4djv3BVmNzu2kQR8IAmHc/SCu59gV9QdfF/BeI+IR4Q7jqPvrn85Vd/gATUFCUgVdaiAAAAABJRU5ErkJggg=="
 }
