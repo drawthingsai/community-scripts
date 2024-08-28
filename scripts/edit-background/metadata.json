@@ -1,6 +1,6 @@
 {
-  "name": "Change Background",
-  "file": "change-background.js",
+  "name": "Edit Background",
+  "file": "edit-background.js",
   "author": "Weiyan Lin",
   "description": "Change input image background inspired by reference image",
   "tags": [
