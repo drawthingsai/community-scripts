@@ -16,15 +16,13 @@ const config = requestFromUser("Edit Background", "", function() {
 
 const selection = config[0][0];
 
-// const prompt = a photograph over the beach with waves of the ocean, under the palm tree, high quality, highly detailed, 4k, cinematic";
-// const prompt = "a photograph with solid color background, high quality, highly detailed, 4k, cinematic";
 const prompts = ["",
   "a photograph with background of a beautiful sunset, high quality, highly detailed, 4k, cinematic",
-  "a photograph with background of a beautiful white sandy beach and blue ocean, high quality, highly detailed, 4k, cinematic",
+  "a photograph with background of a vast cerulean sky dotted with wispy clouds, a turquoise ocean sending gentle waves to shore, and a stretch of golden sand, high quality, highly detailed, 4k, cinematic",
   "a photograph taken on the top of a mountain with beautiful view of craggy peaks and summits stretching to the horizon, clear sky, high quality, highly detailed, 4k, cinematic",
   "a photograph with a bokeh effect background, high quality, highly detailed, 4k, cinematic",
-  "a photograph on a beautiful tropical island with background of the tropical beach and palm trees, high quality, highly detailed, 4k, cinematic",
-  "a photograph with a minimalist background, high quality, highly detailed, 4k, cinematic"
+  "a photograph on a beautiful tropical paradise with background of turquoise ocean sending gentle waves to shore, the powdery white sand beach curves gently, tall coconut palms stands sentinel, high quality, highly detailed, 4k, cinematic",
+  "a photograph with a minimalist background, vast expanse of soft, matte white fills the frame, broken only by a single, thin white line running diagonally from the bottom left to the upper right, high quality, highly detailed, 4k, cinematic"
 ];
 
 const boundingBox = canvas.boundingBox;
@@ -72,7 +70,7 @@ canvas.loadMaskFromSrc(backgroundMask.src);
 
   const depthMapControl1 = pipeline.findControlByName("Depth Map (SDXL, ControlNet, Diffusers 1.0 Mid)");
   depthMapControl1.weight = 0.5;
-  depthMapControl1.guidanceEnd = 0.55;
+  depthMapControl1.guidanceEnd = 0.525;
 
   const image = canvas.saveImageSrc(true);
   canvas.clearMoodboard();
@@ -81,7 +79,7 @@ canvas.loadMaskFromSrc(backgroundMask.src);
 
   const ipAdapterControl = pipeline.findControlByName("IP Adapter Plus (SDXL Base)");
   ipAdapterControl.weight = 0.5;
-  ipAdapterControl.guidanceEnd = 0.45;
+  ipAdapterControl.guidanceEnd = 0.425;
 
   configuration.controls = [depthMapControl1, ipAdapterControl];
   configuration.loras = [blendingLoRA, hyperLoRA];
@@ -104,15 +102,15 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   canvas.extractDepthMapFromSrc(secondImage);
 
   depthMapControl1.weight = 0.3;
-  depthMapControl1.guidanceStart = 0.35;
-  depthMapControl1.guidanceEnd = 0.55;
+  depthMapControl1.guidanceStart = 0.325;
+  depthMapControl1.guidanceEnd = 0.525;
 
   const depthMapControl2 = pipeline.findControlByName("Depth Map (SDXL, ControlNet, Diffusers 1.0 Mid)");
   depthMapControl2.weight = 0.5;
-  depthMapControl2.guidanceEnd = 0.35;
+  depthMapControl2.guidanceEnd = 0.325;
 
   ipAdapterControl.weight = 0.2;
-  ipAdapterControl.guidanceEnd = 0.35;
+  ipAdapterControl.guidanceEnd = 0.325;
 
   hyperLoRA.weight = 0.8;
 
@@ -129,14 +127,14 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   canvas.extractDepthMapFromSrc(thirdImage);
 
   depthMapControl1.weight = 0.2;
-  depthMapControl1.guidanceStart = 0.35;
-  depthMapControl1.guidanceEnd = 0.45;
+  depthMapControl1.guidanceStart = 0.325;
+  depthMapControl1.guidanceEnd = 0.425;
 
   depthMapControl2.weight = 0.4;
-  depthMapControl2.guidanceEnd = 0.35;
+  depthMapControl2.guidanceEnd = 0.325;
 
   ipAdapterControl.weight = 0.2;
-  ipAdapterControl.guidanceEnd = 0.35;
+  ipAdapterControl.guidanceEnd = 0.325;
 
   configuration.controls = [depthMapControl1, depthMapControl2, ipAdapterControl];
   configuration.loras = [blendingLoRA];
