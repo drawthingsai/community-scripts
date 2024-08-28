@@ -60,7 +60,7 @@ canvas.loadMaskFromSrc(backgroundMask.src);
 
   pipeline.downloadBuiltins(["juggernaut_xl_v9_q6p_q8p.ckpt", "layer_xl_fg2ble_v1.0_lora_f16.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "is_net_v1.1_fp16.ckpt", "controlnet_depth_sdxl_v1.0_mid_f16.ckpt", "ip_adapter_plus_xl_base_open_clip_h14_f16.ckpt", "depth_anything_v2.0_f16.ckpt"]);
   configuration.model = "juggernaut_xl_v9_q6p_q8p.ckpt";
-
+  configuration.preserveOriginalAfterInpaint = true;
 
   const blendingLoRA = pipeline.findLoRAByName("Foreground to Blending");
   blendingLoRA.weight = 1;
@@ -139,7 +139,7 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   configuration.controls = [depthMapControl1, depthMapControl2, ipAdapterControl];
   configuration.loras = [blendingLoRA];
   configuration.sampler = SamplerType.DPMPP_2M_AYS;
-  configuration.steps = 10;
+  configuration.steps = 16;
   configuration.guidanceScale = 4.5;
 
   pipeline.run({ configuration: configuration, prompt: prompt, negativePrompt: "", mask: backgroundMask });
