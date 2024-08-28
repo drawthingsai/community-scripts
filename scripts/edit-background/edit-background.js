@@ -88,7 +88,7 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   configuration.clipSkip = 2;
   configuration.guidanceScale = 1;
   configuration.maskBlur = 2.5;
-  configuration.maskOutset = -8;
+  configuration.maskBlurOutset = 0;
   configuration.shift = 1;
 
   pipeline.run({ configuration: configuration, prompt: prompt, negativePrompt: "", mask: backgroundMask });
