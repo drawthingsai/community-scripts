@@ -1,6 +1,7 @@
 wildcards
 detailer
 single-detailer
+edit-background
 creative-upscale
 sd-ultimate-upscale
 wallpaper

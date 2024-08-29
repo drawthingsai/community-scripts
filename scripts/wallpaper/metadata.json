@@ -5,6 +5,8 @@
   "description": "Generate a wallpaper based on device screen size with a few provided editable prompts.",
   "tags": [
     "text-to-image"
+    "text-to-image",
+    "wz"
   ],
   "baseColor": "0x57B17A",
   "images": [
