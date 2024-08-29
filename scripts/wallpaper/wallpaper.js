@@ -1,15 +1,16 @@
 //@api-1.0
 // parameters
 // steps to run the model
-const STEPS = 15
+const STEPS = 8;
 // how closely the generation should adhere to prompt
-const TEXT_GUIDANCE_SCALE = 6
+const TEXT_GUIDANCE_SCALE = 5;
+const SAMPLER = SamplerType.TCD;
 
 // script
 const userSelection = requestFromUser("Make a Wallpaper", "", function () {
   return [
     this.section("What", "", [
-      this.customTextButton("Serene mountain landscape", [
+      this.comboBox("Serene mountain landscape", [
         "Serene mountain landscape",
         "Futuristic cityscape",
         "Enchanted forest",
@@ -23,7 +24,7 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
       ]),
     ]),
     this.section("Who", "", [
-      this.customTextButton("No people, just nature",
+      this.comboBox("No people, just nature",
         ["No people, just nature",
           "Silhouettes of people",
           "Lone ethereal fairy",
@@ -37,7 +38,7 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
         ]),
     ]),
     this.section("Where", "", [
-      this.customTextButton("Swiss Alps", [
+      this.comboBox("Swiss Alps", [
         "Swiss Alps",
         "Bustling metropolis",
         "Mystical woodland",
@@ -51,7 +52,7 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
       ]),
     ]),
     this.section("When", "", [
-      this.customTextButton("Early morning", [
+      this.comboBox("Early morning", [
         "Early morning",
         "Dusk",
         "Twilight",
@@ -63,7 +64,7 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
     ]),
 
     this.section("Describe the scene", "", [
-      this.customTextButton("Snow-capped peaks, reflective lake, wildflowers, warm dawn hues",
+      this.comboBox("Snow-capped peaks, reflective lake, wildflowers, warm dawn hues",
         ["Snow-capped peaks, reflective lake, wildflowers, warm dawn hues",
           "Towering skyscrapers, neon lights, flying vehicles, warm sunset glow",
           "Ancient trees, bioluminescent plants, glowing fairy, twilight hues",
@@ -78,7 +79,7 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
     ]),
 
     this.section("Describe the art style", "", [
-      this.customTextButton("Hyper-realistic, vivid colors, fine details",
+      this.comboBox("Hyper-realistic, vivid colors, fine details",
         ["Hyper-realistic, vivid colors, fine details",
           "Cyberpunk, neon lighting, high contrast",
           "Fantasy, magical, dreamlike quality",
@@ -96,18 +97,20 @@ canvas.clear();
 canvas.canvasZoom = 1
 const configuration = pipeline.configuration;
 const size = device.screenSize;
-configuration.width = size.width;
-configuration.height = size.height;
+configuration.width = size.width * 2;
+configuration.height = size.height * 2;
+configuration.tiledDecoding = true;
 canvas.updateCanvasSize(configuration);
 configuration.steps = STEPS;
 configuration.guidanceScale = TEXT_GUIDANCE_SCALE;
 configuration.strength = 1;
-configuration.loras = [];
 configuration.controls = [];
 canvas.clearMoodboard();
-moodboardSrc = userSelection[1]
-pipeline.downloadBuiltins(["juggernaut_xl_v9_q6p_q8p.ckpt", "realesrgan_x2plus_f16.ckpt"]);
-configuration.model = "juggernaut_xl_v9_q6p_q8p.ckpt";
+moodboardSrc = userSelection[1];
+configuration.sampler = SAMPLER;
+pipeline.downloadBuiltins(["kwai_kolors_1.0_q6p_q8p.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "realesrgan_x2plus_f16.ckpt"]);
+configuration.model = "kwai_kolors_1.0_q6p_q8p.ckpt";
+configuration.loras = [{ "file": "hyper_sdxl_8_step_lora_f16.ckpt", "weight": 0.85 }];
 // upscaled to 2x the original size
 configuration.upscaler = "Real-ESRGAN X2+";
 pipeline.run({
