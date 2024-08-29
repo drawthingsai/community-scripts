@@ -25,28 +25,39 @@ const prompts = ["",
   "a photograph with a minimalist background, vast expanse of soft, matte white fills the frame, broken only by a single, thin white line running diagonally from the bottom left to the upper right, high quality, highly detailed, 4k, cinematic"
 ];
 
-const boundingBox = canvas.boundingBox;
-
-const aspectRatio = boundingBox.width / boundingBox.height;
-const configuration = pipeline.configuration;
-if (aspectRatio < 1) {
-  configuration.width = Math.ceil(16 * aspectRatio) * 64;
-  configuration.height = 1024;
-} else {
-  configuration.width = 1024;
-  configuration.height = Math.ceil(16 / aspectRatio) * 64;
-}
-
-canvas.updateCanvasSize(configuration);
-const zoom = Math.min(Math.floor(configuration.width / boundingBox.width * 60) / 60, Math.floor(configuration.height / boundingBox.height * 60) / 60);
-canvas.canvasZoom = zoom;
-// Now center the image, whatever that should be.
-canvas.moveCanvas(boundingBox.x + Math.round((boundingBox.width - configuration.width / zoom) * 0.5), boundingBox.y + Math.round((boundingBox.height - configuration.height / zoom) * 0.5));
-
-const backgroundMask = canvas.backgroundMask;
-canvas.loadMaskFromSrc(backgroundMask.src);
-
 (function () {
+  const boundingBox = canvas.boundingBox;
+  // Nothing on the screen. Quit.
+  if (boundingBox.width <= 0 || boundingBox.height <= 0) {
+    return;
+  }
+
+  const aspectRatio = boundingBox.width / boundingBox.height;
+  const configuration = pipeline.configuration;
+  if (aspectRatio < 1) {
+    configuration.width = Math.ceil(16 * aspectRatio) * 64;
+    configuration.height = 1024;
+  } else {
+    configuration.width = 1024;
+    configuration.height = Math.ceil(16 / aspectRatio) * 64;
+  }
+
+  canvas.updateCanvasSize(configuration);
+  const zoom = Math.min(Math.floor(configuration.width / boundingBox.width * 60) / 60, Math.floor(configuration.height / boundingBox.height * 60) / 60);
+  canvas.canvasZoom = zoom;
+  // Now center the image, whatever that should be.
+  canvas.moveCanvas(boundingBox.x + Math.round((boundingBox.width - configuration.width / zoom) * 0.5), boundingBox.y + Math.round((boundingBox.height - configuration.height / zoom) * 0.5));
+
+  const builtins = ["is_net_v1.1_fp16.ckpt"];
+
+  if (selection > 0) {
+    builtins.push("juggernaut_xl_v9_q6p_q8p.ckpt", "layer_xl_fg2ble_v1.0_lora_f16.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "controlnet_depth_sdxl_v1.0_mid_f16.ckpt", "ip_adapter_plus_xl_base_open_clip_h14_f16.ckpt", "depth_anything_v2.0_f16.ckpt");
+  }
+
+  pipeline.downloadBuiltins(builtins);
+
+  const backgroundMask = canvas.backgroundMask;
+  canvas.loadMaskFromSrc(backgroundMask.src);
   // If we only want to remove the background, it is done.
   if (selection == 0) {
     return;
@@ -55,12 +66,34 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   // Otherwise, go through the selection.
   const prompt = prompts[selection];
 
+  // Set all relevant configurations.
   configuration.strength = 1;
-  configuration.seed = -1;
-
-  pipeline.downloadBuiltins(["juggernaut_xl_v9_q6p_q8p.ckpt", "layer_xl_fg2ble_v1.0_lora_f16.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "is_net_v1.1_fp16.ckpt", "controlnet_depth_sdxl_v1.0_mid_f16.ckpt", "ip_adapter_plus_xl_base_open_clip_h14_f16.ckpt", "depth_anything_v2.0_f16.ckpt"]);
-  configuration.model = "juggernaut_xl_v9_q6p_q8p.ckpt";
   configuration.preserveOriginalAfterInpaint = true;
+  configuration.faceRestoration = null;
+  configuration.batchSize = 1;
+  configuration.batchCount = 1;
+  configuration.hiresFix = false;
+  configuration.clipSkip = 2;
+  configuration.shift = 1;
+  configuration.refinerModel = null;
+  configuration.tiledDiffusion = false;
+  configuration.tiledDecoding = false; // This need to change to true based on device capacity.
+  configuration.decodingTileWidth = 768;
+  configuration.decodingTileHeight = 768;
+  configuration.diffusionTileOverlap = 128;
+  configuration.sharpness = 0;
+  configuration.zeroNegativePrompt = false;
+  configuration.cropLeft = 0;
+  configuration.cropTop = 0;
+  configuration.originalImageHeight = configuration.height;
+  configuration.originalImageWidth = configuration.width;
+  configuration.targetImageHeight = configuration.height;
+  configuration.targetImageWidth = configuration.width;
+  configuration.negativeOriginalImageHeight = Math.max(Math.floor(configuration.height / 128) * 64, 512);
+  configuration.negativeOriginalImageWidth = Math.max(Math.floor(configuration.width / 128) * 64, 512);
+
+  configuration.seed = -1;
+  configuration.model = "juggernaut_xl_v9_q6p_q8p.ckpt";
 
   const blendingLoRA = pipeline.findLoRAByName("Foreground to Blending");
   blendingLoRA.weight = 1;
@@ -85,11 +118,9 @@ canvas.loadMaskFromSrc(backgroundMask.src);
   configuration.loras = [blendingLoRA, hyperLoRA];
   configuration.sampler = SamplerType.EULER_A_TRAILING;
   configuration.steps = 4;
-  configuration.clipSkip = 2;
   configuration.guidanceScale = 1;
   configuration.maskBlur = 2.5;
-  configuration.maskBlurOutset = 0;
-  configuration.shift = 1;
+  configuration.maskBlurOutset = 2;
 
   pipeline.run({ configuration: configuration, prompt: prompt, negativePrompt: "", mask: backgroundMask });
 
