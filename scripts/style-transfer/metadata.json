@@ -1,0 +1,69 @@
+{
+  "name": "Style Transfer",
+  "file": "style-transfer.js",
+  "author": "Liu Liu",
+  "description": "Apply several styles to a reference image.",
+  "tags": [
+    "image-to-image"
+  ],
+  "baseColor": "0x00CC82",
+  "images": [
+    {
+      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/oil-after.jpg",
+      "tags": [
+        "id:tree",
+        "view:after"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/oil-before.jpeg",
+      "tags": [
+        "id:tree",
+        "view:before"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/anime-after.jpg",
+      "tags": [
+        "id:tree",
+        "view:after"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/anime-before.jpeg",
+      "tags": [
+        "id:tree",
+        "view:before"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/cartoon-after.jpg",
+      "tags": [
+        "id:tree",
+        "view:after"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/cartoon-before.jpeg",
+      "tags": [
+        "id:tree",
+        "view:before"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/PixArt-after.jpg",
+      "tags": [
+        "id:tree",
+        "view:after"
+      ]
+    },
+    {
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/PixArt-before.jpeg",
+      "tags": [
+        "id:tree",
+        "view:before"
+      ]
+    }
+  ],
+  "favicon": "data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABIBAMAAACnw650AAAAG1BMVEUAAAD////////////////////////////////rTT7CAAAACXRSTlMA/rebJRBsRd+IYbvdAAABRklEQVR4nO2VPU/DMBRFrcSwu+VrTEFijifWdGOECUbo0L1C/AAk+N8kvs+p30eijh1yh1TPPT1x4lfbuSXnm9090qH0VD6WzGWgXKN+z3VbQFUevEV9yHVjQX+oX6eglZzTxoDW8mGidbuWM7U5J6GKGlpthKoX9WMCqoSqFzUKclw1iJyGuGoQGRBTJZEFlaoksqBCBZEJHVUQmdCoIpGA/M8VWPTKJ73q59AVkHt7cfjpGlASuYtvZ6QKybhlt1HZJ79/mmOWnJivbrj6/RxT52VprW9pgWO4wQf6ii+wD78QATpQX23vugKipqOGHFvU6szckGOLWlAc//ukMqCjKKsMKBabCFQaKkWk0lBku1FSKYiLoFIQF0EloSBESWXsmQ2H1FilRVAp6JTN3jyATGjuAKqnDqCPcpITh+KDfJglZ5R/PoY5CcXic14AAAAASUVORK5CYII="
+}
