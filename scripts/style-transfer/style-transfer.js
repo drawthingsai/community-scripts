@@ -13,6 +13,7 @@ const configuration = pipeline.configuration;
 configuration.strength = 0.7;
 configuration.loras = [];
 configuration.controls = [];
+configuration.hiresFix = true;
 canvas.clearMoodboard();
 let assistivePrompts = ["african american, highres, detailed, 4k", "highres, detailed, 4k"]
 let CLIPScores = canvas.CLIP(assistivePrompts);

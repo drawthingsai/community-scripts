@@ -16,7 +16,7 @@
       ]
     },
     {
-      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/oil-before.jpeg",
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/base.jpeg",
       "tags": [
         "id:tree",
         "view:before"
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/anime-before.jpeg",
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/base.jpeg",
       "tags": [
         "id:tree",
         "view:before"
@@ -44,21 +44,21 @@
       ]
     },
     {
-      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/cartoon-before.jpeg",
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/base.jpeg",
       "tags": [
         "id:tree",
         "view:before"
       ]
     },
     {
-      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/PixArt-after.jpg",
+      "url": "https://scripts.drawthings.ai/scripts/style-transfer/assets/pixel-after.jpg",
       "tags": [
         "id:tree",
         "view:after"
       ]
     },
     {
-      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/PixArt-before.jpeg",
+      "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/pixel-before.jpeg",
       "tags": [
         "id:tree",
         "view:before"
