@@ -113,12 +113,25 @@ const userSelection = requestFromUser("Make a Wallpaper", "", function () {
 canvas.clear();
 canvas.canvasZoom = 1
 const configuration = pipeline.configuration;
-/*
+
 const size = device.screenSize;
-configuration.width = size.width;
-configuration.height = size.height;
+const aspectRatio = size.width / size.height;
+// Set width / height to around 1.5M pixels.
+configuration.width = Math.floor(Math.sqrt(1572864 * aspectRatio) / 64) * 64;
+configuration.height = Math.floor(Math.sqrt(1572864 / aspectRatio) / 64) * 64;
+// The required pixel density.
+const requiredPixels = size.width * 3 * size.height * 3;
+let upscaleFactor = 1;
+if (configuration.width * configuration.height < requiredPixels) {
+  // Can 2x upscale be enough, if not, we go max at 4x.
+  if (configuration.width * configuration.height * 4 < requiredPixels) {
+    upscaleFactor = 4;
+  } else {
+    upscaleFactor = 2;
+  }
+}
 canvas.updateCanvasSize(configuration);
-*/
+
 configuration.steps = 6;
 configuration.guidanceScale = 1;
 configuration.strength = 1;
@@ -130,14 +143,20 @@ configuration.preserveOriginalAfterInpaint = true;
 configuration.faceRestoration = null;
 configuration.batchSize = 1;
 configuration.batchCount = 1;
-// configuration.hiresFix = false;
+configuration.hiresFix = true; // Turn on hires fix, set it around 1M pixels.
+configuration.hiresFixWidth = Math.floor(Math.sqrt(1048576 * aspectRatio) / 64) * 64;
+configuration.hiresFixHeight = Math.floor(Math.sqrt(1048576 / aspectRatio) / 64) * 64;
+configuration.hiresFixStrength = 0.4;
 configuration.clipSkip = 2;
 configuration.shift = 1;
 configuration.refinerModel = null;
-configuration.tiledDiffusion = false;
+configuration.tiledDiffusion = true;
+configuration.diffusionTileWidth = Math.min(Math.max(configuration.hiresFixWidth, 1024), configuration.width);
+configuration.diffusionTileHeight = Math.min(Math.max(configuration.hiresFixHeight, 1024), configuration.height);
+configuration.diffusionTileOverlap = 128;
 configuration.tiledDecoding = true;
-configuration.decodingTileWidth = 768;
-configuration.decodingTileHeight = 768;
+configuration.decodingTileWidth = Math.min(768, configuration.width);
+configuration.decodingTileHeight = Math.min(768, configuration.height);
 configuration.diffusionTileOverlap = 128;
 configuration.sharpness = 0;
 configuration.zeroNegativePrompt = false;
@@ -149,10 +168,19 @@ configuration.targetImageHeight = configuration.height;
 configuration.targetImageWidth = configuration.width;
 configuration.negativeOriginalImageHeight = Math.max(Math.floor(configuration.height / 128) * 64, 512);
 configuration.negativeOriginalImageWidth = Math.max(Math.floor(configuration.width / 128) * 64, 512);
+if (upscaleFactor == 4) {
+  configuration.upscaler = "4x_ultrasharp_f16.ckpt";
+  configuration.upscalerScaleFactor = 4;
+} else if (upscaleFactor == 2) {
+  configuration.upscaler = "4x_ultrasharp_f16.ckpt";
+  configuration.upscalerScaleFactor = 2;
+} else {
+  configuration.upscaler = null;
+}
 
 configuration.seed = -1;
 
-pipeline.downloadBuiltins(["kwai_kolors_1.0_q6p_q8p.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "dmd2_sdxl_4_step_lora_f16.ckpt"]);
+pipeline.downloadBuiltins(["kwai_kolors_1.0_q6p_q8p.ckpt", "hyper_sdxl_8_step_lora_f16.ckpt", "dmd2_sdxl_4_step_lora_f16.ckpt", "4x_ultrasharp_f16.ckpt"]);
 
 configuration.model = "kwai_kolors_1.0_q6p_q8p.ckpt";
 configuration.loras = [{ "file": "hyper_sdxl_8_step_lora_f16.ckpt", "weight": 0.45 }, { "file": "dmd2_sdxl_4_step_lora_f16.ckpt", "weight": 0.25 }];
