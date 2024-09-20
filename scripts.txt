@@ -1,3 +1,4 @@
+flux-auto-workflow
 wildcards
 detailer
 single-detailer
