@@ -1,0 +1,10 @@
+{
+    "name": "Flux Auto Workflow",
+    "author": "czkoko",
+    "file": "flux-auto-workflow.js",
+    "description": "Automated workflow for Flux, including text-to-image, image refine, batch prompts, batch random prompts, etc.",
+    "tags": [
+        "image-to-image",
+        "text-to-image"
+    ]
+}
