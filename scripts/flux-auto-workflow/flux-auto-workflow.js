@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.0
+// v3.1
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -14,7 +14,7 @@ const useFlux8bit = true;
 //
 
 
-const version = "v3.0";
+const version = "v3.1";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
