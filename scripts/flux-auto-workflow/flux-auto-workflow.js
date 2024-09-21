@@ -853,37 +853,50 @@ const specialActions = [
   "exploring an ancient map",
   "casting a powerful spell",
   "floating weightlessly in mid-air",
-  "building something mechanical with precision",
-  "fighting a shadowy figure in the dark",
   "whispering secrets to a bird",
   "painting a masterpiece on a large canvas",
   "beat the drums",
   "waving energetically at the viewer",
   "summoning a glowing orb of light with a wave of the hand",
-  "drawing runes in the air with a staff",
   "conjuring flames from their fingertips",
   "opening a portal to another dimension",
-  "transforming into an animal in a swirl of magic",
   "teleporting in a flash of light",
   "floating above the ground in meditation",
-  "creating illusions to confuse enemies",
   "using a crystal ball to foresee the future",
-  "tinkering with a clock",
-  "studying a strange artifact closely",
-  "blowing bubbles into the air",
   "catching fireflies in a jar",
-  "puzzling over an ancient puzzle box",
   "mixing ingredients in a bubbling cauldron",
   "adjusting the sails on a small boat",
   "whittling a piece of wood into a figurine",
   "stringing a bow and preparing to shoot",
   "juggling brightly colored balls",
-  "folding clothes neatly into a basket",
-  "pouring a cup of hot coffee",
-  "honing a piece of metal on a grinding wheel",
-  "applying paint to a wall with long strokes",
-  "blowing on hot soup to cool it",
-  "tying a complex knot in a rope"
+  "arm wrestling with the Hulk",
+  "playing chess with a robot",
+  "having a tea party with a dragon",
+  "baking a cake with Spider-Man",
+  "doing yoga alongside Wonder Woman",
+  "reading a comic book with Iron Man",
+  "riding a bicycle with Superman",
+  "playing hopscotch with Thor",
+  "taking selfies with a vampire",
+  "practicing magic tricks with Doctor Strange",
+  "playing a banjo for an audience of ghosts",
+  "fencing with a pirate captain",
+  "having a dance-off with a zombie",
+  "feeding a pet unicorn",
+  "having a pillow fight with Batman",
+  "doing karaoke with Captain America",
+  "building a giant banana with Minions",
+  "getting into a pie fight with Minions",
+  "dancing a conga line with Minions",
+  "trying on costumes with Minions",
+  "riding a unicycle with a Minion holding balloons",
+  "helping Gru plan a heist with Minions",
+  "playing freeze tag with Olaf from Frozen",
+  "having a bubble-blowing contest with SpongeBob",
+  "eating jellybeans with Toothless the dragon",
+  "watching fireworks with Baymax",
+  "teaching Pikachu how to cook pancakes",
+  "going on a treasure hunt with Jack Sparrow"
 ];
 
 function getRandom(array) {
@@ -943,7 +956,7 @@ function generatePrompt() {
       const name = getRandom(femaleName);
       randomSubject += " named \"" + name + "\"";
     }
-  } else if (rand < 0.8) {
+  } else if (rand < 0.85) {
     randomSubject = getRandom(job);
     if (Math.random() < 0.5) {
       randomDress = getRandom(maleDresses);
@@ -960,7 +973,7 @@ function generatePrompt() {
         randomSubject += " named \"" + name + "\"";
       }
     }
-  } else if (rand < 0.9) {
+  } else if (rand < 0.95) {
     randomSubject = getRandom(specialCharacters);
     randomDress = "";
   } else {
