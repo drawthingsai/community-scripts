@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.0
+// v3.1
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -14,7 +14,7 @@ const useFlux8bit = true;
 //
 
 
-const version = "v3.0";
+const version = "v3.1";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
@@ -137,19 +137,26 @@ const male = [
   "An old man",
   "A little boy with short, spiky hair and a mischievous grin",
   "A young boy with curly brown hair and a round, freckled face",
+  "A young boy with straight blond hair and large, curious eyes",
+  "A teen boy with braces, short curly hair, and shy eyes",
   "A teen boy with long, shaggy hair and acne on his cheeks",
   "A young man with short, buzzed hair and a sharp jawline",
   "A young man with a man-bun and a thin mustache",
   "A man in his 20s with wavy, medium-length hair and a clean-shaven face",
   "A man in his 20s with straight, parted hair and a light stubble",
+  "A man in his early 20s with medium-length curly hair and a square jawline",
+  "A man in his late 20s with a trimmed beard and a confident stance",
   "A man in his 30s with short, styled hair and a prominent chin",
   "A man in his 30s with a shaved head and a full beard",
+  "A man in his 30s with close-cropped hair and prominent cheekbones",
   "A man in his 40s with slightly graying hair and laugh lines around his eyes",
   "A man in his 40s with a receding hairline and a square jaw",
+  "A man in his 40s with a short beard and a scar over his left eyebrow",
   "A middle-aged man with thick glasses, a mustache, and thinning hair",
   "A middle-aged man with shoulder-length hair tied back and a rugged face",
   "A man in his 50s with salt-and-pepper hair and a strong brow",
   "A man in his 50s with a balding crown and a goatee",
+  "A man in his 50s with thinning gray hair and a pair of reading glasses",
   "An older man with a full head of white hair and a bushy mustache",
   "An older man with a long beard and deep-set eyes",
   "An elderly man with a bald head, deep wrinkles, and kind eyes",
@@ -157,9 +164,12 @@ const male = [
   "A very old man with a stooped posture, thin white hair, and a gentle smile",
   "A man in his 60s with a gray beard and a weathered face",
   "A man in his 60s with slicked-back gray hair and a stern expression",
+  "A man in his 60s with a long, white ponytail and a weathered face",
   "A man in his 70s with a bald head, a prominent nose, and kind eyes",
   "A man in his 70s with white hair combed to the side and a trimmed beard",
-  "An elderly man with a full white beard and a wrinkled, leathery face"
+  "A man in his 70s with a clean-shaven face, liver spots, and a gentle expression",
+  "An elderly man with a full white beard and a wrinkled, leathery face",
+  "An elderly man with sparse white hair, a wrinkled forehead, and bright, sharp eyes"
 ];
 
 const female = [
@@ -169,28 +179,39 @@ const female = [
   "An elderly woman",
   "A little girl with short, straight hair and rosy cheeks",
   "A little girl with curly pigtails and big, wide eyes",
+  "A little girl with wavy, dark hair and large, expressive eyes",
+  "A little girl with a bob cut and dimples on her cheeks",
   "A young girl with long, braided hair and a bright smile",
+  "A teenage girl with dyed pink hair and round glasses",
   "A teenage girl with shoulder-length wavy hair and freckles",
   "A teenage girl with straight, black hair and sharp features",
   "A young woman with long, flowing hair and high cheekbones",
   "A young woman with a pixie cut and a playful smile",
   "A woman in her 20s with short, bobbed hair and soft eyes",
   "A woman in her 20s with thick, curly hair and an oval face",
+  "A young woman in her early 20s with short, spiked hair and hoop earrings",
+  "A young woman in her late 20s with sleek, straight hair and almond-shaped eyes",
   "A woman in her 30s with medium-length hair and a few wrinkles around her eyes",
   "A woman in her 30s with long, straight hair and a confident expression",
+  "A woman in her 30s with shoulder-length curls and a soft, relaxed expression",
   "A middle-aged woman with shoulder-length wavy hair and laugh lines",
   "A middle-aged woman with a high ponytail and tired eyes",
   "A woman in her 40s with graying hair and a warm smile",
   "A woman in her 40s with short hair and a strong jawline",
+  "A woman in her 40s with sharp features, high cheekbones, and a few gray strands",
   "A woman in her 50s with shoulder-length hair and slight crow's feet",
   "A woman in her 50s with a curly bob and a gentle expression",
+  "A woman in her 50s with a graying bob, thin eyebrows, and a gentle smile",
   "An older woman with a bun of white hair and a round, wrinkled face",
   "An older woman with long, graying hair and a serene expression",
   "An elderly woman with thin white hair and deep wrinkles around her mouth",
   "An elderly woman with short, curly hair and sunken cheeks",
   "A very old woman with her hair in a tight bun and soft, kind eyes",
   "A woman in her 60s with a bob of silver hair and a proud posture",
+  "A woman in her 60s with long, silver hair tied in a braid and laugh lines",
   "A woman in her 70s with long, white hair and a gentle smile",
+  "A woman in her 70s with short white curls, a wrinkled forehead, and a bright expression",
+  "An elderly woman with a long white braid, prominent cheekbones, and warm eyes",
   "An elderly woman with short white hair, deep-set eyes, and a frail frame"
 ];
 
@@ -499,6 +520,42 @@ const femaleDresses = [
   "A knight's shining plate armor with a crest"
 ];
 
+const maleName = [
+  "Xiao Dong",
+  "Xiao Bin",
+  "Kenta",
+  "Hideto",
+  "Son Kang-Dae",
+  "Thi Tạ Hiền",
+  "Pan Aduladej",
+  "Pruitt Villeneuve",
+  "Friedrick Brackmann",
+  "Pietro Caponera",
+  "Jasper Bergquist",
+  "Tomas Rosten",
+  "Pouya Hosseini",
+  "Nikolaev",
+  "Dequinn Harrell"
+];
+
+const femaleName = [
+  "Xiao Na",
+  "Xiao Han",
+  "Mikami",
+  "Kanako",
+  "Ha Yun-Soo",
+  "La Ngọc Lý",
+  "Tidarat Taksin",
+  "Vignetta Badour",
+  "Leota Zobel",
+  "Fabia Santomauro",
+  "Elsa Widforss",
+  "Helena Hoel",
+  "Anna Qaedi",
+  "Lidochka Vasilev",
+  "Xemena Porter"
+];
+
 const dailyScenes = [
   "A quiet suburban neighborhood",
   "A cozy cafe on a rainy afternoon",
@@ -754,45 +811,92 @@ const dailyActions = [
   "sewing a patch onto a garment",
   "tuning the strings of a guitar",
   "wiping sweat from a brow after hard work",
-  "planting seeds carefully into the soil"
+  "planting seeds carefully into the soil",
+  "Riding on the back of a lion",
+  "Riding on a horse",
+  "Riding on the back of a tiger",
+  "Crubbing a puppy",
+  "Holding a puppy",
+  "Running with a golden retriever",
+  "Crubbing a kitten",
+  "Holding a black kitten",
+  "Eating a huge hamburger",
+  "Raising a beer",
+  "Crying with tears in his eyes",
+  "Laughing happily with the scissors sign",
+  "Dragging his chin in thought",
+  "Having an angry expression",
+  "Having a smirking expression",
+  "Having a smug expression",
+  "Sitting on a bench with crossed legs",
+  "Lying down with arms behind the head",
+  "Clapping hands enthusiastically",
+  "Blowing a kiss",
+  "Scratching the head in confusion",
+  "Dancing with both hands up",
+  "Sitting cross-legged on the ground",
+  "Walking confidently with a briefcase",
+  "Taking a selfie",
+  "Winking with one eye",
+  "Covering mouth in surprise",
+  "Yawning with wide-open mouth",
+  "Throwing a paper airplane",
+  "Shivering in the cold",
+  "Sweating in the heat",
+  "Nodding in agreement",
+  "Shrugging with palms up",
+  "Blowing bubbles",
+  "Holding a bouquet of flowers"
 ];
 
 const specialActions = [
   "exploring an ancient map",
   "casting a powerful spell",
   "floating weightlessly in mid-air",
-  "building something mechanical with precision",
-  "fighting a shadowy figure in the dark",
   "whispering secrets to a bird",
   "painting a masterpiece on a large canvas",
   "beat the drums",
   "waving energetically at the viewer",
   "summoning a glowing orb of light with a wave of the hand",
-  "drawing runes in the air with a staff",
   "conjuring flames from their fingertips",
   "opening a portal to another dimension",
-  "transforming into an animal in a swirl of magic",
   "teleporting in a flash of light",
   "floating above the ground in meditation",
-  "creating illusions to confuse enemies",
   "using a crystal ball to foresee the future",
-  "tinkering with a clock",
-  "sharpening a blade meticulously",
-  "studying a strange artifact closely",
-  "blowing bubbles into the air",
   "catching fireflies in a jar",
-  "puzzling over an ancient puzzle box",
   "mixing ingredients in a bubbling cauldron",
   "adjusting the sails on a small boat",
   "whittling a piece of wood into a figurine",
   "stringing a bow and preparing to shoot",
   "juggling brightly colored balls",
-  "folding clothes neatly into a basket",
-  "pouring a cup of hot coffee",
-  "honing a piece of metal on a grinding wheel",
-  "applying paint to a wall with long strokes",
-  "blowing on hot soup to cool it",
-  "tying a complex knot in a rope"
+  "arm wrestling with the Hulk",
+  "playing chess with a robot",
+  "having a tea party with a dragon",
+  "baking a cake with Spider-Man",
+  "doing yoga alongside Wonder Woman",
+  "reading a comic book with Iron Man",
+  "riding a bicycle with Superman",
+  "playing hopscotch with Thor",
+  "taking selfies with a vampire",
+  "practicing magic tricks with Doctor Strange",
+  "playing a banjo for an audience of ghosts",
+  "fencing with a pirate captain",
+  "having a dance-off with a zombie",
+  "feeding a pet unicorn",
+  "having a pillow fight with Batman",
+  "doing karaoke with Captain America",
+  "building a giant banana with Minions",
+  "getting into a pie fight with Minions",
+  "dancing a conga line with Minions",
+  "trying on costumes with Minions",
+  "riding a unicycle with a Minion holding balloons",
+  "helping Gru plan a heist with Minions",
+  "playing freeze tag with Olaf from Frozen",
+  "having a bubble-blowing contest with SpongeBob",
+  "eating jellybeans with Toothless the dragon",
+  "watching fireworks with Baymax",
+  "teaching Pikachu how to cook pancakes",
+  "going on a treasure hunt with Jack Sparrow"
 ];
 
 function getRandom(array) {
@@ -841,19 +945,35 @@ function generatePrompt() {
   } else if (rand < 0.35) {
     randomSubject = getRandom(male);
     randomDress = getRandom(maleDresses);
+    if (Math.random() < 0.4) {
+      const name = getRandom(maleName);
+      randomSubject += " named \"" + name + "\"";
+    }
   } else if (rand < 0.6) {
     randomSubject = getRandom(female);
     randomDress = getRandom(femaleDresses);
-  } else if (rand < 0.8) {
+    if (Math.random() < 0.4) {
+      const name = getRandom(femaleName);
+      randomSubject += " named \"" + name + "\"";
+    }
+  } else if (rand < 0.85) {
     randomSubject = getRandom(job);
     if (Math.random() < 0.5) {
       randomDress = getRandom(maleDresses);
       randomSubject = "a male " + randomSubject;
+      if (Math.random() < 0.4) {
+        const name = getRandom(maleName);
+        randomSubject += " named \"" + name + "\"";
+      }
     } else {
       randomDress = getRandom(femaleDresses);
       randomSubject = "a female " + randomSubject;
+      if (Math.random() < 0.4) {
+        const name = getRandom(femaleName);
+        randomSubject += " named \"" + name + "\"";
+      }
     }
-  } else if (rand < 0.9) {
+  } else if (rand < 0.95) {
     randomSubject = getRandom(specialCharacters);
     randomDress = "";
   } else {
