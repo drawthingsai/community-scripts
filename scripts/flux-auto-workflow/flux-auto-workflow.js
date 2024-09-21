@@ -499,6 +499,42 @@ const femaleDresses = [
   "A knight's shining plate armor with a crest"
 ];
 
+const maleName = [
+  "Xiao Dong",
+  "Xiao Bin",
+  "Kenta",
+  "Hideto",
+  "Son Kang-Dae",
+  "Thi Tạ Hiền",
+  "Pan Aduladej",
+  "Pruitt Villeneuve",
+  "Friedrick Brackmann",
+  "Pietro Caponera",
+  "Jasper Bergquist",
+  "Tomas Rosten",
+  "Pouya Hosseini",
+  "Nikolaev",
+  "Dequinn Harrell"
+];
+
+const femaleName = [
+  "Xiao Na",
+  "Xiao Han",
+  "Mikami",
+  "Kanako",
+  "Ha Yun-Soo",
+  "La Ngọc Lý",
+  "Tidarat Taksin",
+  "Vignetta Badour",
+  "Leota Zobel",
+  "Fabia Santomauro",
+  "Elsa Widforss",
+  "Helena Hoel",
+  "Anna Qaedi",
+  "Lidochka Vasilev",
+  "Xemena Porter"
+];
+
 const dailyScenes = [
   "A quiet suburban neighborhood",
   "A cozy cafe on a rainy afternoon",
@@ -777,7 +813,6 @@ const specialActions = [
   "creating illusions to confuse enemies",
   "using a crystal ball to foresee the future",
   "tinkering with a clock",
-  "sharpening a blade meticulously",
   "studying a strange artifact closely",
   "blowing bubbles into the air",
   "catching fireflies in a jar",
@@ -841,17 +876,33 @@ function generatePrompt() {
   } else if (rand < 0.35) {
     randomSubject = getRandom(male);
     randomDress = getRandom(maleDresses);
+    if (Math.random() < 0.4) {
+      const name = getRandom(maleName);
+      randomSubject += " named \"" + name + "\"";
+    }
   } else if (rand < 0.6) {
     randomSubject = getRandom(female);
     randomDress = getRandom(femaleDresses);
+    if (Math.random() < 0.4) {
+      const name = getRandom(femaleName);
+      randomSubject += " named \"" + name + "\"";
+    }
   } else if (rand < 0.8) {
     randomSubject = getRandom(job);
     if (Math.random() < 0.5) {
       randomDress = getRandom(maleDresses);
       randomSubject = "a male " + randomSubject;
+      if (Math.random() < 0.4) {
+        const name = getRandom(maleName);
+        randomSubject += " named \"" + name + "\"";
+      }
     } else {
       randomDress = getRandom(femaleDresses);
       randomSubject = "a female " + randomSubject;
+      if (Math.random() < 0.4) {
+        const name = getRandom(femaleName);
+        randomSubject += " named \"" + name + "\"";
+      }
     }
   } else if (rand < 0.9) {
     randomSubject = getRandom(specialCharacters);
