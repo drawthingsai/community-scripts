@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.1
+// v3.2
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -10,11 +10,18 @@
 //
 const useFlux8bit = true;
 //
+// You can customize unlimited styles you like here, and the custom style is enabled by default.
+//
+const customStyle = [
+  "Style of the movie \"The Grand Budapest Hotel\", by Wes Anderson",
+  "Style of the movie \"Blade Runner 2049\", by Denis Villeneuve"
+];
+//
 //
 //
 
 
-const version = "v3.1";
+const version = "v3.2";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
@@ -59,7 +66,7 @@ const promptsSourceInput = requestFromUser(
       ),
       this.section(
         "❖  Random Prompt Style Filter",
-        "• Filter the styles you don't need.",
+        "• Filter the styles you don't need.\n• The custom style can be set at the beginning of the source code.",
         [
           this.switch(true, "✡︎   Photography"),
           this.switch(true, "✡︎   Cinematic"),
@@ -71,6 +78,7 @@ const promptsSourceInput = requestFromUser(
           this.switch(false, "✡︎   Surrealism"),
           this.switch(false, "✡︎   Illustration"),
           this.switch(false, "✡︎   Fantasy"),
+          this.switch(true, "✡︎   Custom")
         ]
       ),
       this.section(
@@ -336,7 +344,6 @@ const specialCharacters = [
   "Donald John Trump",
   "Albert Einstein",
   "Martin Luther King Jr.",
-  "Nelson Mandela",
   "Elon Musk",
   "Mahatma Gandhi",
   "Steve Jobs",
@@ -910,6 +917,9 @@ function styleFilter() {
     if (promptsSourceInput[5][x] == true) {
       newStyle.push(style[x]);
     }
+  }
+  if (promptsSourceInput[5][10] == true) {
+    newStyle.push(...customStyle);
   }
 }
 
