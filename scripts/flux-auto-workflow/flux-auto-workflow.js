@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.1
+// v3.2
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -10,11 +10,18 @@
 //
 const useFlux8bit = true;
 //
+// You can customize unlimited styles you like here, and the custom style is enabled by default.
+//
+const customStyle = [
+  "Style of the movie \"The Grand Budapest Hotel\", by Wes Anderson",
+  "Style of the movie \"Blade Runner 2049\", by Denis Villeneuve"
+];
+//
 //
 //
 
 
-const version = "v3.1";
+const version = "v3.2";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
@@ -59,7 +66,7 @@ const promptsSourceInput = requestFromUser(
       ),
       this.section(
         "❖  Random Prompt Style Filter",
-        "• Filter the styles you don't need.",
+        "• Filter the styles you don't need.\n• The custom style can be set at the beginning of the source code.",
         [
           this.switch(true, "✡︎   Photography"),
           this.switch(true, "✡︎   Cinematic"),
@@ -71,6 +78,7 @@ const promptsSourceInput = requestFromUser(
           this.switch(false, "✡︎   Surrealism"),
           this.switch(false, "✡︎   Illustration"),
           this.switch(false, "✡︎   Fantasy"),
+          this.switch(true, "✡︎   Custom")
         ]
       ),
       this.section(
@@ -80,6 +88,15 @@ const promptsSourceInput = requestFromUser(
           this.textField("", "keyword", false, 10),
         ]
       ),
+      this.section(
+        "❖  Random Prompt Custom Subject",
+        "•  Add custom subject to random prompts.\n•  For example, if you want to generate images of sports cars, you should disable the following random clothes and action.",
+        [
+          this.textField("", "A sports car. (Leave it blank here to use random subjects)", false, 10),
+          this.switch(false, "✡︎   With Clothes"),
+          this.switch(false, "✡︎   With Action")
+        ]
+      )
     ];
   }
 );
@@ -336,7 +353,6 @@ const specialCharacters = [
   "Donald John Trump",
   "Albert Einstein",
   "Martin Luther King Jr.",
-  "Nelson Mandela",
   "Elon Musk",
   "Mahatma Gandhi",
   "Steve Jobs",
@@ -418,7 +434,7 @@ const groupPerson = [
   "A superhero and an alien"
 ];
 
-const maleDresses = [
+const maleClothes = [
   // Daily and modern clothing
   "Business suit with a sharp tie",
   "Casual T-shirt and shorts",
@@ -468,7 +484,7 @@ const maleDresses = [
   "A battle suit with laser gauntlets and shields"
 ];
 
-const femaleDresses = [
+const femaleClothes = [
   // Daily and modern clothing
   "Flowing silk gown adorned with intricate embroidery",
   "Elegant evening gown with sparkling sequins",
@@ -911,13 +927,16 @@ function styleFilter() {
       newStyle.push(style[x]);
     }
   }
+  if (promptsSourceInput[5][10] == true) {
+    newStyle.push(...customStyle);
+  }
 }
 
 function generatePrompt() {
   const randomStyle = getRandom(newStyle);
   const randomLight = getRandom(light);
 
-  let randomSubject, randomDress, randomAction, randomScene;
+  let randomSubject, randomClothes, randomAction, randomScene;
   const imagination = promptsSourceInput[3][0];
   const rand = Math.random();
 
@@ -937,21 +956,21 @@ function generatePrompt() {
   if (rand < 0.1) {
     randomSubject = getRandom(animal);
     if (imagination == 0) {
-      randomDress = Math.random() < 0.5 ? getRandom(maleDresses) : getRandom(femaleDresses);
+      randomClothes = Math.random() < 0.5 ? getRandom(maleClothes) : getRandom(femaleClothes);
     } else {
-      randomDress = "";
+      randomClothes = "";
       randomAction = "";
     }
   } else if (rand < 0.35) {
     randomSubject = getRandom(male);
-    randomDress = getRandom(maleDresses);
+    randomClothes = getRandom(maleClothes);
     if (Math.random() < 0.4) {
       const name = getRandom(maleName);
       randomSubject += " named \"" + name + "\"";
     }
   } else if (rand < 0.6) {
     randomSubject = getRandom(female);
-    randomDress = getRandom(femaleDresses);
+    randomClothes = getRandom(femaleClothes);
     if (Math.random() < 0.4) {
       const name = getRandom(femaleName);
       randomSubject += " named \"" + name + "\"";
@@ -959,14 +978,14 @@ function generatePrompt() {
   } else if (rand < 0.85) {
     randomSubject = getRandom(job);
     if (Math.random() < 0.5) {
-      randomDress = getRandom(maleDresses);
+      randomClothes = getRandom(maleClothes);
       randomSubject = "a male " + randomSubject;
       if (Math.random() < 0.4) {
         const name = getRandom(maleName);
         randomSubject += " named \"" + name + "\"";
       }
     } else {
-      randomDress = getRandom(femaleDresses);
+      randomClothes = getRandom(femaleClothes);
       randomSubject = "a female " + randomSubject;
       if (Math.random() < 0.4) {
         const name = getRandom(femaleName);
@@ -975,17 +994,27 @@ function generatePrompt() {
     }
   } else if (rand < 0.95) {
     randomSubject = getRandom(specialCharacters);
-    randomDress = "";
+    randomClothes = "";
   } else {
     randomSubject = getRandom(groupPerson);
-    randomDress = "";
+    randomClothes = "";
+  }
+
+  if (promptsSourceInput[7][0] != "") {
+    randomSubject = promptsSourceInput[7][0];
+    if (promptsSourceInput[7][1] == false) {
+      randomClothes = "";
+    }
+    if (promptsSourceInput[7][2] == false) {
+      randomAction = "";
+    }
   }
 
   var imagetype = "";
-  const w = randomDress == "" ? "" : " wearing ";
+  const w = randomClothes == "" ? "" : " wearing ";
   if (promptsSourceInput[2][0] == 0) {
     if (imagination == 0) {
-      imagetype = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomDress}, ${randomAction}, in ${randomScene}.`;
+      imagetype = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
     } else {
       imagetype = `${randomStyle}, ${randomSubject} ${randomAction}, in ${randomScene}.`;
     }
@@ -999,7 +1028,7 @@ function generatePrompt() {
   if (promptsSourceInput[6][0] != "") {
     imagetype = promptsSourceInput[6][0] + ", " + imagetype;
   }
-  return imagetype;
+  return imagetype.replace(", ,", ",");
 }
 
 if (promptsSourceInput[1][0] == 1) {
