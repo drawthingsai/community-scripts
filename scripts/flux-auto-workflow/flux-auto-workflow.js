@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.2
+// v3.3
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -14,14 +14,15 @@ const useFlux8bit = true;
 //
 const customStyle = [
   "Style of the movie \"The Grand Budapest Hotel\", by Wes Anderson",
-  "Style of the movie \"Blade Runner 2049\", by Denis Villeneuve"
+  "Style of the movie \"Blade Runner 2049\", by Denis Villeneuve",
+  "Stylized photo, professional model, commercial photography, hasselblad XCD"
 ];
 //
 //
 //
 
 
-const version = "v3.2";
+const version = "v3.3";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
@@ -31,42 +32,53 @@ const promptsSourceInput = requestFromUser(
     return [
       this.section(
         "❖  Workflow Mode",
-        "• Flux Model: The optimization parameters will be set automatically for Flux.\n• Other Model: SDXL, SD3, etc. Parameters need to be set manually.\n• Image Refiner: Refine the existing image on the canvas automatically.",
+        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Other Model: SDXL, SD3, etc. Parameters need to be set manually.\n •   Image Refiner: Refine the existing image on the canvas automatically.",
         [
           this.segmented(0, ["🌊  Flux Model   ", "🧩  Other Model   ", "✨  Image Refiner   "]),
         ]
       ),
       this.section(
         "❖  Prompt Source",
-        "• Select the source of the prompt.",
+        " •   Select the source of the prompt.",
         [
           this.segmented(0, ["📝  Custom Prompt   ", "🎲  Random Prompt   "]),
         ]
       ),
       this.section(
-        "❖  Random Prompt Image Type",
-        "• Select the type of the image.",
-        [
-          this.segmented(0, ["👤  Subject   ", "🏡  Scene   "]),
-        ]
-      ),
-      this.section(
-        "❖  Random Prompt Imagination level",
-        "• Creative: Have more whimsical action costume combinations and rich imagination.\n• Conservative: Imagination is more conservative and more loyal to reality.",
-        [
-          this.segmented(0, ["🎨  Creative   ", "💭  Conservative   "]),
-        ]
-      ),
-      this.section(
-        "❖  Random Prompt Quantity",
-        "•  The number of random prompts to be generated.",
+        "❖  Random Prompt • Quantity",
+        " •   The number of random prompts to be generated.",
         [
           this.slider(10, this.slider.fractional(0), 1, 30, ""),
         ]
       ),
       this.section(
-        "❖  Random Prompt Style Filter",
-        "• Filter the styles you don't need.\n• The custom style can be set at the beginning of the source code.",
+        "❖  Random Prompt • Creative Mode",
+        " •   🅿: Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt.",
+        [
+          this.segmented(1, ["🅿", "🆂", "🅰", "🅼"]),
+        ]
+      ),
+      this.section(
+        "❖  Random Prompt • Manual Options  (🅼 Mode)",
+        " •   Manually select parts of the prompt. Automatically match clothes based on the subject's gender.",
+        [
+          this.textField("", " {Subject}  Leave it blank to generate random scene without the subject.", false, 10),
+          this.switch(false, "✡︎   Clothes"),
+          this.switch(false, "✡︎   Action"),
+          this.switch(true, "✡︎   Light"),
+          this.switch(true, "✡︎   Scene")
+        ]
+      ),
+      this.section(
+        "❖  Random Prompt • Custom Prefix     (🅿 / 🆂 / 🅰 / 🅼 Mode)",
+        " •   Add custom prefix to random prompts, such as the keyword to trigger lora.",
+        [
+          this.textField("", "keyword", false, 10),
+        ]
+      ),
+      this.section(
+        "❖  Random Prompt • Style Filter           (🅿 / 🆂 / 🅰 / 🅼 Mode)",
+        " •   Filter the styles you don't need.\n •   The custom style can be set at the beginning of the source code.",
         [
           this.switch(true, "✡︎   Photography"),
           this.switch(true, "✡︎   Cinematic"),
@@ -80,22 +92,6 @@ const promptsSourceInput = requestFromUser(
           this.switch(false, "✡︎   Fantasy"),
           this.switch(true, "✡︎   Custom")
         ]
-      ),
-      this.section(
-        "❖  Random Prompt Custom Prefix",
-        "•  Add custom prefix to random prompts, such as the keyword to trigger lora.",
-        [
-          this.textField("", "keyword", false, 10),
-        ]
-      ),
-      this.section(
-        "❖  Random Prompt Custom Subject",
-        "•  Add custom subject to random prompts.\n•  For example, if you want to generate images of sports cars, you should disable the following random clothes and action.",
-        [
-          this.textField("", "A sports car. (Leave it blank here to use random subjects)", false, 10),
-          this.switch(false, "✡︎   With Clothes"),
-          this.switch(false, "✡︎   With Action")
-        ]
       )
     ];
   }
@@ -103,7 +99,7 @@ const promptsSourceInput = requestFromUser(
 
 const style = [
   "Photography style, realistic details, life-like",
-  "Cinematic style, Film particles, Orange-blue tone",
+  "Cinematic style, film grain, Orange-blue tone",
   "Vintage film style, grainy texture",
   "Lomo style, faded and dreamy",
   "3D render, ray tracing, keyshot",
@@ -656,21 +652,24 @@ const dailyScenes = [
   "A desert landscape with massive, abstract dunes sculpted by the wind, the sand reflecting iridescent colors under a deep blue sky",
   "A Parisian street at dawn, with soft golden light reflecting off wet cobblestones, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere",
   "A lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow, while mist rises from the undergrowth",
-  "A minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space",
-  "An abstract composition of overlapping translucent circles in pastel hues, their edges softly blending together to create a calming gradient of color and light",
-  "A futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows, creating a dynamic interplay of light and form",
-  "A fluid, wave-like pattern of flowing curves and arcs, rendered in bold primary colors, evoking the sense of continuous movement and rhythm",
-  "A deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray",
-  "A surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors, forming a complex yet harmonious structure",
-  "A series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop",
-  "A minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion",
-  "A kaleidoscopic array of sharp, geometric prisms and polygons in vibrant colors, their edges reflecting light in a way that fragments the surrounding space",
-  "A soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance",
-  "A seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement",
-  "A gradient of fading, parallel lines in varying thicknesses, transitioning from bold, sharp edges to soft, diffused endings, forming an elegant visual flow",
-  "A minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts, creating layers of muted tones and depth",
-  "An intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark, matte background, evoking a digital aesthetic",
-  "A three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces, casting angular shadows that shift as if in motion"
+  "front of the background of fashionable Morandi style color-blocking",
+  "front of the background of fashionable Morandi style solid color",
+  "front of the background of fashionable minimalist, youthful and energetic color matching",
+  "front of the background of white columns, with long shadows",
+  "front of the background of black and white stitching",
+  "front of the background of black and white light and shadow",
+  "front of the background of minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space",
+  "front of the background of abstract composition of overlapping translucent circles in pastel hues, their edges softly blending together to create a calming gradient of color and light",
+  "front of the background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows, creating a dynamic interplay of light and form",
+  "front of the background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray",
+  "front of the background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors, forming a complex yet harmonious structure",
+  "front of the background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop",
+  "front of the background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion",
+  "front of the background of soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance",
+  "front of the background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement",
+  "front of the background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts, creating layers of muted tones and depth",
+  "front of the background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark, matte background, evoking a digital aesthetic",
+  "front of the background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces, casting angular shadows that shift as if in motion"
 ];
 
 const specialScenes = [
@@ -923,11 +922,11 @@ function getRandom(array) {
 var newStyle = [];
 function styleFilter() {
   for (var x = 0; x < style.length; x++) {
-    if (promptsSourceInput[5][x] == true) {
+    if (promptsSourceInput[6][x] == true) {
       newStyle.push(style[x]);
     }
   }
-  if (promptsSourceInput[5][10] == true) {
+  if (promptsSourceInput[6][10] == true) {
     newStyle.push(...customStyle);
   }
 }
@@ -937,29 +936,23 @@ function generatePrompt() {
   const randomLight = getRandom(light);
 
   let randomSubject, randomClothes, randomAction, randomScene;
-  const imagination = promptsSourceInput[3][0];
+  const creativeMode = promptsSourceInput[3][0];
   const rand = Math.random();
 
-  if (imagination == 0) {
-    if (rand < 0.75) {
-      randomAction = getRandom(dailyActions);
-      randomScene = getRandom(dailyScenes);
-    } else {
-      randomAction = getRandom(specialActions);
-      randomScene = getRandom(specialScenes);
-    }
-  } else {
+  if (rand < 0.75) {
     randomAction = getRandom(dailyActions);
     randomScene = getRandom(dailyScenes);
+  } else {
+    randomAction = getRandom(specialActions);
+    randomScene = getRandom(specialScenes);
   }
 
   if (rand < 0.1) {
     randomSubject = getRandom(animal);
-    if (imagination == 0) {
+    if (creativeMode == 0 || creativeMode == 3) {
       randomClothes = Math.random() < 0.5 ? getRandom(maleClothes) : getRandom(femaleClothes);
     } else {
       randomClothes = "";
-      randomAction = "";
     }
   } else if (rand < 0.35) {
     randomSubject = getRandom(male);
@@ -1000,39 +993,70 @@ function generatePrompt() {
     randomClothes = "";
   }
 
-  if (promptsSourceInput[7][0] != "") {
-    randomSubject = promptsSourceInput[7][0];
-    if (promptsSourceInput[7][1] == false) {
+  if (creativeMode == 3) {
+    if (promptsSourceInput[4][0] != "") {
+      randomSubject = promptsSourceInput[4][0];
+      const man = ["man", "boy", "guy", "gentleman", "male", "husband", "father", "son", "brother", "uncle", "grandfather"];
+      const woman = ["woman", "girl", "lady", "female", "wife", "mother", "daughter", "sister", "aunt", "grandmother"];
+      const words = randomSubject.toLowerCase().split(" ");
+      const isMan = words.some(word => man.includes(word));
+      const isWoman = words.some(word => woman.includes(word));
+
+      if (isMan) {
+        randomClothes = getRandom(maleClothes);
+      } else if (isWoman) {
+        randomClothes = getRandom(femaleClothes);
+      } else {
+        randomClothes = Math.random() < 0.5 ? getRandom(maleClothes) : getRandom(femaleClothes);
+      }
+
+      if (promptsSourceInput[4][1] == false) {
+        randomClothes = "";
+      }
+      if (promptsSourceInput[4][2] == false) {
+        randomAction = "";
+      }
+      if (promptsSourceInput[4][3] == false) {
+        randomLight = "";
+      }
+      if (promptsSourceInput[4][4] == false) {
+        randomScene = "";
+      }
+    } else {
+      randomSubject = "";
       randomClothes = "";
-    }
-    if (promptsSourceInput[7][2] == false) {
       randomAction = "";
     }
   }
 
-  var imagetype = "";
   const w = randomClothes == "" ? "" : " wearing ";
-  if (promptsSourceInput[2][0] == 0) {
-    if (imagination == 0) {
-      imagetype = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
-    } else {
-      imagetype = `${randomStyle}, ${randomSubject} ${randomAction}, in ${randomScene}.`;
-    }
-  } else {
-    if (imagination == 0) {
-      imagetype = `${randomStyle}, ${randomLight}, ${randomScene}.`;
-    } else {
-      imagetype = `${randomStyle}, ${randomScene}.`;
-    }
+  const i = randomSubject == "" ? "" : "in ";
+  var buildPrompt = "";
+  switch (creativeMode) {
+    case 0:
+      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
+      break;
+    case 1:
+      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, in ${randomScene}.`;
+      break;
+    case 2:
+      buildPrompt = `${randomStyle}, ${randomLight}, someone ${randomAction}, in ${randomScene}.`;
+      break;
+    case 3:
+      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, ${i}${randomScene}.`;
+      break;
+    default:
+      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
   }
-  if (promptsSourceInput[6][0] != "") {
-    imagetype = promptsSourceInput[6][0] + ", " + imagetype;
+
+  if (promptsSourceInput[5][0] != "") {
+    buildPrompt = promptsSourceInput[5][0] + ", " + buildPrompt;
   }
-  return imagetype.replace(", ,", ",");
+  return buildPrompt.replace(", ,", ",").replace(", ,", ",");
 }
 
 if (promptsSourceInput[1][0] == 1) {
-  const randomPromptCount = promptsSourceInput[4][0];
+  const randomPromptCount = promptsSourceInput[2][0];
   promptsSource = "";
   styleFilter();
   for (var x = 0; x < randomPromptCount; x++) {
@@ -1062,10 +1086,10 @@ if (workflow == 0 || workflow == 1) {
       return [
         this.section(
           "❖  Prompt Setting",
-          "• Support multiple prompts batch generation, a blank line between each prompt.\n• Use ⬆︎ Shift + ↵ Enter to break line.",
+          " •   Support multiple prompts batch generation, a blank line between each prompt.\n •   Use ⬆︎ Shift + ↵ Enter to break line. iPadOS / iOS requires an external keyboard.",
           [
             this.textField(promptsSource, " Write your prompts here.", true, 420),
-            this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖    Batch count of each prompt"),
+            this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt"),
           ]
         ),
       ];
@@ -1079,11 +1103,11 @@ const promptsCount = promptsArray.length;
 
 var start = Number;
 function fluxModel() {
-  var tip = `•   If you need a more accurate quantization model, please set 'useFlux8bit' to 'false'.`;
+  var tip = ` •   If you need a more accurate quantization model, please set 'useFlux8bit' to 'false'.`;
   if (useFlux8bit) {
     const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"])
     if (!isDownload[0]) {
-      tip = `•   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please set 'useFlux8bit' to 'false' at the top of script.`;
+      tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please set 'useFlux8bit' to 'false' at the top of script.`;
     }
   }
   var titleInfo = "";
@@ -1103,7 +1127,7 @@ function fluxModel() {
         d = 0;
         widgetA = this.section(
           "❖  Performance Mode",
-          `• Speed Mode: Use the Dev to Schnell Lora to provide the fastest speed.\n• Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n• Quality Mode: Use high steps to provide the best color and aesthetic style.`,
+          ` •   Speed Mode: Use the Dev to Schnell Lora to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
           [
             this.segmented(0, ["🚀  Speed   ", "⚖️  Balance   ", "🏆  Quality   "]),
           ]
@@ -1113,13 +1137,13 @@ function fluxModel() {
         d = 1;
         widgetA = this.section(
           "❖  Batch Refine",
-          `• Select the image folder that needs to be refined in batches.\n⚠︎ All image size in the folder must be consistent, and the 'Image Size' above must be adjusted to the same size.`,
+          ` •   Select the image folder that needs to be refined in batches.\n⚠︎   All image size in the folder must be consistent, and the 'Image Size' above must be adjusted to the same size.`,
           [
             widgets = this.directory(),
           ]
         );
         widgetB = this.switch(false, "✡︎   Capture Image Description");
-        tip = `•   After enabling the 'Capture Image Description' function, more perfect prompt can be provided for batch refine, making the refined image closer to the original image, but it will increase the running time and require the download of approximately 1.7GB of model files.`;
+        tip = ` •   After enabling the 'Capture Image Description' function, more perfect prompt can be provided for batch refine, making the refined image closer to the original image, but it will increase the running time and require the download of approximately 1.7GB of model files.`;
       }
 
       return [
@@ -1133,7 +1157,7 @@ function fluxModel() {
         widgetA,
         this.section(
           "❖  Detail Optimization",
-          `• Standard Mode: helps to add more natural details and textures.\n• Enhance Mode: will add stronger contrast and the composition will change more.`,
+          ` •   Standard Mode: helps to add more natural details and textures.\n •   Enhance Mode: will add stronger contrast and the composition will change more.`,
           [
             this.segmented(d, ["📷  Standard   ", "📸  Enhance   "]),
           ]
