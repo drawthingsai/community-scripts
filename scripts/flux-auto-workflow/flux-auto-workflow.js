@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.3
+// v3.4
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -10,19 +10,19 @@
 //
 const useFlux8bit = true;
 //
-// You can customize unlimited styles you like here, and the custom style is enabled by default.
+// You can customize unlimited styles you like here, and the custom style is disabled by default.
 //
 const customStyle = [
   "Style of the movie \"The Grand Budapest Hotel\", by Wes Anderson",
-  "Style of the movie \"Blade Runner 2049\", by Denis Villeneuve",
-  "Stylized photo, professional model, commercial photography, hasselblad XCD"
+  "Dynamic Marvel comic book layout with multiple scene transitions, rich character expressions, and storytelling through irregular panel design. Bold, graphic illustration with a strong visual hierarchy and narrative flow",
+  "Hyper-realistic photography, Vibrant, saturated colors like electric pinks, greens, and yellows with sharp, high-contrast shadows. A bold, energetic style that feels modern and dynamic, reminiscent of pop art or street art",
 ];
 //
 //
 //
 
 
-const version = "v3.3";
+const version = "v3.4";
 var promptsSource = pipeline.prompts.prompt;
 
 const promptsSourceInput = requestFromUser(
@@ -53,9 +53,9 @@ const promptsSourceInput = requestFromUser(
       ),
       this.section(
         "❖  Random Prompt • Creative Mode",
-        " •   🅿: Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt.",
+        " •   🅿: Program Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt.",
         [
-          this.segmented(1, ["🅿", "🆂", "🅰", "🅼"]),
+          this.segmented(1, ["P", "S", "A", "M"]),
         ]
       ),
       this.section(
@@ -63,51 +63,83 @@ const promptsSourceInput = requestFromUser(
         " •   Manually select parts of the prompt. Automatically match clothes based on the subject's gender.",
         [
           this.textField("", " {Subject}  Leave it blank to generate random scene without the subject.", false, 10),
-          this.switch(false, "✡︎   Clothes"),
           this.switch(false, "✡︎   Action"),
+          this.switch(false, "✡︎   Clothes"),
           this.switch(true, "✡︎   Light"),
           this.switch(true, "✡︎   Scene")
         ]
       ),
       this.section(
         "❖  Random Prompt • Custom Prefix     (🅿 / 🆂 / 🅰 / 🅼 Mode)",
-        " •   Add custom prefix to random prompts, such as the keyword to trigger lora.",
+        " •   Add custom prefix to random prompts, such as the keyword to trigger LoRA.",
         [
           this.textField("", "keyword", false, 10),
+        ]
+      ),
+      this.section(
+        "❖  Random Prompt • Viewing Angle     (🅿 / 🆂 / 🅰 / 🅼 Mode)",
+        " •   Auto: The model automatically selects the appropriate viewing angle.\n •   Random: Random selection from the list of viewing angle.",
+        [
+          this.menu(0, ["⏹️   Auto", "🔀   Random", "⏺️   Front View", "➡️   Side View", "⬇️   Top View", "↘️   Top-Down View", "↗️   Bottom View", "📷   GoPro"]),
         ]
       ),
       this.section(
         "❖  Random Prompt • Style Filter           (🅿 / 🆂 / 🅰 / 🅼 Mode)",
         " •   Filter the styles you don't need.\n •   The custom style can be set at the beginning of the source code.",
         [
-          this.switch(true, "✡︎   Photography"),
-          this.switch(true, "✡︎   Cinematic"),
-          this.switch(false, "✡︎   Vintage Film"),
-          this.switch(false, "✡︎   Lomo Film"),
-          this.switch(false, "✡︎   3D Render"),
-          this.switch(false, "✡︎   Cartoon"),
-          this.switch(false, "✡︎   Comic Book"),
-          this.switch(false, "✡︎   Surrealism"),
-          this.switch(false, "✡︎   Illustration"),
-          this.switch(false, "✡︎   Fantasy"),
-          this.switch(true, "✡︎   Custom")
+          this.switch(true, "✡︎   Hasselblad Master Photography"),
+          this.switch(true, "✡︎   Soft High-Key Photography"),
+          this.switch(true, "✡︎   High-Fashion Portrait"),
+          this.switch(true, "✡︎   Kodak Film Aesthetic"),
+          this.switch(true, "✡︎   Orange-Teal Cinematic"),
+          this.switch(true, "✡︎   Desaturated Cinematic"),
+          this.switch(true, "✡︎   Vintage Cinematic"),
+          this.switch(true, "✡︎   Retro Aesthetic Cinematic"),
+          this.switch(true, "✡︎   Cold Fashion"),
+          this.switch(true, "✡︎   Cold Steel Futurism"),
+          this.switch(true, "✡︎   Dark Gothic Romance"),
+          this.switch(true, "✡︎   Futuristic Noir Aesthetic"),
+          this.switch(true, "✡︎   Opulent Baroque"),
+          this.switch(true, "✡︎   Pastel Dreamscape"),
+          this.switch(false, "✡︎   Conceptual Illustration"),
+          this.switch(false, "✡︎   Mystical Fantasy"),
+          this.switch(false, "✡︎   Pixar Cartoon Universe"),
+          this.switch(false, "✡︎   Vibrant Anime"),
+          this.switch(false, "✡︎   Custom")
         ]
       )
     ];
   }
 );
 
+const angle = [
+  "front view",
+  "side view",
+  "top view",
+  "top down view",
+  "bottom view",
+  "GoPro view"
+];
+
 const style = [
-  "Photography style, realistic details, life-like",
-  "Cinematic style, film grain, Orange-blue tone",
-  "Vintage film style, grainy texture",
-  "Lomo style, faded and dreamy",
-  "3D render, ray tracing, keyshot",
-  "Cartoon style, digital artwork",
-  "Comic book style, graphic illustration, comic art, graphic novel art",
-  "Surrealism, abstract shapes and forms",
-  "Illustration style, conceptual art, lines",
-  "Fantasy, ethereal and mystical"
+  "Hyper-realistic photography, captured with Hasselblad XCD, masterpieces of photography, sharp and intricate details, life-like textures, high-resolution clarity, and true-to-life colors",//Hasselblad Master Photography
+  "Bright, white-dominant images with soft shadows and very subtle details. The focus is on high key lighting with minimal color, often in grayscale or with just a hint of pastel shades",//Soft High-Key Photography
+  "Hyper-realistic photography, Bold lighting, sharp contrasts, and dramatic poses. Emphasizes luxury and glamour with sleek, polished visuals. Perfect for runway or fashion magazine aesthetics",//High-Fashion Portrait
+  "Rich, vibrant colors with a slight warmth, with slightly saturated tones of red, yellow, and green. Subtle film grain adds texture. Captures the essence of classic Kodak color film",//Kodak Film Aesthetic
+  "A vibrant cinematic palette with strong orange and teal tones. Fine film grain and gaussian noise add texture",//Orange-Teal Cinematic
+  "Desaturated color palette with slight orange and blue undertones, shadow is very light. Fine film grain and gaussian noise to give a gritty, atmospheric quality",//Desaturated Cinematic
+  "Grainy, low-saturation film aesthetics with soft textures and muted colors, evoking the look of old films. Faded tones and nostalgic, retro atmospheres, Fine film grain and gaussian noise add texture",//Vintage Cinematic
+  "Symmetrical compositions with pastel and muted tones, often featuring warm yellows, soft pinks, and teal blues. Strong focus on meticulous framing, quirky characters, and vintage aesthetics. The style evokes a whimsical, nostalgic feel",//Retro Aesthetic Cinematic
+  "Desaturated, cold color palette dominated by greys, muted blues, and browns. Minimal contrast, with a focus on bleak, overcast lighting and a sense of emptiness. Ideal for dark, minimalist fashion themes with a gritty edge",//Cold Fashion
+  "A cool-toned, industrial palette dominated by metallic grays, blues, and muted whites. Sharp details and reflections give a sleek, futuristic appearance with a subtle, polished sheen",//Cold Steel Futurism
+  "Deep reds, blacks, and purples, with an emphasis on dramatic shadows. The style creates a mysterious, romantic atmosphere, with a rich, almost baroque aesthetic",//Dark Gothic Romance
+  "Dark, atmospheric visuals characterized by deep blues, vibrant oranges. Fine film grain and gaussian noise add texture. Cinematic compositions with a focus on shadows and reflections",//Futuristic Noir Aesthetic
+  "Hyper-realistic photography, rich and warm colors with deep reds, golds, and dark shadows. Heavy textures, intricate details, and ornate patterns evoke the luxury and grandeur of baroque art",//Opulent Baroque
+  "Soft pastel colors (pinks, light blues, lavender) blended with smooth gradients. Dreamy and surreal, often with a misty or glowing effect. Minimal contrast, focusing on soft, harmonious tones",//Pastel Dreamscape
+  "Minimalist conceptual illustration, flat design with bold shapes, vibrant colors, and clean lines. Perfect for fashion ads, offering a trendy, modern look",//Conceptual Illustration
+  "Ethereal 3D fantasy artwork with a vibrant color palette. Dreamy, whimsical worlds featuring purples, blues, and golds. Mystical elements evoke a magical, otherworldly atmosphere",//Mystical Fantasy
+  "Bright, vibrant 3D cartoon artwork with a Pixar-inspired style. High attention to realistic details, smooth textures, and expressive characters",//Pixar Cartoon Universe
+  "Dynamic anime art style with vibrant, saturated colors, detailed character designs, bold outlines, and lively, expressive scenes. A balance of stylization and realism"//Vibrant Anime
 ];
 
 const light = [
@@ -255,7 +287,6 @@ const animal = [
   "A kangaroo",
   "A panda",
   "A penguin",
-  "A turtle",
   "A hedgehog",
   "A raccoon",
   "A cheetah",
@@ -359,7 +390,6 @@ const specialCharacters = [
   "Indiana Jones",
   "Darth Vader",
   "Frodo Baggins",
-  "Hannibal Lecter",
   "Jack Sparrow",
   "Katniss Everdeen",
   "Tony Stark",
@@ -572,7 +602,7 @@ const dailyScenes = [
   "A quiet suburban neighborhood",
   "A cozy cafe on a rainy afternoon",
   "A modern apartment with floor-to-ceiling windows",
-  "A bustling farmers' market",
+  "A bustling farmers market",
   "A train speeding through the countryside",
   "A grand city plaza with towering skyscrapers",
   "A cozy bedroom",
@@ -644,14 +674,30 @@ const dailyScenes = [
   "A contemporary dance studio with a rehearsal",
   "A home workshop with DIY projects",
   "A suburban street with holiday decorations",
-  "A minimalist, monochromatic urban neighborhood with tall, sleek buildings fading into misty horizons, blending reality with dreamlike abstraction",
-  "A warm, golden-hued cafe with soft glowing lights and rain-soaked windows that reflect streaks of neon, as light bounces off puddles and creates a surreal, almost impressionistic ambiance",
-  "An ultra-modern apartment with oversized geometric windows, the city skyline blurred and refracted through glass prisms, casting vibrant, abstract patterns across minimalist furniture",
+  "A minimalist, monochromatic urban neighborhood with tall, sleek buildings fading into misty horizons",
+  "A warm, golden-hued cafe with soft glowing lights and rain-soaked windows that reflect streaks of neon",
+  "An ultra-modern apartment with oversized geometric windows, the city skyline blurred and refracted through glass prisms",
   "A suburban street, adorned with extravagant holiday decorations, but transformed into a dreamy, ethereal display of glowing orbs and shimmering",
   "A foggy forest where towering trees merge into abstract lines, and beams of sunlight pierce through in soft",
   "A desert landscape with massive, abstract dunes sculpted by the wind, the sand reflecting iridescent colors under a deep blue sky",
-  "A Parisian street at dawn, with soft golden light reflecting off wet cobblestones, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere",
-  "A lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow, while mist rises from the undergrowth",
+  "A Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere",
+  "A lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow",
+  "A minimalist white wall in the centre of the room features wood framed artwork, a contemporary leather chair and a black stone coffee table",
+  "A muted green room with a textured wallpaper, showcasing a round wooden table and a vintage armchair",
+  "An elegant cream-colored room featuring a large mirror, a marble side table, and a decorative plant in the corner",
+  "An industrial kitchen with exposed brick walls, showcasing a stainless steel island and simple wooden stools",
+  "A serene yoga studio with light gray walls, featuring a wall of mirrors, yoga mats neatly arranged, and natural wood benches",
+  "A sleek bathroom with deep navy tiles, showcasing a freestanding tub, a minimalist vanity, and a touch of greenery in the corner",
+  "An outdoor patio with warm wooden decking, featuring simple lounge chairs and a low table surrounded by lush greenery",
+  "A tranquil meditation room with soft beige walls, a small altar, and a few cushions arranged on the floor",
+  "A cozy bedroom with pastel walls, featuring a low platform bed and a minimalist bedside table",
+  "A clean-lined workshop with gray walls, showcasing tools neatly organized on pegboards and a sturdy workbench in the center",
+  "A chic hair salon with white walls, featuring minimalist styling stations and a simple waiting area adorned with plants",
+  "A bright and airy sunroom with glass walls, featuring a small table and chairs, surrounded by indoor plants",
+  "A spacious garage with white walls, featuring organized storage shelves and a central workbench",
+  "A modern greenhouse with clear glass panels, showcasing neatly arranged potted plants and a simple seating area for plant enthusiasts",
+  "A minimalist classroom with soft blue walls, featuring simple desks arranged in rows and a chalkboard at the front",
+  "An extremely dark room with the shadow of the window projected on the ground",
   "front of the background of fashionable Morandi style color-blocking",
   "front of the background of fashionable Morandi style solid color",
   "front of the background of fashionable minimalist, youthful and energetic color matching",
@@ -659,17 +705,17 @@ const dailyScenes = [
   "front of the background of black and white stitching",
   "front of the background of black and white light and shadow",
   "front of the background of minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space",
-  "front of the background of abstract composition of overlapping translucent circles in pastel hues, their edges softly blending together to create a calming gradient of color and light",
-  "front of the background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows, creating a dynamic interplay of light and form",
+  "front of the background of abstract composition of overlapping translucent circles in pastel hues",
+  "front of the background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows",
   "front of the background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray",
-  "front of the background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors, forming a complex yet harmonious structure",
+  "front of the background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors",
   "front of the background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop",
   "front of the background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion",
   "front of the background of soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance",
   "front of the background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement",
-  "front of the background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts, creating layers of muted tones and depth",
-  "front of the background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark, matte background, evoking a digital aesthetic",
-  "front of the background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces, casting angular shadows that shift as if in motion"
+  "front of the background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts",
+  "front of the background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark",
+  "front of the background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces"
 ];
 
 const specialScenes = [
@@ -696,7 +742,7 @@ const specialScenes = [
   "A dragon's lair filled with treasure",
   "A labyrinth of mirrors reflecting endless possibilities",
   "A tower in the middle of a mystical forest",
-  "A ghostly ship sailing through the fog",
+  "A ghostly ship",
   "An underground cavern lit by glowing fungi",
   "A futuristic city with flying cars and neon lights",
   "A high-tech laboratory filled with robotic arms",
@@ -922,24 +968,26 @@ function getRandom(array) {
 var newStyle = [];
 function styleFilter() {
   for (var x = 0; x < style.length; x++) {
-    if (promptsSourceInput[6][x] == true) {
+    if (promptsSourceInput[7][x] == true) {
       newStyle.push(style[x]);
     }
   }
-  if (promptsSourceInput[6][10] == true) {
+  if (promptsSourceInput[6][style.length] == true) {
     newStyle.push(...customStyle);
   }
 }
 
 function generatePrompt() {
   const randomStyle = getRandom(newStyle);
-  const randomLight = getRandom(light);
+  var randomLight = getRandom(light);
 
   let randomSubject, randomClothes, randomAction, randomScene;
   const creativeMode = promptsSourceInput[3][0];
   const rand = Math.random();
-
-  if (rand < 0.75) {
+  if (0 < creativeMode < 3) {
+    randomLight = "";
+  }
+  if (rand < 0.85) {
     randomAction = getRandom(dailyActions);
     randomScene = getRandom(dailyScenes);
   } else {
@@ -1029,30 +1077,37 @@ function generatePrompt() {
     }
   }
 
+  var view = "";
+  if (promptsSourceInput[6][0] > 1) {
+    view = angle[promptsSourceInput[6][0] - 2];
+  } else if (promptsSourceInput[6][0] == 1) {
+    view = getRandom(angle);
+  }
+
   const w = randomClothes == "" ? "" : " wearing ";
   const i = randomSubject == "" ? "" : "in ";
   var buildPrompt = "";
   switch (creativeMode) {
     case 0:
-      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} in ${randomScene}.`;
       break;
     case 1:
-      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes} in ${randomScene}.`;
       break;
     case 2:
-      buildPrompt = `${randomStyle}, ${randomLight}, someone ${randomAction}, in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, someone ${randomAction} in ${randomScene}.`;
       break;
     case 3:
-      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, ${i}${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${i}${randomScene}.`;
       break;
     default:
-      buildPrompt = `${randomStyle}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction}, in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} in ${randomScene}.`;
   }
 
   if (promptsSourceInput[5][0] != "") {
     buildPrompt = promptsSourceInput[5][0] + ", " + buildPrompt;
   }
-  return buildPrompt.replace(", ,", ",").replace(", ,", ",");
+  return buildPrompt.split(', ,').join('');
 }
 
 if (promptsSourceInput[1][0] == 1) {
@@ -1127,12 +1182,12 @@ function fluxModel() {
         d = 0;
         widgetA = this.section(
           "❖  Performance Mode",
-          ` •   Speed Mode: Use the Dev to Schnell Lora to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
+          ` •   Speed Mode: Use the Dev to Schnell LoRA to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
           [
             this.segmented(0, ["🚀  Speed   ", "⚖️  Balance   ", "🏆  Quality   "]),
           ]
         );
-        widgetB = this.switch(false, "✡︎   Use New Seed");
+        widgetB = this.switch(false, "✡︎   Keep Control");
       } else {
         d = 1;
         widgetA = this.section(
@@ -1163,10 +1218,10 @@ function fluxModel() {
           ]
         ),
         this.section(
-          "❖  Other Settings",
-          "",
+          "❖  Additional Model Settings",
+          " •   Make sure the LoRA and Control models are compatible with Flux before enabling.",
           [
-            this.switch(false, "✡︎   Keep Other Lora"),
+            this.switch(false, "✡︎   Keep LoRA"),
             widgetB,
           ]
         ),
@@ -1193,7 +1248,7 @@ function fluxModel() {
   const mode = userInputs[1][0];
   const detail = userInputs[2][0];
   const keepLora = userInputs[3][0];
-  const newSeed = userInputs[3][1];
+  const keepControl = userInputs[3][1];
   const capture = userInputs[3][1];
 
   var loras = [];
@@ -1201,8 +1256,9 @@ function fluxModel() {
     loras = configuration.loras;
   }
 
-  if (newSeed == true && workflow == 0) {
-    configuration.seed += 1;
+  var controls = [];
+  if (keepControl) {
+    controls = configuration.controls;
   }
 
   if (useFlux8bit) {
@@ -1233,8 +1289,12 @@ function fluxModel() {
   configuration.height = size.height;
   configuration.batchCount = 1;
   configuration.batchSize = 1;
+  configuration.clipSkip = 1;
   configuration.resolutionDependentShift = false;
   configuration.speedUpWithGuidanceEmbed = true;
+  configuration.tiledDiffusion = false;
+  configuration.hiresFix = false;
+  configuration.upscaler = null;
   configuration.refinerModel = null;
   start = Date.now();
 
@@ -1257,8 +1317,9 @@ function fluxModel() {
         if (mode == 0) {
           console.log(`🟢 Speed Mode ‣ Running the Flux Dev   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
           schnellLora = loras;
-          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.0 });
+          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
           configuration.loras = schnellLora;
+          configuration.controls = controls;
           configuration.sampler = 15;
           configuration.strength = 1.0;
           configuration.shift = 1.0;
@@ -1272,8 +1333,9 @@ function fluxModel() {
         } else if (mode == 1) {
           console.log(`🟠 Balance Mode ‣ ❶ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
           schnellLora = loras;
-          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.0 });
+          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
           configuration.loras = schnellLora;
+          configuration.controls = controls;
           configuration.strength = 1.0;
           configuration.guidanceScale = 3.5;
           configuration.sampler = 15;
@@ -1296,9 +1358,11 @@ function fluxModel() {
             configuration.strength = 0.5;
             configuration.steps = 8;
           }
+          configuration.controls = [];
           pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
         } else if (mode == 2) {
           console.log(`🔴 Quality Mode ‣ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+          configuration.controls = controls;
           configuration.sampler = 15;
           configuration.strength = 1.0;
           configuration.shift = devShift;
@@ -1352,6 +1416,7 @@ function fluxModel() {
         p = answer;
       }
     }
+    configuration.controls = [];
     if (detail == 0) {
       console.log(`⚪️ Standard Mode ‣ ${info}`);
       configuration.loras = [];
