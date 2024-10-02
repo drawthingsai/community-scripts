@@ -1,14 +1,33 @@
 //@api-1.0
-// v3.5
+// v3.6
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
 // You only need to fill in the prompts and select the Performance Mode and Image Size. 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//
+//     Custom Setting Area
+//
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Select the accuracy of the model. If you need a more accurate quantization model, please set this constant to `false`, and use Flux Dev (8-bit) by default.
 //
 const useFlux8bit = true;
+//
+// Enable Controls for other model.
+//
+const enableOtherMoldelControls = false;
+//
+// Enable LoRA for other model.
+//
+const enableOtherMoldelLoRA = false;
+//
+// After enabling, it will automatically set parameters for other supported models. After disabling, you need to set parameters manually, but you can use accelerate LoRA.
+//
+const enableOtherMoldePreset = true;
 //
 // You can customize unlimited styles you like here, and the custom style is disabled by default.
 //
@@ -18,11 +37,10 @@ const customStyle = [
   "Hyper-realistic photography, Vibrant, saturated colors like electric pinks, greens, and yellows with sharp, high-contrast shadows. A bold, energetic style that feels modern and dynamic, reminiscent of pop art or street art",
 ];
 //
-//
-//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v3.5";
+const version = "v3.6";
 var promptsSource = pipeline.prompts.prompt;
 
 const stylePreview = [
@@ -47,6 +65,18 @@ const stylePreview = [
   "data:image/png;base64,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"
 ];
 
+const configuration = pipeline.configuration;
+let otherModelName = checkModel();
+if (checkModel()) {
+  if (otherModelName == "Flux") {
+    otherModelName = `🧩  Other Model (null)`;
+  } else {
+    otherModelName = `🧩  ${otherModelName} `;
+  }
+} else {
+  otherModelName = `🧩  Unknown Model `;
+}
+
 const promptsSourceInput = requestFromUser(
   `Flux Auto Workflow ${version}`,
   "Next",
@@ -54,9 +84,9 @@ const promptsSourceInput = requestFromUser(
     return [
       this.section(
         "❖  Workflow Mode",
-        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Other Model: SDXL, SD3, etc. Parameters need to be set manually.\n •   Image Refiner: Refine the existing image on the canvas automatically.",
+        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Other Model: Supports automatic parameter setting for DreamShaper Turbo,\n      Kolors, SDXL, SD3 downloaded from the model list of Draw Things.\n      (Accelerate LoRA is not supported)\n      If 'Unknown Model' is displayed, you need to set the parameters manually first.\n •   Image Refiner: Refine the existing image on the canvas or folder automatically.",
         [
-          this.segmented(0, ["🌊  Flux Model   ", "🧩  Other Model   ", "✨  Image Refiner   "]),
+          this.segmented(0, ["🌊  Flux Model ", otherModelName, "✨  Image Refiner "]),
         ]
       ),
       this.section(
@@ -70,7 +100,7 @@ const promptsSourceInput = requestFromUser(
         "❖  Random Prompt • Quantity",
         " •   The number of random prompts to be generated.",
         [
-          this.slider(10, this.slider.fractional(0), 1, 30, ""),
+          this.slider(10, this.slider.fractional(0), 1, 50, ""),
         ]
       ),
       this.section(
@@ -134,6 +164,28 @@ const promptsSourceInput = requestFromUser(
     ];
   }
 );
+
+if (promptsSourceInput[0][0] == 1 && checkModel() == "Flux") {
+  requestFromUser(
+    `Flux Auto Workflow ${version}`,
+    "Exit",
+    function () {
+      return [
+        this.section(
+          "⚠️  The current workflow is incompatible with Flux.",
+          "",
+          []
+        ),
+        this.section(
+          "Please exit and reselect other non-Flux models.",
+          "",
+          []
+        ),
+      ];
+    }
+  );
+  return;
+}
 
 const angle = [
   "front view",
@@ -320,12 +372,10 @@ const animal = [
   "Two llamas",
   "A koala",
   "A moose",
-  "A crocodile",
   "A flamingo",
   "A peacock",
-  "A hedgehog",
-  "A platypus",
-  "A bison"
+  "A bison",
+  "A mouse"
 ];
 
 const job = [
@@ -402,7 +452,6 @@ const job = [
 const specialCharacters = [
   "Donald John Trump",
   "Albert Einstein",
-  "Martin Luther King Jr.",
   "Elon Musk",
   "Mahatma Gandhi",
   "Steve Jobs",
@@ -422,7 +471,6 @@ const specialCharacters = [
   "Santa Claus",
   "Winnie the Pooh",
   "The Joker",
-  "James T. Kirk",
   "Wonder Woman",
   "Batman",
   "Iron Man",
@@ -524,7 +572,7 @@ const maleClothes = [
   "A pirate's tattered coat and tricorne hat",
   "A warrior's fur-lined cape and leather bracers",
   "A dragon-scale armor with glowing runes",
-  "A steampunk adventurer's outfit with brass goggles",
+  "A steampunk adventurer's outfit",
   "A futuristic bodysuit with armor plating",
   "A futuristic police uniform with a tactical visor",
   "A mech pilot's flight suit with tech interfaces",
@@ -621,366 +669,1081 @@ const femaleName = [
   "Xemena Porter"
 ];
 
-const dailyScenes = [
-  "A quiet suburban neighborhood",
-  "A cozy cafe on a rainy afternoon",
-  "A modern apartment with floor-to-ceiling windows",
-  "A bustling farmers market",
-  "A train speeding through the countryside",
-  "A grand city plaza with towering skyscrapers",
-  "A cozy bedroom",
-  "A flower-filled meadow at dawn",
-  "A tropical beach with crystal clear water",
-  "A quaint bakery on a cobblestone street",
-  "A bustling airport terminal",
-  "A crowded subway station with commuters rushing",
-  "A rooftop garden overlooking a bustling city",
-  "A modern art gallery with abstract sculptures",
-  "A quiet library with towering bookshelves",
-  "A large greenhouse filled with exotic plants",
-  "A horse stable in a countryside manor",
-  "A cozy cabin in the middle of a snowy forest",
-  "A lush vineyard in the countryside",
-  "A train station in the middle of nowhere",
-  "A crowded amusement park with colorful rides",
-  "A busy sports stadium during a championship game",
-  "A graffiti-covered alley in an industrial area",
-  "A calm lake surrounded by towering mountains",
-  "A serene meadow filled with wildflowers",
-  "A bustling medieval marketplace",
-  "A Viking village near a frozen fjord",
-  "A Victorian-era street filled with carriages",
-  "A samurai dojo surrounded by cherry blossoms",
-  "An Egyptian temple with towering obelisks",
-  "A 1920s jazz club filled with dancing and music",
-  "A medieval castle with stone walls and torches",
-  "A Roman bathhouse with steaming pools",
-  "A quiet suburban neighborhood",
-  "A small-town diner with vintage decor",
-  "A sunny park with children playing",
-  "A local library with reading nooks",
-  "A farmer's field with ripe crops",
-  "A community swimming pool",
-  "A neighborhood block party",
-  "A busy street market with fresh produce",
-  "A family living room with cozy furniture",
-  "A well-tended garden with blooming flowers",
-  "A quaint coffee shop with outdoor seating",
-  "A suburban backyard with a barbecue grill",
-  "A city street lined with boutique shops",
-  "A playground with swings and slides",
-  "A yoga studio with calming music",
-  "A riverside picnic with a checkered blanket",
-  "A vintage bookstore with wooden shelves",
-  "A botanical garden with exotic plants",
-  "A peaceful nature trail through the woods",
-  "A weekend farmers' market with local goods",
-  "A contemporary art museum with interactive exhibits",
-  "A cozy cabin with a crackling fireplace",
-  "A beachside boardwalk with street performers",
-  "A local bakery with freshly baked bread",
-  "A city park with a fountain and benches",
-  "A suburban street with autumn leaves",
-  "A home garden with vegetable patches",
-  "A crowded farmer's market with seasonal produce",
-  "A beach with volleyball nets and sunbathers",
-  "A local theater with a community play",
-  "A suburban pool party with floats and music",
-  "A pet store with a variety of animals",
-  "A city zoo with family-friendly exhibits",
-  "A local craft fair with handmade goods",
-  "A vineyard with a wine tasting room",
-  "A rural farmhouse with a barn",
-  "A sunny café patio with potted plants",
-  "A city rooftop bar with skyline views",
-  "A town square with a weekly market",
-  "A contemporary dance studio with a rehearsal",
-  "A home workshop with DIY projects",
-  "A suburban street with holiday decorations",
-  "A minimalist, monochromatic urban neighborhood with tall, sleek buildings fading into misty horizons",
-  "A warm, golden-hued cafe with soft glowing lights and rain-soaked windows that reflect streaks of neon",
-  "An ultra-modern apartment with oversized geometric windows, the city skyline blurred and refracted through glass prisms",
-  "A suburban street, adorned with extravagant holiday decorations, but transformed into a dreamy, ethereal display of glowing orbs and shimmering",
-  "A foggy forest where towering trees merge into abstract lines, and beams of sunlight pierce through in soft",
-  "A desert landscape with massive, abstract dunes sculpted by the wind, the sand reflecting iridescent colors under a deep blue sky",
-  "A Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere",
-  "A lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow",
-  "A minimalist white wall in the centre of the room features wood framed artwork, a contemporary leather chair and a black stone coffee table",
-  "A muted green room with a textured wallpaper, showcasing a round wooden table and a vintage armchair",
-  "An elegant cream-colored room featuring a large mirror, a marble side table, and a decorative plant in the corner",
-  "An industrial kitchen with exposed brick walls, showcasing a stainless steel island and simple wooden stools",
-  "A serene yoga studio with light gray walls, featuring a wall of mirrors, yoga mats neatly arranged, and natural wood benches",
-  "A sleek bathroom with deep navy tiles, showcasing a freestanding tub, a minimalist vanity, and a touch of greenery in the corner",
-  "An outdoor patio with warm wooden decking, featuring simple lounge chairs and a low table surrounded by lush greenery",
-  "A tranquil meditation room with soft beige walls, a small altar, and a few cushions arranged on the floor",
-  "A cozy bedroom with pastel walls, featuring a low platform bed and a minimalist bedside table",
-  "A clean-lined workshop with gray walls, showcasing tools neatly organized on pegboards and a sturdy workbench in the center",
-  "A chic hair salon with white walls, featuring minimalist styling stations and a simple waiting area adorned with plants",
-  "A bright and airy sunroom with glass walls, featuring a small table and chairs, surrounded by indoor plants",
-  "A spacious garage with white walls, featuring organized storage shelves and a central workbench",
-  "A modern greenhouse with clear glass panels, showcasing neatly arranged potted plants and a simple seating area for plant enthusiasts",
-  "A minimalist classroom with soft blue walls, featuring simple desks arranged in rows and a chalkboard at the front",
-  "An extremely dark room with the shadow of the window projected on the ground",
-  "front of the background of fashionable Morandi style color-blocking",
-  "front of the background of fashionable Morandi style solid color",
-  "front of the background of fashionable minimalist, youthful and energetic color matching",
-  "front of the background of white columns, with long shadows",
-  "front of the background of black and white stitching",
-  "front of the background of black and white light and shadow",
-  "front of the background of minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space",
-  "front of the background of abstract composition of overlapping translucent circles in pastel hues",
-  "front of the background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows",
-  "front of the background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray",
-  "front of the background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors",
-  "front of the background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop",
-  "front of the background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion",
-  "front of the background of soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance",
-  "front of the background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement",
-  "front of the background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts",
-  "front of the background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark",
-  "front of the background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces"
-];
-
-const specialScenes = [
-  "A dense, fog-covered forest at dusk",
-  "A cascading waterfall in a lush jungle",
-  "A vast desert with sand dunes stretching to the horizon",
-  "A stormy sea crashing against jagged cliffs",
-  "A glowing cave filled with crystals",
-  "A frozen tundra with icy winds",
-  "A dark forest with towering ancient trees",
-  "A tropical rainforest with misty rain",
-  "A misty swamp with vines hanging from trees",
-  "A rocky canyon illuminated by the setting sun",
-  "A volcanic landscape with molten lava flows",
-  "A starry desert night with distant howling winds",
-  "An enchanted forest with glowing mushrooms",
-  "A mystical cave with glowing runes on the walls",
-  "A dark, abandoned castle",
-  "A magical library filled with levitating books",
-  "A haunted mansion",
-  "An ancient temple hidden deep within a jungle",
-  "A crystal palace in the middle of a frozen lake",
-  "A forgotten city overgrown with vines",
-  "A dragon's lair filled with treasure",
-  "A labyrinth of mirrors reflecting endless possibilities",
-  "A tower in the middle of a mystical forest",
-  "A ghostly ship",
-  "An underground cavern lit by glowing fungi",
-  "A futuristic city with flying cars and neon lights",
-  "A high-tech laboratory filled with robotic arms",
-  "A cyberpunk alleyway filled with neon signs and graffiti",
-  "An alien planet with strange plants and floating rocks",
-  "A utopian city with glass towers and holograms",
-  "A spaceship",
-  "A post-apocalyptic wasteland with ruined buildings",
-  "A robotic factory with assembly lines and sparks flying",
-  "A virtual reality world with pixelated landscapes",
-  "A desert planet with two suns and endless dunes",
-  "A futuristic marketplace filled with exotic goods",
-  "A cybernetic forest where trees are intertwined with machines",
-  "A neon-lit nightclub in a futuristic metropolis",
-  "A colossal spaceship hangar with advanced technology",
-  "A world where everything is made of candy",
-  "An underwater kingdom with glowing creatures",
-  "A land where the sky is filled with floating lanterns",
-  "A realm where time flows backward",
-  "A desert of glass shards reflecting the stars",
-  "A forest where the trees are made of light",
-  "A circus tent with acrobats performing high above",
-  "A magical workshop filled with enchanted objects",
-  "An old-fashioned theater with red velvet seats",
-  "The Yellow Brick Road in *The Wizard of Oz*",
-  "The floating diner in *Inception*",
-  "The end of the world in *Mad Max: Fury Road*",
-  "The Hogwarts Great Hall in *Harry Potter* series",
-  "The T-Rex chase in *Jurassic Park*",
-  "The space station in *2001: A Space Odyssey*",
-  "The giant wave in *Interstellar*",
-  "The Casablanca airport scene in *Casablanca*",
-  "The iconic dance scene in *Pulp Fiction*",
-  "The DeLorean time travel in *Back to the Future*",
-  "The beachfront sunset in *The Graduate*",
-  "The battlefield in *Gladiator*",
-  "The grand ball scene in *Beauty and the Beast*",
-  "The iconic trench warfare in *All Quiet on the Western Front*",
-];
-
-const dailyActions = [
-  "spreading butter on toast",
-  "plucking petals from a flower",
-  "spreading a blanket on the ground",
-  "peeling fruit with a knife",
-  "buttoning up a coat",
-  "gazing into the distance",
-  "dancing gracefully",
-  "standing tall with determination",
-  "sitting by a warm fire",
-  "playing a melodious tune on a violin",
-  "watering a small plant",
-  "holding a cup of steaming coffee",
-  "riding a bicycle",
-  "holding a candle to light the way",
-  "organizing spices on a shelf",
-  "blowing on a dandelion",
-  "sketching a landscape in a notebook",
-  "taking a photograph with an old camera",
-  "sipping tea",
-  "knitting a colorful scarf",
-  "playing chess",
-  "blowing a kiss playfully",
-  "saluting with a serious face",
+const commonActions = [
+  "looking surprised",
+  "looking confused",
+  "looking angry",
+  "looking scared",
+  "looking sad",
+  "looking happy",
+  "laughing",
+  "smiling",
+  "yawning sleepily",
+  "jump up happily",
+  "blowing dandelion",
+  "blow balloons",
+  "hold a puppy",
+  "waving",
+  "waving energetically at the viewer",
+  "petting a kitten",
+  "nodding in agreement",
   "giving a peace sign",
-  "covering mouth in surprise",
-  "placing hands on hips while smiling",
-  "making a heart shape with hands",
-  "holding up a finger to signal quiet",
-  "winking cheekily",
+  "giving a thumbs-up with confidence",
   "clapping hands slowly with approval",
+  "winking cheekily",
   "raising eyebrows in amusement",
-  "pointing finger to lips in thought",
   "crossing fingers for good luck",
   "holding both hands up in surrender",
   "gesturing to come closer",
   "shrugging with a carefree smile",
   "placing one hand over the chest",
   "rubbing chin thoughtfully",
-  "blowing a raspberry at the camera",
+  "blowing a kiss playfully",
+  "making a heart shape with hands",
+  "holding up a finger to signal quiet",
   "mocking a strongman pose",
   "flexing arms to show off muscles",
-  "tipping an imaginary hat",
-  "holding hands up in celebration",
   "making a silly face with tongue out",
-  "giving a slow, exaggerated wink",
   "doing finger guns playfully",
   "resting chin on hand with a smirk",
-  "with a sense of wonder",
-  "with a look of fear",
-  "with an expression of joy",
-  "with deep sorrow in their eyes",
-  "filled with hope",
-  "lost in thought",
-  "radiating confidence",
-  "looking anxious and uneasy",
-  "with a mischievous grin",
-  "looking determined and strong",
-  "with a serene calmness",
-  "on the brink of tears",
-  "overcome with anger",
-  "in deep contemplation",
-  "with a big smile",
-  "with a quiet smile",
-  "covering face with hands in shyness",
-  "pointing two thumbs at themselves",
-  "throwing hands up in frustration",
-  "making an exaggerated sad face",
-  "crossing arms with a playful pout",
-  "showing a skeptical expression while raising one eyebrow",
-  "leaning forward with hands on knees",
-  "giving a high-five to the camera",
-  "feeding pigeons",
-  "folding origami animals",
-  "composing a letter by candlelight",
-  "spinning thread from wool",
-  "giving a thumbs-up with confidence",
-  "crossing arms and nodding slightly",
-  "tilting head with a curious expression",
-  "releasing a paper boat into a stream",
-  "polishing a pair of boots",
-  "chopping vegetables for a meal",
-  "rolling out dough for baking",
-  "cleaning an old pair of glasses",
-  "setting up a telescope for stargazing",
-  "writing formulas on a chalkboard",
-  "sewing a patch onto a garment",
-  "tuning the strings of a guitar",
-  "wiping sweat from a brow after hard work",
-  "planting seeds carefully into the soil",
-  "Riding on the back of a lion",
-  "Riding on a horse",
-  "Riding on the back of a tiger",
-  "Crubbing a puppy",
-  "Holding a puppy",
-  "Running with a golden retriever",
-  "Crubbing a kitten",
-  "Holding a black kitten",
-  "Eating a huge hamburger",
-  "Raising a beer",
-  "Crying with tears in his eyes",
-  "Laughing happily with the scissors sign",
-  "Dragging his chin in thought",
-  "Having an angry expression",
-  "Having a smirking expression",
-  "Having a smug expression",
-  "Sitting on a bench with crossed legs",
-  "Lying down with arms behind the head",
-  "Clapping hands enthusiastically",
-  "Blowing a kiss",
-  "Scratching the head in confusion",
-  "Dancing with both hands up",
-  "Sitting cross-legged on the ground",
-  "Walking confidently with a briefcase",
-  "Taking a selfie",
-  "Winking with one eye",
-  "Covering mouth in surprise",
-  "Yawning with wide-open mouth",
-  "Throwing a paper airplane",
-  "Shivering in the cold",
-  "Sweating in the heat",
-  "Nodding in agreement",
-  "Shrugging with palms up",
-  "Blowing bubbles",
-  "Holding a bouquet of flowers"
-];
-
-const specialActions = [
-  "exploring an ancient map",
-  "casting a powerful spell",
-  "floating weightlessly in mid-air",
-  "whispering secrets to a bird",
-  "painting a masterpiece on a large canvas",
-  "beat the drums",
-  "waving energetically at the viewer",
-  "summoning a glowing orb of light with a wave of the hand",
-  "conjuring flames from their fingertips",
-  "opening a portal to another dimension",
-  "teleporting in a flash of light",
-  "floating above the ground in meditation",
-  "using a crystal ball to foresee the future",
-  "catching fireflies in a jar",
-  "mixing ingredients in a bubbling cauldron",
-  "adjusting the sails on a small boat",
-  "whittling a piece of wood into a figurine",
-  "stringing a bow and preparing to shoot",
-  "juggling brightly colored balls",
-  "arm wrestling with the Hulk",
-  "playing chess with a robot",
-  "having a tea party with a dragon",
-  "baking a cake with Spider-Man",
-  "doing yoga alongside Wonder Woman",
-  "reading a comic book with Iron Man",
-  "riding a bicycle with Superman",
+  "nodding in agreement",
+  "shrugging with palms up",
+  "blowing bubbles",
+  "clapping hands enthusiastically",
+  "pointing finger to lips in thought",
+  "raising eyebrows in amusement",
+  "with the Hulk together",
+  "with a robot together",
   "playing hopscotch with Thor",
   "taking selfies with a vampire",
-  "practicing magic tricks with Doctor Strange",
-  "playing a banjo for an audience of ghosts",
-  "fencing with a pirate captain",
-  "having a dance-off with a zombie",
-  "feeding a pet unicorn",
-  "having a pillow fight with Batman",
-  "doing karaoke with Captain America",
-  "building a giant banana with Minions",
-  "getting into a pie fight with Minions",
-  "dancing a conga line with Minions",
-  "trying on costumes with Minions",
-  "riding a unicycle with a Minion holding balloons",
-  "helping Gru plan a heist with Minions",
-  "playing freeze tag with Olaf from Frozen",
-  "having a bubble-blowing contest with SpongeBob",
-  "eating jellybeans with Toothless the dragon",
-  "watching fireworks with Baymax",
-  "teaching Pikachu how to cook pancakes",
-  "going on a treasure hunt with Jack Sparrow"
+  "with Doctor Strange together",
+  "with Minions together",
+  "with SpongeBob together",
+  "with Pikachu together"
+];
+
+const dailyScenes = [
+  ["on a deserted road", [
+    "riding a Harley",
+    "driving a retro car",
+    "riding a horse",
+    "walking tiredly with a backpack",
+    "jump up and cheer"
+  ]],
+  ["in a quiet suburban neighborhood", [
+    "walking a dog down the sidewalk",
+    "watering the lawn in front of a house",
+    "chatting with a neighbor over the fence",
+    "retrieving mail from the mailbox",
+    "riding a bicycle down the street"
+  ]],
+  ["in a cozy cafe on a rainy afternoon", [
+    "sipping a warm beverage by the window",
+    "reading a book in a comfortable armchair",
+    "writing in a journal at a small table",
+    "chatting with a friend over coffee",
+    "watching the rain fall from inside"
+  ]],
+  ["in a modern apartment with floor-to-ceiling windows", [
+    "looking out at the city skyline",
+    "watering plants near the window",
+    "doing yoga in the living room",
+    "cooking a meal in the modern kitchen",
+    "relaxing on a sofa with a book"
+  ]],
+  ["at a bustling farmers market", [
+    "selecting fresh produce from a stall",
+    "sampling local cheeses and jams",
+    "carrying a woven basket filled with groceries",
+    "talking to a farmer about their crops",
+    "paying for goods with cash"
+  ]],
+  ["on a train speeding through the countryside", [
+    "looking out the window at the passing scenery",
+    "reading a book in a train seat",
+    "talking to a fellow passenger",
+    "eating a snack from a packed lunch",
+    "listening to music with headphones"
+  ]],
+  ["in a grand city plaza with towering skyscrapers", [
+    "taking photos of the surrounding buildings",
+    "sitting on a bench and people-watching",
+    "walking across the plaza towards a destination",
+    "feeding pigeons gathered in the square",
+    "checking a map for directions"
+  ]],
+  ["in a cozy bedroom", [
+    "sitting on the sofa and reading",
+    "lying in bed in a daze",
+    "leaning against the window",
+    "smiling and sitting cross-legged on the bed",
+    "taking clothes out of the closet"
+  ]],
+  ["in a flower-filled meadow at dawn", [
+    "walking through the field admiring the flowers",
+    "taking photographs of the sunrise",
+    "lying down in the grass and looking at the sky",
+    "picking a bouquet of wildflowers",
+    "watching butterflies flutter around the blossoms"
+  ]],
+  ["on a tropical beach with crystal clear water", [
+    "swimming in the ocean",
+    "sunbathing on the sand",
+    "walking along the shoreline",
+    "building a sandcastle",
+    "sipping a drink from a coconut"
+  ]],
+  ["in a quaint bakery on a cobblestone street", [
+    "looking at the pastries in the display case",
+    "ordering a croissant and coffee",
+    "carrying a bag of freshly baked bread",
+    "sitting at a small table enjoying a treat",
+    "talking to the baker about their craft"
+  ]],
+  ["in a bustling airport terminal", [
+    "checking in at the ticket counter",
+    "walking through the terminal with luggage",
+    "looking at the departure board",
+    "sitting at the gate waiting for a flight",
+    "buying a coffee from a kiosk"
+  ]],
+  ["in a crowded subway station with commuters rushing", [
+    "walking quickly through the station",
+    "standing on the platform waiting for a train",
+    "checking the train schedule on a display",
+    "holding onto a handrail as the train arrives",
+    "moving through the crowd to board the subway"
+  ]],
+  ["on a rooftop garden overlooking a bustling city", [
+    "admiring the city view",
+    "watering plants in the garden",
+    "sitting on a bench and relaxing",
+    "talking with a friend while enjoying the view",
+    "taking photographs of the cityscape"
+  ]],
+  ["in a modern art gallery with abstract sculptures", [
+    "looking at a sculpture thoughtfully",
+    "walking through the gallery observing the art",
+    "reading the information plaque next to a piece",
+    "discussing a sculpture with a companion",
+    "taking a photograph of a particularly striking piece"
+  ]],
+  ["in a quiet library with towering bookshelves", [
+    "browsing the bookshelves",
+    "reading a book at a table",
+    "using a computer at a workstation",
+    "returning a book to the shelves",
+    "whispering to a librarian at the help desk"
+  ]],
+  ["in a large greenhouse filled with exotic plants", [
+    "walking amongst the plants",
+    "examining a particular plant closely",
+    "taking photographs of the flowers",
+    "watering plants with a watering can",
+    "talking to a gardener about the different species"
+  ]],
+  ["at a horse stable in a countryside manor", [
+    "grooming a horse",
+    "leading a horse out of its stall",
+    "petting a horse gently",
+    "mucking out a stable",
+    "carrying a saddle towards a horse"
+  ]],
+  ["in a cozy cabin in the middle of a snowy forest", [
+    "sitting by a crackling fireplace",
+    "looking out the window at the snow-covered trees",
+    "reading a book wrapped in a blanket",
+    "drinking hot cocoa by the fire",
+    "chopping wood outside the cabin"
+  ]],
+  ["in a lush vineyard in the countryside", [
+    "walking through the rows of grapevines",
+    "sampling grapes from a vine",
+    "talking to a winemaker about the vineyard",
+    "taking photographs of the landscape",
+    "carrying a basket of harvested grapes"
+  ]],
+  ["at a train station in the middle of nowhere", [
+    "waiting on the platform for a train",
+    "looking at the train schedule posted on the wall",
+    "sitting on a bench with luggage",
+    "walking around the empty platform",
+    "watching the train arrive at the station"
+  ]],
+  ["at a crowded amusement park with colorful rides", [
+    "riding a roller coaster",
+    "eating cotton candy",
+    "playing carnival games",
+    "walking through the park with friends",
+    "waiting in line for a ride"
+  ]],
+  ["in a busy sports stadium during a championship game", [
+    "watching the game from the stands",
+    "cheering for a team",
+    "eating stadium food",
+    "high-fiving fellow fans",
+    "holding up a sign supporting the team"
+  ]],
+  ["in a graffiti-covered alley in an industrial area", [
+    "taking photographs of the graffiti",
+    "walking cautiously down the alley",
+    "admiring the street art",
+    "sketching in a notebook",
+    "looking closely at a detailed piece of graffiti"
+  ]],
+  ["on a calm lake surrounded by towering mountains", [
+    "paddling a canoe across the lake",
+    "fishing from a boat",
+    "swimming in the lake",
+    "sitting on the shore and enjoying the view",
+    "taking photographs of the mountain reflections"
+  ]],
+  ["in a serene meadow filled with wildflowers", [
+    "walking through the meadow picking flowers",
+    "lying in the grass and looking at the clouds",
+    "taking photographs of the wildflowers",
+    "having a picnic with friends",
+    "chasing butterflies through the field"
+  ]],
+  ["at a bustling medieval marketplace", [
+    "browsing the stalls filled with goods",
+    "bartering with a merchant",
+    "eating a piece of roasted meat",
+    "watching a street performer juggle",
+    "carrying a purchase in a cloth bag"
+  ]],
+  ["in a Viking village near a frozen fjord", [
+    "walking between the wooden houses",
+    "working on a fishing net by the shore",
+    "chopping wood for a fire",
+    "wearing a fur cloak and carrying an axe",
+    "talking to another villager near a longboat"
+  ]],
+  ["on a Victorian-era street filled with carriages", [
+    "riding in a horse-drawn carriage",
+    "walking along the cobblestone street",
+    "greeting someone tipping their top hat",
+    "window shopping at a storefront",
+    "carrying a parasol to shield from the sun"
+  ]],
+  ["at a samurai dojo surrounded by cherry blossoms", [
+    "practicing swordsmanship with a wooden katana",
+    "meditating in the dojo garden",
+    "bowing respectfully to a sensei",
+    "sweeping the dojo floor with a broom",
+    "observing other samurai training"
+  ]],
+  ["at an Egyptian temple with towering obelisks", [
+    "walking through the temple ruins",
+    "looking up at the hieroglyphics carved on the walls",
+    "taking photographs of the obelisks",
+    "exploring the inner chambers of the temple",
+    "sketching the temple in a notebook"
+  ]],
+  ["in a 1920s jazz club filled with dancing and music", [
+    "dancing the Charleston",
+    "sipping a cocktail at a table",
+    "listening to the jazz band play",
+    "talking to someone at the bar",
+    "snapping fingers to the rhythm of the music"
+  ]],
+  ["in a medieval castle with stone walls and torches", [
+    "walking through the castle halls",
+    "looking out from a castle window",
+    "holding a torch to light the way",
+    "sitting at a long wooden table eating",
+    "talking to a knight in armor"
+  ]],
+  ["at a Roman bathhouse with steaming pools", [
+    "relaxing in a warm pool",
+    "receiving a massage",
+    "chatting with other bathers",
+    "wrapping a towel around oneself",
+    "walking on the mosaic tile floor"
+  ]],
+  ["in a quiet suburban neighborhood", [
+    "mowing the lawn",
+    "playing catch with a child",
+    "walking a dog down the street",
+    "washing a car in the driveway",
+    "talking to a neighbor over the fence"
+  ]],
+  ["in a small-town diner with vintage decor", [
+    "sitting at the counter ordering food",
+    "drinking coffee from a mug",
+    "eating a slice of pie",
+    "reading a newspaper at a booth",
+    "talking to the waitress"
+  ]],
+  ["in a sunny park with children playing", [
+    "pushing a child on a swing",
+    "watching children play tag",
+    "sitting on a park bench reading a book",
+    "having a picnic on the grass",
+    "throwing a frisbee to a dog"
+  ]],
+  ["at a local library with reading nooks", [
+    "reading a book in a comfortable chair",
+    "browsing the bookshelves",
+    "using a computer at a desk",
+    "studying at a table",
+    "talking quietly to a librarian"
+  ]],
+  ["in a farmer's field with ripe crops", [
+    "harvesting crops by hand",
+    "driving a tractor",
+    "inspecting the crops",
+    "carrying a basket of harvested vegetables",
+    "walking through the field checking the soil"
+  ]],
+  ["at a community swimming pool", [
+    "swimming laps",
+    "sunbathing on a lounge chair",
+    "playing water volleyball",
+    "diving off the diving board",
+    "sitting on the edge of the pool dangling feet in the water"
+  ]],
+  ["at a neighborhood block party", [
+    "talking to neighbors",
+    "eating food from the grill",
+    "playing games with children",
+    "listening to music",
+    "dancing in the street"
+  ]],
+  ["at a busy street market with fresh produce", [
+    "buying fruits and vegetables from vendors",
+    "sampling different cheeses",
+    "carrying a shopping bag filled with groceries",
+    "haggling over prices",
+    "smelling fresh herbs and spices"
+  ]],
+  ["in a family living room with cozy furniture", [
+    "watching television together",
+    "playing board games",
+    "reading books on the sofa",
+    "talking and laughing together",
+    "snuggling under a blanket"
+  ]],
+  ["in a well-tended garden with blooming flowers", [
+    "watering the flowers with a watering can",
+    "pruning roses with gardening shears",
+    "smelling the fragrant blooms",
+    "walking through the garden paths",
+    "sitting on a bench admiring the flowers"
+  ]],
+  ["at a quaint coffee shop with outdoor seating", [
+    "sipping coffee at a table outside",
+    "reading a book in the sunshine",
+    "chatting with a friend over coffee",
+    "people-watching on the street",
+    "using a laptop at a table"
+  ]],
+  ["in a suburban backyard with a barbecue grill", [
+    "grilling burgers and hot dogs",
+    "eating at a picnic table",
+    "playing lawn games",
+    "relaxing in lawn chairs",
+    "swimming in a backyard pool"
+  ]],
+  ["on a city street lined with boutique shops", [
+    "window shopping at the boutiques",
+    "carrying shopping bags filled with purchases",
+    "walking down the sidewalk",
+    "stopping to look at a street performer",
+    "entering a shop to browse"
+  ]],
+  ["at a playground with swings and slides", [
+    "swinging on a swing set",
+    "sliding down a slide",
+    "climbing on the jungle gym",
+    "playing in the sandbox",
+    "sitting on a bench watching children play"
+  ]],
+  ["in a yoga studio with calming music", [
+    "performing yoga poses",
+    "meditating on a mat",
+    "stretching on the floor",
+    "listening to calming music",
+    "drinking water from a bottle"
+  ]],
+  ["at a riverside picnic with a checkered blanket", [
+    "eating food from a picnic basket",
+    "lying on a checkered blanket",
+    "throwing rocks into the river",
+    "watching ducks swim by",
+    "reading a book by the water"
+  ]],
+  ["in a vintage bookstore with wooden shelves", [
+    "browsing the bookshelves",
+    "reading a book in a comfy chair",
+    "talking to the bookstore owner",
+    "buying a stack of old books",
+    "smelling the musty scent of old paper"
+  ]],
+  ["in a botanical garden with exotic plants", [
+    "walking through the greenhouses",
+    "admiring the colorful flowers",
+    "taking photos of rare plants",
+    "reading information plaques about the plants",
+    "sitting on a bench enjoying the scenery"
+  ]],
+  ["on a peaceful nature trail through the woods", [
+    "hiking along the trail",
+    "taking photos of the scenery",
+    "listening to the sounds of nature",
+    "identifying different types of trees and plants",
+    "breathing in the fresh air"
+  ]],
+  ["at a weekend farmers' market with local goods", [
+    "buying fresh produce from local farmers",
+    "tasting samples of homemade jams and jellies",
+    "carrying a basket filled with groceries",
+    "talking to the farmers about their products",
+    "listening to live music"
+  ]],
+  ["at a contemporary art museum with interactive exhibits", [
+    "touching and interacting with the exhibits",
+    "watching videos and animations",
+    "listening to audio installations",
+    "reading descriptions of the artwork",
+    "discussing the art with a friend"
+  ]],
+  ["in a cozy cabin with a crackling fireplace", [
+    "sitting by the fire reading a book",
+    "drinking hot cocoa",
+    "watching the flames dance",
+    "talking with family and friends",
+    "playing board games"
+  ]],
+  ["on a beachside boardwalk with street performers", [
+    "watching street performers",
+    "eating ice cream",
+    "walking along the boardwalk",
+    "playing arcade games",
+    "buying souvenirs from a shop"
+  ]],
+  ["at a local bakery with freshly baked bread", [
+    "buying freshly baked bread and pastries",
+    "talking to the baker",
+    "smelling the aroma of bread",
+    "choosing from a variety of treats",
+    "carrying a bag of pastries home"
+  ]],
+  ["in a city park with a fountain and benches", [
+    "sitting on a bench watching people pass by",
+    "throwing coins in the fountain",
+    "reading a book under a tree",
+    "walking around the park",
+    "having a picnic on the grass"
+  ]],
+  ["on a suburban street with autumn leaves", [
+    "raking leaves into a pile",
+    "walking on crunchy leaves",
+    "taking photos of the colorful trees",
+    "jumping in a pile of leaves",
+    "riding a bike down the street"
+  ]],
+  ["in a home garden with vegetable patches", [
+    "watering the vegetable plants",
+    "harvesting ripe vegetables",
+    "weeding the garden beds",
+    "checking the plants for pests",
+    "tying tomato plants to stakes"
+  ]],
+  ["at a crowded farmer's market with seasonal produce", [
+    "buying fresh fruits and vegetables",
+    "sampling locally made cheeses and jams",
+    "talking to the farmers",
+    "carrying a reusable shopping bag",
+    "navigating through the crowd"
+  ]],
+  ["on a beach with volleyball nets and sunbathers", [
+    "playing beach volleyball",
+    "sunbathing on a towel",
+    "swimming in the ocean",
+    "building a sandcastle",
+    "walking along the shoreline"
+  ]],
+  ["at a local theater with a community play", [
+    "watching the play from the audience",
+    "applauding the actors",
+    "reading the program",
+    "talking to other audience members during intermission",
+    "taking photos of the stage after the play"
+  ]],
+  ["at a suburban pool party with floats and music", [
+    "swimming in the pool",
+    "floating on an inflatable raft",
+    "eating snacks and drinking beverages",
+    "talking to friends and family",
+    "listening to music and dancing"
+  ]],
+  ["at a pet store with a variety of animals", [
+    "looking at the animals in cages and tanks",
+    "holding a puppy or kitten",
+    "buying pet food and supplies",
+    "talking to the pet store employees",
+    "choosing a new pet to take home"
+  ]],
+  ["at a city zoo with family-friendly exhibits", [
+    "looking at the animals in their enclosures",
+    "reading information signs about the animals",
+    "taking photographs of the animals",
+    "watching animal demonstrations and feedings",
+    "riding the zoo train"
+  ]],
+  ["at a local craft fair with handmade goods", [
+    "browsing the handmade crafts",
+    "buying unique gifts and souvenirs",
+    "talking to the artists and craftspeople",
+    "eating food from local vendors",
+    "listening to live music"
+  ]],
+  ["at a vineyard with a wine tasting room", [
+    "sampling different wines",
+    "touring the vineyard",
+    "learning about the winemaking process",
+    "buying bottles of wine",
+    "enjoying the vineyard scenery"
+  ]],
+  ["at a rural farmhouse with a barn", [
+    "feeding farm animals",
+    "collecting eggs from the chicken coop",
+    "milking a cow",
+    "riding a tractor",
+    "sitting on the porch swing"
+  ]],
+  ["on a sunny café patio with potted plants", [
+    "drinking coffee or tea at a table",
+    "reading a book or newspaper",
+    "talking with friends",
+    "people-watching",
+    "enjoying the sunshine"
+  ]],
+  ["on a city rooftop bar with skyline views", [
+    "drinking cocktails with friends",
+    "admiring the city skyline",
+    "taking photos of the view",
+    "listening to music",
+    "talking to other patrons"
+  ]],
+  ["in a town square with a weekly market", [
+    "browsing the market stalls",
+    "buying fresh produce and local goods",
+    "talking to vendors",
+    "watching street performers",
+    "eating food from street vendors"
+  ]],
+  ["in a contemporary dance studio with a rehearsal", [
+    "practicing dance moves",
+    "stretching and warming up",
+    "watching other dancers rehearse",
+    "receiving feedback from the instructor",
+    "marking choreography"
+  ]],
+  ["in a home workshop with DIY projects", [
+    "working on a woodworking project",
+    "using power tools",
+    "painting a piece of furniture",
+    "organizing tools and supplies",
+    "sweeping up sawdust"
+  ]],
+  ["on a suburban street with holiday decorations", [
+    "walking down the street admiring the decorations",
+    "taking photos of decorated houses",
+    "carrying presents to a neighbor's house",
+    "singing carols with friends",
+    "putting up holiday decorations on one's own house"
+  ]],
+  ["in a minimalist, monochromatic urban neighborhood with tall, sleek buildings fading into misty horizons", [
+    "walking down the street, shrouded in mist",
+    "taking a photograph of a stark architectural detail",
+    "entering a sleek, minimalist cafe",
+    "hailing a futuristic, self-driving taxi",
+    "observing a drone silently delivering a package"
+  ]],
+  ["in a warm, golden-hued cafe with soft glowing lights and rain-soaked windows that reflect streaks of neon", [
+    "sipping a warm beverage, watching the rain",
+    "writing in a journal, the neon lights reflecting in the puddles outside",
+    "sketching the scene, capturing the interplay of light and shadow",
+    "quietly conversing with a friend, the warm light illuminating their faces",
+    "reading a book, lost in the cozy atmosphere"
+  ]],
+  ["in an ultra-modern apartment with oversized geometric windows, the city skyline blurred and refracted through glass prisms", [
+    "adjusting the smart lighting system to match the city's glow",
+    "watering a geometrically arranged succulent garden",
+    "practicing yoga, the city lights creating a dynamic backdrop",
+    "preparing a meal in the sleek, minimalist kitchen",
+    "relaxing on a chaise lounge, gazing at the refracted skyline"
+  ]],
+  ["on a suburban street, adorned with extravagant holiday decorations, but transformed into a dreamy, ethereal display of glowing orbs and shimmering", [
+    "walking down the street, mesmerized by the glowing decorations",
+    "taking photos of the otherworldly light displays",
+    "pointing out fantastical shapes in the shimmering lights to a child",
+    "stopping to admire a particularly intricate light sculpture",
+    "marveling at the transformation of familiar houses into dreamlike structures"
+  ]],
+  ["in a foggy forest where towering trees merge into abstract lines, and beams of sunlight pierce through in soft", [
+    "walking cautiously through the fog, the trees looming like giants",
+    "photographing the ethereal beams of sunlight filtering through the fog",
+    "reaching out to touch the soft moss growing on a tree trunk",
+    "pausing to listen to the quiet sounds of the forest",
+    "observing the intricate patterns of light and shadow on the forest floor"
+  ]],
+  ["in a desert landscape with massive, abstract dunes sculpted by the wind, the sand reflecting iridescent colors under a deep blue sky", [
+    "climbing a towering sand dune, the sand shifting beneath their feet",
+    "photographing the iridescent colors of the sand",
+    "sketching the abstract shapes of the dunes",
+    "shielding their eyes from the sun, gazing at the vast expanse of desert",
+    "running down a dune, leaving footprints in the shifting sand"
+  ]],
+  ["on a Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere", [
+    "walking along the cobblestone street, taking in the quiet beauty",
+    "photographing the Parisian rooftops in the soft morning light",
+    "sketching the intricate details of a wrought-iron balcony",
+    "sipping a coffee at a small outdoor cafe",
+    "buying a fresh baguette from a nearby boulangerie"
+  ]],
+  ["in a lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow", [
+    "walking along a rainforest path, observing the diverse plant life",
+    "photographing the intricate patterns of light and shadow",
+    "listening to the sounds of the rainforest",
+    "carefully examining a colorful tropical flower",
+    "sketching the lush vegetation in a notebook"
+  ]],
+  ["in a minimalist white wall in the centre of the room features wood framed artwork, a contemporary leather chair and a black stone coffee table", [
+    "admiring the framed artwork",
+    "sitting in the leather chair reading a book",
+    "placing a cup of coffee on the black stone coffee table",
+    "adjusting the position of a decorative object on the table",
+    "walking around the room appreciating the minimalist aesthetic"
+  ]],
+  ["in a muted green room with a textured wallpaper, showcasing a round wooden table and a vintage armchair", [
+    "sitting in the vintage armchair reading a book",
+    "placing a vase of flowers on the round wooden table",
+    "writing in a journal at the table",
+    "touching the textured wallpaper",
+    "admiring the room's calming atmosphere"
+  ]],
+  ["in an elegant cream-colored room featuring a large mirror, a marble side table, and a decorative plant in the corner", [
+    "checking their reflection in the large mirror",
+    "placing a decorative object on the marble side table",
+    "watering the decorative plant",
+    "admiring the elegant decor",
+    "arranging flowers in a vase on the side table"
+  ]],
+  ["in an industrial kitchen with exposed brick walls, showcasing a stainless steel island and simple wooden stools", [
+    "preparing a meal at the stainless steel island",
+    "sitting on a wooden stool having a cup of coffee",
+    "cleaning the stainless steel surfaces",
+    "placing fresh herbs in pots on the island",
+    "admiring the exposed brick walls"
+  ]],
+  ["in a serene yoga studio with light gray walls, featuring a wall of mirrors, yoga mats neatly arranged, and natural wood benches", [
+    "performing yoga poses in front of the mirrors",
+    "sitting on a yoga mat meditating",
+    "stretching on the floor",
+    "placing a water bottle on a wooden bench",
+    "rolling up a yoga mat after practice"
+  ]],
+  ["in a sleek bathroom with deep navy tiles, showcasing a freestanding tub, a minimalist vanity, and a touch of greenery in the corner", [
+    "filling the freestanding tub with water",
+    "placing a towel on the edge of the tub",
+    "brushing teeth at the minimalist vanity",
+    "adjusting the greenery in the corner",
+    "admiring the sleek navy tiles"
+  ]],
+  ["on an outdoor patio with warm wooden decking, featuring simple lounge chairs and a low table surrounded by lush greenery", [
+    "sitting in a lounge chair reading a book",
+    "placing a drink on the low table",
+    "watering the lush greenery",
+    "enjoying the fresh air and sunshine",
+    "chatting with a friend on the patio"
+  ]],
+  ["in a tranquil meditation room with soft beige walls, a small altar, and a few cushions arranged on the floor", [
+    "sitting on a cushion meditating",
+    "lighting a candle on the small altar",
+    "arranging the cushions on the floor",
+    "deep breathing exercises",
+    "practicing mindfulness"
+  ]],
+  ["in a cozy bedroom with pastel walls, featuring a low platform bed and a minimalist bedside table", [
+    "lying in the low platform bed reading a book",
+    "placing a glass of water on the minimalist bedside table",
+    "turning off the bedside lamp",
+    "getting out of bed and stretching",
+    "folding clothes and placing them on the bedside table"
+  ]],
+  ["in a clean-lined workshop with gray walls, showcasing tools neatly organized on pegboards and a sturdy workbench in the center", [
+    "working on a project at the workbench",
+    "selecting a tool from the pegboard",
+    "sweeping the floor clean",
+    "organizing tools on the pegboard",
+    "measuring wood for a project"
+  ]],
+  ["in a chic hair salon with white walls, featuring minimalist styling stations and a simple waiting area adorned with plants", [
+    "getting a haircut at a styling station",
+    "reading a magazine in the waiting area",
+    "looking at hair product displays",
+    "talking to a hairstylist",
+    "checking their hair in the mirror"
+  ]],
+  ["in a bright and airy sunroom with glass walls, featuring a small table and chairs, surrounded by indoor plants", [
+    "sitting at the small table drinking tea",
+    "reading a book surrounded by plants",
+    "watering the indoor plants",
+    "enjoying the sunshine streaming through the glass walls",
+    "painting a picture at the table"
+  ]],
+  ["in a spacious garage with white walls, featuring organized storage shelves and a central workbench", [
+    "working on a car repair project",
+    "organizing tools and equipment on the shelves",
+    "sweeping the garage floor",
+    "parking a bicycle in the garage",
+    "painting a project at the workbench"
+  ]],
+  ["in a modern greenhouse with clear glass panels, showcasing neatly arranged potted plants and a simple seating area for plant enthusiasts", [
+    "watering the potted plants",
+    "checking the plants for pests and diseases",
+    "repotting a plant",
+    "sitting in the seating area enjoying the greenery",
+    "pruning a plant with gardening shears"
+  ]],
+  ["in a minimalist classroom with soft blue walls, featuring simple desks arranged in rows and a chalkboard at the front", [
+    "sitting at a desk writing in a notebook",
+    "listening to the teacher lecture",
+    "raising their hand to ask a question",
+    "writing on the chalkboard",
+    "reading a book at their desk"
+  ]],
+  ["in an extremely dark room with the shadow of the window projected on the ground", [
+    "fumbling for a light switch",
+    "slowly walking towards the window",
+    "peering out the window cautiously",
+    "standing still, letting their eyes adjust to the darkness",
+    "tracing the outline of the window shadow with their hand"
+  ]],
+  ["in the front of a background of fashionable Morandi style color-blocking", commonActions],
+  ["in the front of a background of fashionable Morandi style solid color", commonActions],
+  ["in the front of a background of fashionable minimalist, youthful and energetic color matching", commonActions],
+  ["in the front of a background of white columns, with long shadows", commonActions],
+  ["in the front of a background of black and white stitching", commonActions],
+  ["in the front of a background of black and white light and shadow", commonActions],
+  ["in the front of a background of minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space", commonActions],
+  ["in the front of a background of abstract composition of overlapping translucent circles in pastel hues", commonActions],
+  ["in the front of a background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows", commonActions],
+  ["in the front of a background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray", commonActions],
+  ["in the front of a background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors", commonActions],
+  ["in the front of a background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop", commonActions],
+  ["in the front of a background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion", commonActions],
+  ["in the front of a background of soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance", commonActions],
+  ["in the front of a background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement", commonActions],
+  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts", commonActions],
+  ["in the front of a background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark", commonActions],
+  ["in the front of a background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces", commonActions]
+];
+
+const specialScenes = [
+  ["in a dense, fog-covered forest at dusk", [
+    "carefully stepping over exposed roots",
+    "listening intently to the rustling leaves",
+    "shielding their eyes from the mist"
+  ]],
+  ["at a cascading waterfall in a lush jungle", [
+    "gazing up at the cascading water",
+    "wading in the cool pool at the base",
+    "listening to the roar of the waterfall"
+  ]],
+  ["in a vast desert with sand dunes stretching to the horizon", [
+    "shielding their eyes from the sun",
+    "walking along the crest of a dune",
+    "leaving footprints in the sand"
+  ]],
+  ["on a stormy sea crashing against jagged cliffs", [
+    "holding onto the railing of a ship",
+    "watching the waves crash against the rocks",
+    "bracing against the strong wind"
+  ]],
+  ["in a glowing cave filled with crystals", [
+    "running their hand along a crystal surface",
+    "admiring the light refracting through the crystals",
+    "carefully navigating the uneven cave floor"
+  ]],
+  ["on a frozen tundra with icy winds", [
+    "pulling their coat tighter against the wind",
+    "exhaling a cloud of frosty breath",
+    "trudging through the snow"
+  ]],
+  ["in a dark forest with towering ancient trees", [
+    "looking up at the towering trees",
+    "stepping over fallen branches",
+    "listening to the wind rustling through the leaves"
+  ]],
+  ["in a tropical rainforest with misty rain", [
+    "feeling the mist on their skin",
+    "listening to the sounds of the rainforest",
+    "walking beneath the dense canopy"
+  ]],
+  ["in a misty swamp with vines hanging from trees", [
+    "carefully wading through the murky water",
+    "pushing aside hanging vines",
+    "listening to the croaking of frogs"
+  ]],
+  ["in a rocky canyon illuminated by the setting sun", [
+    "watching the colors of the sunset",
+    "standing on the edge of the canyon",
+    "admiring the shadows cast by the rocks"
+  ]],
+  ["on a volcanic landscape with molten lava flows", [
+    "feeling the heat radiating from the lava",
+    "watching the lava flow slowly down the slope",
+    "keeping a safe distance from the molten rock"
+  ]],
+  ["on a starry desert night with distant howling winds", [
+    "looking up at the stars",
+    "listening to the wind howling in the distance",
+    "wrapping themselves in a blanket"
+  ]],
+  ["in an enchanted forest with glowing mushrooms", [
+    "bending down to examine a glowing mushroom",
+    "walking through a path lit by glowing mushrooms",
+    "admiring the magical glow of the forest"
+  ]],
+  ["in a mystical cave with glowing runes on the walls", [
+    "tracing the glowing runes with their fingers",
+    "trying to decipher the meaning of the runes",
+    "feeling a sense of awe and mystery"
+  ]],
+  ["in a dark, abandoned castle", [
+    "walking down a dusty hallway",
+    "pushing open a creaking door",
+    "holding a flickering lantern"
+  ]],
+  ["in a magical library filled with levitating books", [
+    "reaching out to touch a levitating book",
+    "walking through rows of floating books",
+    "looking up at the high ceiling"
+  ]],
+  ["in a haunted mansion", [
+    "walking cautiously down a dark hallway",
+    "listening for strange noises",
+    "peering into a shadowy room"
+  ]],
+  ["in an ancient temple hidden deep within a jungle", [
+    "examining ancient carvings on the walls",
+    "brushing dust off a stone statue",
+    "walking through crumbling ruins"
+  ]],
+  ["at a crystal palace in the middle of a frozen lake", [
+    "walking across the frozen lake towards the palace",
+    "admiring the reflections of the palace in the ice",
+    "touching the icy surface of the palace walls"
+  ]],
+  ["in a forgotten city overgrown with vines", [
+    "pushing aside thick vines",
+    "walking through crumbling streets",
+    "examining weathered statues"
+  ]],
+  ["in a dragon's lair filled with treasure", [
+    "picking up a gold coin",
+    "admiring a pile of jewels",
+    "carefully stepping over a sleeping dragon"
+  ]],
+  ["in a labyrinth of mirrors reflecting endless possibilities", [
+    "looking into a mirror at their reflection",
+    "trying to find their way through the maze",
+    "touching the surface of a mirror"
+  ]],
+  ["at a tower in the middle of a mystical forest", [
+    "climbing the winding staircase of the tower",
+    "looking out from the top of the tower",
+    "touching the ancient stones of the tower walls"
+  ]],
+  ["on a ghostly ship", [
+    "walking across the creaking deck",
+    "looking out at the misty sea",
+    "holding onto the ship's railing"
+  ]],
+  ["in an underground cavern lit by glowing fungi", [
+    "admiring the glowing fungi",
+    "carefully navigating the uneven cave floor",
+    "touching the soft surface of a glowing mushroom"
+  ]],
+  ["in a futuristic city with flying cars and neon lights", [
+    "looking up at the flying cars",
+    "walking along a busy street",
+    "admiring the bright neon lights"
+  ]],
+  ["in a high-tech laboratory filled with robotic arms", [
+    "watching a robotic arm move",
+    "examining a complex piece of equipment",
+    "typing on a futuristic keyboard"
+  ]],
+  ["in a cyberpunk alleyway filled with neon signs and graffiti", [
+    "looking at the neon signs",
+    "walking through the narrow alleyway",
+    "examining the graffiti on the walls"
+  ]],
+  ["on an alien planet with strange plants and floating rocks", [
+    "looking at the strange plants",
+    "walking on the uneven surface",
+    "reaching out to touch a floating rock"
+  ]],
+  ["in a utopian city with glass towers and holograms", [
+    "looking up at the glass towers",
+    "walking through a pristine park",
+    "interacting with a hologram"
+  ]],
+  ["on a spaceship", [
+    "looking out the window at the stars",
+    "sitting in the pilot's chair",
+    "pushing buttons on a control panel"
+  ]],
+  ["in a post-apocalyptic wasteland with ruined buildings", [
+    "walking through the rubble",
+    "scavenging for supplies",
+    "looking at the ruined buildings"
+  ]],
+  ["in a robotic factory with assembly lines and sparks flying", [
+    "watching the robots work",
+    "listening to the sounds of machinery",
+    "avoiding the sparks"
+  ]],
+  ["in a virtual reality world with pixelated landscapes", [
+    "interacting with the virtual environment",
+    "walking through the pixelated landscape",
+    "wearing a VR headset"
+  ]],
+  ["on a desert planet with two suns and endless dunes", [
+    "shielding their eyes from the two suns",
+    "walking across the hot sand",
+    "looking at the endless dunes"
+  ]],
+  ["at a futuristic marketplace filled with exotic goods", [
+    "looking at the exotic goods",
+    "talking to a vendor",
+    "holding a strange object"
+  ]],
+  ["in a cybernetic forest where trees are intertwined with machines", [
+    "touching a tree trunk intertwined with metal",
+    "walking through the unusual forest",
+    "looking at the glowing lights on the machines"
+  ]],
+  ["at a neon-lit nightclub in a futuristic metropolis", [
+    "dancing to the music",
+    "drinking a futuristic cocktail",
+    "talking to someone at the bar"
+  ]],
+  ["in a colossal spaceship hangar with advanced technology", [
+    "looking at the large spaceships",
+    "walking across the vast hangar floor",
+    "examining a piece of advanced technology"
+  ]],
+  ["in a world where everything is made of candy", [
+    "taking a bite out of a candy house",
+    "walking on a candy path",
+    "licking a candy tree"
+  ]],
+  ["in an underwater kingdom with glowing creatures", [
+    "swimming through the underwater kingdom",
+    "looking at the glowing creatures",
+    "riding a seahorse"
+  ]],
+  ["in a land where the sky is filled with floating lanterns", [
+    "looking up at the floating lanterns",
+    "releasing a lantern into the sky",
+    "walking through a field of lanterns"
+  ]],
+  ["in a realm where time flows backward", [
+    "watching events unfold in reverse",
+    "walking backward",
+    "catching a thrown object that returns to the thrower's hand"
+  ]],
+  ["on a desert of glass shards reflecting the stars", [
+    "carefully walking on the glass shards",
+    "admiring the reflections of the stars",
+    "picking up a shard of glass"
+  ]],
+  ["in a forest where the trees are made of light", [
+    "walking through the glowing forest",
+    "touching a tree made of light",
+    "looking up at the branches of light"
+  ]],
+  ["in a circus tent with acrobats performing high above", [
+    "watching the acrobats perform",
+    "clapping and cheering",
+    "eating popcorn"
+  ]],
+  ["in a magical workshop filled with enchanted objects", [
+    "looking at the enchanted objects",
+    "picking up a magical item",
+    "mixing potions"
+  ]],
+  ["in an old-fashioned theater with red velvet seats", [
+    "sitting in a red velvet seat",
+    "watching a play on stage",
+    "reading the program"
+  ]],
+  ["on the Yellow Brick Road in *The Wizard of Oz*", [
+    "following the Yellow Brick Road",
+    "skipping down the path",
+    "looking towards the Emerald City"
+  ]],
+  ["in the floating diner in *Inception*", [
+    "sitting at a table in the diner",
+    "watching objects float around",
+    "talking to another character"
+  ]],
+  ["at the end of the world in *Mad Max: Fury Road*", [
+    "driving a vehicle across the wasteland",
+    "looking out at the desolate landscape",
+    "holding a weapon"
+  ]],
+  ["in the Hogwarts Great Hall in *Harry Potter* series", [
+    "sitting at a table in the Great Hall",
+    "looking up at the enchanted ceiling",
+    "talking to another student"
+  ]],
+  ["on the space station in *2001: A Space Odyssey*", [
+    "floating in zero gravity",
+    "looking out the window at Earth",
+    "operating a control panel"
+  ]],
+  ["in the giant wave in *Interstellar*", [
+    "being tossed around by the wave",
+    "holding onto something for dear life",
+    "looking up at the massive wave"
+  ]],
+  ["at the Casablanca airport scene in *Casablanca*", [
+    "standing on the tarmac",
+    "watching a plane take off",
+    "talking to another character"
+  ]],
+  ["at the iconic dance scene in *Pulp Fiction*", [
+    "dancing with a partner",
+    "snapping their fingers to the music",
+    "drinking a milkshake"
+  ]],
+  ["at the beachfront sunset in *The Graduate*", [
+    "standing on the beach",
+    "watching the sunset",
+    "talking to another character"
+  ]],
+  ["on the battlefield in *Gladiator*", [
+    "fighting with a sword",
+    "riding a horse",
+    "looking at the chaos of battle"
+  ]],
+  ["at the grand ball scene in *Beauty and the Beast*", [
+    "dancing with a partner",
+    "walking down a grand staircase",
+    "talking to other guests"
+  ]],
+  ["in the iconic trench warfare in *All Quiet on the Western Front*", [
+    "crouching in a trench",
+    "looking out over no man's land",
+    "holding a rifle"
+  ]]
 ];
 
 function getRandom(array) {
@@ -991,7 +1754,6 @@ function getRandom(array) {
 var newStyle = [];
 function styleFilter() {
   const singleStyle = promptsSourceInput[7][0];
-  console.log(singleStyle)
   if (singleStyle == 0) {
     for (var x = 0; x < style.length; x++) {
       if (promptsSourceInput[7][x + 1] == true) {
@@ -1017,12 +1779,20 @@ function generatePrompt() {
     randomLight = "";
   }
 
-  if (rand < 0.85) {
-    randomAction = getRandom(dailyActions);
-    randomScene = getRandom(dailyScenes);
+  if (rand < 0.8) {
+    const sceneArray = getRandom(dailyScenes);
+    randomScene = sceneArray[0];
+    randomAction = getRandom(sceneArray[1]);
+    if (rand < 0.25) {
+      randomAction = getRandom(commonActions);
+    }
   } else {
-    randomAction = getRandom(specialActions);
-    randomScene = getRandom(specialScenes);
+    const sceneArray = getRandom(specialScenes);
+    randomScene = sceneArray[0];
+    randomAction = getRandom(sceneArray[1]);
+    if (rand > 0.95) {
+      randomAction = getRandom(commonActions);
+    }
   }
 
   if (rand < 0.1) {
@@ -1104,6 +1874,7 @@ function generatePrompt() {
       randomSubject = "";
       randomClothes = "";
       randomAction = "";
+      randomScene = randomScene.substring(randomScene.indexOf(' ') + 1);
     }
   }
 
@@ -1115,29 +1886,26 @@ function generatePrompt() {
   }
 
   const w = randomClothes == "" ? "" : " wearing ";
-  var i = "in ";
-  if (randomSubject == "" || randomScene == "") {
-    i = "";
-  }
+
   var buildPrompt = "";
   switch (creativeMode) {
     case 0:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
       break;
     case 1:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes} in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes} ${randomScene}.`;
       break;
     case 2:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, someone ${randomAction} in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, someone ${randomAction} ${randomScene}.`;
       break;
     case 3:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${i}${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
       break;
     default:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} in ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
   }
 
-  if (promptsSourceInput[5][0] != "") {
+  if (promptsSourceInput[5][0].trim() != "") {
     buildPrompt = promptsSourceInput[5][0] + ", " + buildPrompt;
   }
   return buildPrompt.replace(", ,", ",").replace(", ,", ",").replace(",  .", ".");
@@ -1158,10 +1926,9 @@ if (promptsSourceInput[0][0] == 1) {
 }
 
 const workflow = promptsSourceInput[0][0];
-const configuration = pipeline.configuration;
 var batchCount = configuration.batchCount;
-var maxCount = 100;
-if (batchCount > 100) {
+var maxCount = 20;
+if (batchCount > 20) {
   maxCount = batchCount;
 }
 
@@ -1188,6 +1955,15 @@ if (workflow == 0 || workflow == 1) {
 }
 const promptsArray = prompts.split('\n\n').filter(prompts => prompts.trim() !== '');
 const promptsCount = promptsArray.length;
+
+function calcShift(h, w) {
+  const step1 = (h * w) / 256;
+  const step2 = (1.15 - 0.5) / (4096 - 256);
+  const step3 = (step1 - 256) * step2;
+  const step4 = step3 + 0.5;
+  const result = Math.exp(step4);
+  return Math.round(result * 100) / 100;
+}
 
 var start = Number;
 function fluxModel() {
@@ -1269,15 +2045,6 @@ function fluxModel() {
       ];
     }
   );
-
-  function calcShift(h, w) {
-    const step1 = (h * w) / 256;
-    const step2 = (1.15 - 0.5) / (4096 - 256);
-    const step3 = (step1 - 256) * step2;
-    const step4 = step3 + 0.5;
-    const result = Math.exp(step4);
-    return Math.round(result * 100) / 100;
-  }
 
   var userSize = {};
   if (workflow == 0) {
@@ -1496,7 +2263,7 @@ function otherModel() {
     for (var i = 0; i < batchCount; i++) {
       const completedBatches = batchCount * s + i + 1;
       const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
-      console.log(`🟢 Running the Other Model   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+      console.log(`🟢 Running the ${otherModelName.replace("🧩  ", "")}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
       pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
     }
   }
@@ -1520,27 +2287,54 @@ function initModel() {
   configuration.seed = -1;
   configuration.batchCount = 1;
   configuration.batchSize = 1;
+  if (!enableOtherMoldePreset) {
+    return;
+  }
   configuration.clipSkip = 1;
   configuration.tiledDiffusion = false;
   configuration.hiresFix = false;
   configuration.upscaler = null;
   configuration.refinerModel = null;
-  configuration.loras = [];
-  configuration.controls = [];
+  configuration.resolutionDependentShift = false;
   configuration.shift = 1.0;
   configuration.strength = 1.0;
+  if (!enableOtherMoldelControls) {
+    configuration.controls = [];
+  }
+  if (!enableOtherMoldelLoRA) {
+    configuration.loras = [];
+  }
+
+  if (checkModel() == "DreamShaper" || checkModel() == "Kolors" || checkModel() == "SDXL") {
+    configuration.originalImageHeight = height;
+    configuration.originalImageWidth = width;
+    configuration.targetImageHeight = height;
+    configuration.targetImageWidth = width;
+    configuration.negativeOriginalImageHeight = 512;
+    configuration.negativeOriginalImageWidth = 512;
+  }
 
   switch (checkModel()) {
-    case "dreamshaper":
-      configuration.originalImageHeight = height;
-      configuration.originalImageWidth = width;
-      configuration.targetImageHeight = height;
-      configuration.targetImageWidth = width;
-      configuration.negativeOriginalImageHeight = 512;
-      configuration.negativeOriginalImageWidth = 512;
+    case "DreamShaper":
       configuration.sampler = 1;
       configuration.guidanceScale = 2.0;
       configuration.steps = 10;
+      break;
+    case "Kolors":
+      configuration.sampler = 12;
+      configuration.guidanceScale = 5.0;
+      configuration.steps = 12;
+      break;
+    case "SDXL":
+      configuration.sampler = 12;
+      configuration.guidanceScale = 6.0;
+      configuration.steps = 12;
+      break;
+    case "SD3 Medium":
+      configuration.sampler = 15;
+      configuration.guidanceScale = 5.0;
+      configuration.steps = 20;
+      configuration.shift = calcShift(height, width);
       break;
     default:
       return;
@@ -1549,10 +2343,22 @@ function initModel() {
 
 function checkModel() {
   const model = configuration.model;
-  if (model.includes("dreamshaper_xl_v2.1_turbo")) {
-    return "dreamshaper";
+  if (model.includes("flux_")) {
+    return "Flux";
   }
-  return "";
+  if (model.includes("dreamshaper_xl_v2.1_turbo")) {
+    return "DreamShaper";
+  }
+  if (model.includes("kwai_kolors")) {
+    return "Kolors";
+  }
+  if (model.includes("xl_")) {
+    return "SDXL";
+  }
+  if (model.includes("sd3_medium")) {
+    return "SD3 Medium";
+  }
+  return null;
 }
 
 function base64ToBinary(base64) {
@@ -1598,12 +2404,14 @@ function estimateTime(totalStartTime, completedBatches, totalBatches) {
   const remainingBatches = totalBatches - completedBatches;
   const estimatedRemainingTime = Math.floor(averageTimePerBatch * remainingBatches);
   const remainingMinutes = Math.floor(estimatedRemainingTime / 60000);
-  const remainingSeconds = Math.floor((estimatedRemainingTime % 60000) / 1000).toString().padStart(2, '0');
+  let remainingSeconds = Math.floor((estimatedRemainingTime % 60000) / 1000);
+  remainingSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
   return `   ⏱ Remaining time ‣ ${remainingMinutes}:${remainingSeconds}`;
 }
 
 const end = Date.now();
 const duration = end - start;
 const minutes = Math.floor(duration / 60000);
-const seconds = Math.floor((duration % 60000) / 1000).toString().padStart(2, '0');
+let seconds = Math.floor((duration % 60000) / 1000);
+seconds = seconds < 10 ? '0' + seconds : seconds;
 console.log(`✔︎ Total time ‣ ${minutes}:${seconds}`);
