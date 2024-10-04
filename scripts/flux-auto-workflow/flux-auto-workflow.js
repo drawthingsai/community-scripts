@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.6
+// v3.7
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -17,18 +17,6 @@
 //
 const useFlux8bit = true;
 //
-// Enable Controls for other model.
-//
-const enableOtherMoldelControls = false;
-//
-// Enable LoRA for other model.
-//
-const enableOtherMoldelLoRA = false;
-//
-// After enabling, it will automatically set parameters for other supported models. After disabling, you need to set parameters manually, but you can use accelerate LoRA.
-//
-const enableOtherMoldePreset = true;
-//
 // You can customize unlimited styles you like here, and the custom style is disabled by default.
 //
 const customStyle = [
@@ -40,7 +28,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v3.6";
+const version = "v3.7";
 var promptsSource = pipeline.prompts.prompt;
 
 const stylePreview = [
@@ -66,15 +54,15 @@ const stylePreview = [
 ];
 
 const configuration = pipeline.configuration;
-let otherModelName = checkModel();
+let customModelName = checkModel();
 if (checkModel()) {
-  if (otherModelName == "Flux") {
-    otherModelName = `🧩  Other Model (null)`;
+  if (customModelName == "Flux") {
+    customModelName = `⚠️  Custom Model `;
   } else {
-    otherModelName = `🧩  ${otherModelName} `;
+    customModelName = `🧩  ${customModelName} `;
   }
 } else {
-  otherModelName = `🧩  Unknown Model `;
+  customModelName = `🧩  Unknown Model `;
 }
 
 const promptsSourceInput = requestFromUser(
@@ -84,9 +72,9 @@ const promptsSourceInput = requestFromUser(
     return [
       this.section(
         "❖  Workflow Mode",
-        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Other Model: Supports automatic parameter setting for DreamShaper Turbo,\n      Kolors, SDXL, SD3 downloaded from the model list of Draw Things.\n      (Accelerate LoRA is not supported)\n      If 'Unknown Model' is displayed, you need to set the parameters manually first.\n •   Image Refiner: Refine the existing image on the canvas or folder automatically.",
+        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Custom Model: Supports automatic parameter setting for DreamShaper Turbo,\n      Kolors, SDXL, SD3 downloaded from the model list of Draw Things.\n      (Accelerate LoRA is not supported)\n      If 'Unknown Model' is displayed, you need to set the parameters manually first.\n •   Image Refiner: Refine the existing image on the canvas or folder automatically.",
         [
-          this.segmented(0, ["🌊  Flux Model ", otherModelName, "✨  Image Refiner "]),
+          this.segmented(0, ["🌊  Flux Model ", customModelName, "✨  Image Refiner "]),
         ]
       ),
       this.section(
@@ -165,7 +153,7 @@ const promptsSourceInput = requestFromUser(
   }
 );
 
-if (promptsSourceInput[0][0] == 1 && checkModel() == "Flux") {
+if (promptsSourceInput[0][0] == 1 && configuration.model.includes("flux_1_dev")) {
   requestFromUser(
     `Flux Auto Workflow ${version}`,
     "Exit",
@@ -623,7 +611,7 @@ const femaleClothes = [
   "A fairy's delicate dress made of flower petals",
   "A mystical cloak that shifts colors with the light",
   "A witch's dark, flowing gown and pointed hat",
-  "A steampunk adventurer's outfit with brass goggles",
+  "A steampunk adventurer's outfit",
   "A Valkyrie's armor with feathered wings",
   "A futuristic bodysuit with glowing circuits",
   "A dragon-scale armor with glowing runes",
@@ -1932,26 +1920,44 @@ if (batchCount > 20) {
   maxCount = batchCount;
 }
 
+var enableOtherMoldelLoRA = false;
+var enableOtherMoldelControls = false;
+var enableCustomMoldePreset = true;
+
 var prompts = pipeline.prompts.prompt;
 if (workflow == 0 || workflow == 1) {
+  const h = workflow == 1 ? 300 : 420;
   const promptsInput = requestFromUser(
     `Flux Auto Workflow ${version}`,
     buttonText,
     function () {
+      let widget = [
+        this.textField(promptsSource, " Write your prompts here.", true, h),
+        this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt"),
+      ];
+      if (workflow == 1) {
+        widget.push(
+          this.switch(false, "✡︎   Keep LoRA"),
+          this.switch(false, "✡︎   Keep Control"),
+          this.switch(true, "✡︎   Automatic Configure Custom Model")
+        );
+      }
       return [
         this.section(
           "❖  Prompt Setting",
           " •   Support multiple prompts batch generation, a blank line between each prompt.\n •   Use ⬆︎ Shift + ↵ Enter to break line. iPadOS / iOS requires an external keyboard.",
-          [
-            this.textField(promptsSource, " Write your prompts here.", true, 420),
-            this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt"),
-          ]
+          widget
         ),
       ];
     }
   );
   prompts = promptsInput[0][0];
   batchCount = promptsInput[0][1];
+  if (workflow == 1) {
+    enableOtherMoldelLoRA = promptsInput[0][2];
+    enableOtherMoldelControls = promptsInput[0][3];
+    enableCustomMoldePreset = promptsInput[0][4];
+  }
 }
 const promptsArray = prompts.split('\n\n').filter(prompts => prompts.trim() !== '');
 const promptsCount = promptsArray.length;
@@ -2035,6 +2041,7 @@ function fluxModel() {
           [
             this.switch(false, "✡︎   Keep LoRA"),
             widgetB,
+            this.switch(false, "✡︎   Allow Unofficial Flux-Dev"),
           ]
         ),
         this.section(
@@ -2063,6 +2070,7 @@ function fluxModel() {
   const keepControl = userInputs[3][1];
   const capture = userInputs[3][1];
   const imgFiles = userInputs[1][0];
+  const unofficialFlux = userInputs[3][2];
 
   var loras = [];
   if (keepLora) {
@@ -2074,24 +2082,25 @@ function fluxModel() {
     controls = configuration.controls;
   }
 
-  if (useFlux8bit) {
-    const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)", "FLUX.1 [dev] to [schnell] 4-Step"]);
-    if (!isDownload[0]) {
-      pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
+  if (!unofficialFlux) {
+    if (useFlux8bit) {
+      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"]);
+      if (!isDownload[0]) {
+        pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
+      }
+      configuration.model = "flux_1_dev_q5p.ckpt";
+    } else {
+      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev]"]);
+      if (!isDownload[0]) {
+        pipeline.downloadBuiltins(["FLUX.1 [dev]"]);
+      }
+      configuration.model = "flux_1_dev_q8p.ckpt";
     }
-    if (!isDownload[1]) {
-      pipeline.downloadBuiltins(["FLUX.1 [dev] to [schnell] 4-Step"]);
-    }
-    configuration.model = "flux_1_dev_q5p.ckpt";
-  } else {
-    const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev]", "FLUX.1 [dev] to [schnell] 4-Step"]);
-    if (!isDownload[0]) {
-      pipeline.downloadBuiltins(["FLUX.1 [dev]"]);
-    }
-    if (!isDownload[1]) {
-      pipeline.downloadBuiltins(["FLUX.1 [dev] to [schnell] 4-Step"]);
-    }
-    configuration.model = "flux_1_dev_q8p.ckpt";
+  }
+
+  const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] to [schnell] 4-Step"]);
+  if (!isDownload[0]) {
+    pipeline.downloadBuiltins(["FLUX.1 [dev] to [schnell] 4-Step"]);
   }
 
   if ((configuration.width != size.width || configuration.height != size.height) && (workflow == 0)) {
@@ -2263,7 +2272,7 @@ function otherModel() {
     for (var i = 0; i < batchCount; i++) {
       const completedBatches = batchCount * s + i + 1;
       const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
-      console.log(`🟢 Running the ${otherModelName.replace("🧩  ", "")}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+      console.log(`🟢 Running the ${customModelName.replace("🧩  ", "")}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
       pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
     }
   }
@@ -2287,7 +2296,7 @@ function initModel() {
   configuration.seed = -1;
   configuration.batchCount = 1;
   configuration.batchSize = 1;
-  if (!enableOtherMoldePreset) {
+  if (!enableCustomMoldePreset) {
     return;
   }
   configuration.clipSkip = 1;
@@ -2304,8 +2313,8 @@ function initModel() {
   if (!enableOtherMoldelLoRA) {
     configuration.loras = [];
   }
-
-  if (checkModel() == "DreamShaper" || checkModel() == "Kolors" || checkModel() == "SDXL") {
+  const currentModel = checkModel();
+  if (currentModel == "DreamShaper" || currentModel == "Kolors" || currentModel == "SDXL") {
     configuration.originalImageHeight = height;
     configuration.originalImageWidth = width;
     configuration.targetImageHeight = height;
@@ -2314,7 +2323,7 @@ function initModel() {
     configuration.negativeOriginalImageWidth = 512;
   }
 
-  switch (checkModel()) {
+  switch (currentModel) {
     case "DreamShaper":
       configuration.sampler = 1;
       configuration.guidanceScale = 2.0;
