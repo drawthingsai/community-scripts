@@ -13,10 +13,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Select the accuracy of the model. If you need a more accurate quantization model, please set this constant to `false`, and use Flux Dev (8-bit) by default.
-//
-const useFlux8bit = true;
-//
 // You can customize unlimited styles you like here, and the custom style is disabled by default.
 //
 const customStyle = [
@@ -1946,12 +1942,10 @@ const userInputs = requestFromUser(
   function () {
     let widget = [];
     if (workflow == 0) {
-      let tip = ` •   If you need a more accurate quantization model, please set 'useFlux8bit' to 'false'.`;
-      if (useFlux8bit) {
-        const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"])
-        if (!isDownload[0]) {
-          tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please set 'useFlux8bit' to 'false' at the top of script.`;
-        }
+      let tip = ` •   When there are multiple Flux models with different precisions, the one with the highest precision is used first. The priority is: FLUX.1 [dev] (Exact) >> FLUX.1 [dev] >> FLUX.1 [dev] (8-bit). If it is not downloaded, FLUX.1 [dev] (8-bit) is used first.`;
+      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"])
+      if (!isDownload[0] && !isDownload[1] && !isDownload[2]) {
+        tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please download from the model list.`;
       }
       widget.push(
         this.section(
@@ -2112,18 +2106,19 @@ if (keepControl) {
 
 if (workflow != 1) {
   if (!unofficialFlux) {
-    if (useFlux8bit) {
-      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"]);
-      if (!isDownload[0]) {
-        pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
-      }
+    const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"]);
+    const isFluxF16 = isDownload[0];
+    const isFlux = isDownload[1];
+    const isFlux8bit = isDownload[2];
+    if (isFluxF16) {
+      configuration.model = "flux_1_dev_f16.ckpt";
+    } else if (isFlux) {
+      configuration.model = "flux_1_dev_q8p.ckpt";
+    } else if (isFlux8bit) {
       configuration.model = "flux_1_dev_q5p.ckpt";
     } else {
-      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev]"]);
-      if (!isDownload[0]) {
-        pipeline.downloadBuiltins(["FLUX.1 [dev]"]);
-      }
-      configuration.model = "flux_1_dev_q8p.ckpt";
+      pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
+      configuration.model = "flux_1_dev_q5p.ckpt";
     }
   }
 
