@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.7
+// v3.8
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -13,10 +13,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// Select the accuracy of the model. If you need a more accurate quantization model, please set this constant to `false`, and use Flux Dev (8-bit) by default.
-//
-const useFlux8bit = true;
-//
 // You can customize unlimited styles you like here, and the custom style is disabled by default.
 //
 const customStyle = [
@@ -28,7 +24,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v3.7";
+const version = "v3.8";
 var promptsSource = pipeline.prompts.prompt;
 
 const stylePreview = [
@@ -55,14 +51,14 @@ const stylePreview = [
 
 const configuration = pipeline.configuration;
 let customModelName = checkModel();
-if (checkModel()) {
+if (checkModel() != "Custom") {
   if (customModelName == "Flux") {
-    customModelName = `⚠️  Custom Model `;
+    customModelName = `🧩  Custom Model `;
   } else {
     customModelName = `🧩  ${customModelName} `;
   }
 } else {
-  customModelName = `🧩  Unknown Model `;
+  customModelName = `⚠️  Unknown Model `;
 }
 
 const promptsSourceInput = requestFromUser(
@@ -72,7 +68,7 @@ const promptsSourceInput = requestFromUser(
     return [
       this.section(
         "❖  Workflow Mode",
-        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Custom Model: Supports automatic parameter setting for DreamShaper Turbo,\n      Kolors, SDXL, SD3 downloaded from the model list of Draw Things.\n      (Accelerate LoRA is not supported)\n      If 'Unknown Model' is displayed, you need to set the parameters manually first.\n •   Image Refiner: Refine the existing image on the canvas or folder automatically.",
+        " •   Flux Model: The optimization parameters will be set automatically for Flux.\n •   Custom Model: Supports automatic parameter setting for DreamShaper Turbo,\n      Kolors, SDXL, SD3, Schnell downloaded from the model list of Draw Things.\n •   Image Refiner: Refine the existing image on the canvas or folder automatically.",
         [
           this.segmented(0, ["🌊  Flux Model ", customModelName, "✨  Image Refiner "]),
         ]
@@ -165,7 +161,7 @@ if (promptsSourceInput[0][0] == 1 && configuration.model.includes("flux_1_dev"))
           []
         ),
         this.section(
-          "Please exit and reselect other non-Flux models.",
+          "Please select flux workflow or exit and reselect other non-Flux models.",
           "",
           []
         ),
@@ -371,7 +367,6 @@ const job = [
   "knight",
   "robot",
   "alien",
-  "superhero",
   "supervillain",
   "princess",
   "prince",
@@ -379,12 +374,10 @@ const job = [
   "queen",
   "farmer",
   "chef",
-  "musician",
   "painter",
   "dancer",
   "group of dancers",
   "astronaut",
-  "scientist",
   "teacher",
   "student",
   "group of students",
@@ -399,42 +392,24 @@ const job = [
   "samurai",
   "monk",
   "priest",
-  "nun",
   "ghost",
   "group of ghosts",
   "vampire",
   "zombie",
   "mummy",
   "skeleton",
-  "clown",
   "jester",
-  "bard",
   "blacksmith",
   "fisherman",
   "hunter",
-  "gatherer",
   "traveler",
-  "explorer",
   "journalist",
-  "architect",
-  "engineer",
   "pilot",
-  "librarian",
   "mechanic",
   "gardener",
   "artist",
   "actor",
-  "director",
-  "photographer",
-  "writer",
-  "editor",
-  "nanny",
-  "barista",
-  "waiter",
-  "diplomat",
-  "translator",
-  "biologist",
-  "historian"
+  "photographer"
 ];
 
 const specialCharacters = [
@@ -1257,35 +1232,35 @@ const dailyScenes = [
     "quietly conversing with a friend, the warm light illuminating their faces",
     "reading a book, lost in the cozy atmosphere"
   ]],
-  ["in an ultra-modern apartment with oversized geometric windows, the city skyline blurred and refracted through glass prisms", [
+  ["in an ultra-modern apartment with oversized geometric windows", [
     "adjusting the smart lighting system to match the city's glow",
     "watering a geometrically arranged succulent garden",
     "practicing yoga, the city lights creating a dynamic backdrop",
     "preparing a meal in the sleek, minimalist kitchen",
     "relaxing on a chaise lounge, gazing at the refracted skyline"
   ]],
-  ["on a suburban street, adorned with extravagant holiday decorations, but transformed into a dreamy, ethereal display of glowing orbs and shimmering", [
+  ["on a suburban street, adorned with extravagant holiday decorations", [
     "walking down the street, mesmerized by the glowing decorations",
     "taking photos of the otherworldly light displays",
     "pointing out fantastical shapes in the shimmering lights to a child",
     "stopping to admire a particularly intricate light sculpture",
     "marveling at the transformation of familiar houses into dreamlike structures"
   ]],
-  ["in a foggy forest where towering trees merge into abstract lines, and beams of sunlight pierce through in soft", [
+  ["in a foggy forest where towering trees merge into abstract lines", [
     "walking cautiously through the fog, the trees looming like giants",
     "photographing the ethereal beams of sunlight filtering through the fog",
     "reaching out to touch the soft moss growing on a tree trunk",
     "pausing to listen to the quiet sounds of the forest",
     "observing the intricate patterns of light and shadow on the forest floor"
   ]],
-  ["in a desert landscape with massive, abstract dunes sculpted by the wind, the sand reflecting iridescent colors under a deep blue sky", [
+  ["in a desert landscape with massive, abstract dunes sculpted by the wind", [
     "climbing a towering sand dune, the sand shifting beneath their feet",
     "photographing the iridescent colors of the sand",
     "sketching the abstract shapes of the dunes",
     "shielding their eyes from the sun, gazing at the vast expanse of desert",
     "running down a dune, leaving footprints in the shifting sand"
   ]],
-  ["on a Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless, romantic atmosphere", [
+  ["on a Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless", [
     "walking along the cobblestone street, taking in the quiet beauty",
     "photographing the Parisian rooftops in the soft morning light",
     "sketching the intricate details of a wrought-iron balcony",
@@ -1299,7 +1274,7 @@ const dailyScenes = [
     "carefully examining a colorful tropical flower",
     "sketching the lush vegetation in a notebook"
   ]],
-  ["in a minimalist white wall in the centre of the room features wood framed artwork, a contemporary leather chair and a black stone coffee table", [
+  ["in a minimalist white wall in the centre of the room features wood framed artwork", [
     "admiring the framed artwork",
     "sitting in the leather chair reading a book",
     "placing a cup of coffee on the black stone coffee table",
@@ -1417,17 +1392,17 @@ const dailyScenes = [
   ["in the front of a background of white columns, with long shadows", commonActions],
   ["in the front of a background of black and white stitching", commonActions],
   ["in the front of a background of black and white light and shadow", commonActions],
-  ["in the front of a background of minimalist landscape of intersecting black and white lines, creating geometric shapes that seem to float in a stark, infinite white space", commonActions],
+  ["in the front of a background of minimalist landscape of intersecting black and white lines", commonActions],
   ["in the front of a background of abstract composition of overlapping translucent circles in pastel hues", commonActions],
-  ["in the front of a background of futuristic grid of perfect cubes and spheres, suspended in a glowing space where each shape casts sharp shadows", commonActions],
-  ["in the front of a background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles, each surface reflecting metallic or matte textures in varying shades of gray", commonActions],
+  ["in the front of a background of futuristic grid of perfect cubes and spheres", commonActions],
+  ["in the front of a background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles", commonActions],
   ["in the front of a background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors", commonActions],
-  ["in the front of a background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern, creating depth and a sense of organized chaos against a neutral backdrop", commonActions],
-  ["in the front of a background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair, evoking a sense of balance and harmony in motion", commonActions],
-  ["in the front of a background of soft, ethereal blend of thin, interweaving lines and geometric shapes, all in muted pastel tones, creating a feeling of serene complexity and delicate balance", commonActions],
-  ["in the front of a background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale, creating an optical illusion of depth and movement", commonActions],
-  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles, where each shape subtly overlaps and shifts", commonActions],
-  ["in the front of a background of intricate web of crisscrossing, neon-colored lines, forming geometric shapes that pulse with soft glows against a dark", commonActions],
+  ["in the front of a background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern", commonActions],
+  ["in the front of a background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair", commonActions],
+  ["in the front of a background of soft, ethereal blend of thin, interweaving lines and geometric shapes", commonActions],
+  ["in the front of a background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale", commonActions],
+  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles", commonActions],
+  ["in the front of a background of intricate web of crisscrossing, neon-colored lines", commonActions],
   ["in the front of a background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces", commonActions]
 ];
 
@@ -1790,14 +1765,14 @@ function generatePrompt() {
     } else {
       randomClothes = "";
     }
-  } else if (rand < 0.35) {
+  } else if (rand < 0.4) {
     randomSubject = getRandom(male);
     randomClothes = getRandom(maleClothes);
     if (Math.random() < 0.4) {
       const name = getRandom(maleName);
       randomSubject += " named \"" + name + "\"";
     }
-  } else if (rand < 0.6) {
+  } else if (rand < 0.7) {
     randomSubject = getRandom(female);
     randomClothes = getRandom(femaleClothes);
     if (Math.random() < 0.4) {
@@ -1808,25 +1783,30 @@ function generatePrompt() {
     randomSubject = getRandom(job);
     if (Math.random() < 0.5) {
       randomClothes = getRandom(maleClothes);
-      randomSubject = "a male " + randomSubject;
+      randomSubject = "A male " + randomSubject;
       if (Math.random() < 0.4) {
         const name = getRandom(maleName);
         randomSubject += " named \"" + name + "\"";
       }
     } else {
       randomClothes = getRandom(femaleClothes);
-      randomSubject = "a female " + randomSubject;
+      randomSubject = "A female " + randomSubject;
       if (Math.random() < 0.4) {
         const name = getRandom(femaleName);
         randomSubject += " named \"" + name + "\"";
       }
     }
-  } else if (rand < 0.95) {
+  } else if (rand < 0.9) {
     randomSubject = getRandom(specialCharacters);
     randomClothes = "";
   } else {
-    randomSubject = getRandom(groupPerson);
-    randomClothes = "";
+    if (Math.random() < 0.5) {
+      randomSubject = getRandom(male) + " with " + getRandom(female) + "  together";
+      randomClothes = "";
+    } else {
+      randomSubject = getRandom(groupPerson);
+      randomClothes = "";
+    }
   }
 
   if (creativeMode == 3) {
@@ -1862,6 +1842,7 @@ function generatePrompt() {
       randomSubject = "";
       randomClothes = "";
       randomAction = "";
+      randomLight = promptsSourceInput[4][3] == true ? randomLight : "";
       randomScene = randomScene.substring(randomScene.indexOf(' ') + 1);
     }
   }
@@ -1878,25 +1859,25 @@ function generatePrompt() {
   var buildPrompt = "";
   switch (creativeMode) {
     case 0:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
       break;
     case 1:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes} ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes} ${randomScene}.`;
       break;
     case 2:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, someone ${randomAction} ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. Someone ${randomAction} ${randomScene}.`;
       break;
     case 3:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
       break;
     default:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}, ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
+      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
   }
 
   if (promptsSourceInput[5][0].trim() != "") {
     buildPrompt = promptsSourceInput[5][0] + ", " + buildPrompt;
   }
-  return buildPrompt.replace(", ,", ",").replace(", ,", ",").replace(",  .", ".");
+  return buildPrompt.replace(", , .", ".").replace(", ,", ",").replace(". ,", ".").replace(",  .", ".");
 }
 
 if (promptsSourceInput[1][0] == 1) {
@@ -1908,11 +1889,6 @@ if (promptsSourceInput[1][0] == 1) {
   }
 }
 
-var buttonText = "Next";
-if (promptsSourceInput[0][0] == 1) {
-  buttonText = "🪄 Generate ";
-}
-
 const workflow = promptsSourceInput[0][0];
 var batchCount = configuration.batchCount;
 var maxCount = 20;
@@ -1920,119 +1896,77 @@ if (batchCount > 20) {
   maxCount = batchCount;
 }
 
-var enableOtherMoldelLoRA = false;
-var enableOtherMoldelControls = false;
-var enableCustomMoldePreset = true;
-
 var prompts = pipeline.prompts.prompt;
 if (workflow == 0 || workflow == 1) {
-  const h = workflow == 1 ? 300 : 420;
   const promptsInput = requestFromUser(
     `Flux Auto Workflow ${version}`,
-    buttonText,
+    "Next",
     function () {
-      let widget = [
-        this.textField(promptsSource, " Write your prompts here.", true, h),
-        this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt"),
-      ];
-      if (workflow == 1) {
-        widget.push(
-          this.switch(false, "✡︎   Keep LoRA"),
-          this.switch(false, "✡︎   Keep Control"),
-          this.switch(true, "✡︎   Automatic Configure Custom Model")
-        );
-      }
       return [
         this.section(
           "❖  Prompt Setting",
           " •   Support multiple prompts batch generation, a blank line between each prompt.\n •   Use ⬆︎ Shift + ↵ Enter to break line. iPadOS / iOS requires an external keyboard.",
-          widget
-        ),
+          [
+            this.textField(promptsSource, " Write your prompts here.", true, 410),
+            this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt")
+          ]
+        )
       ];
     }
   );
   prompts = promptsInput[0][0];
   batchCount = promptsInput[0][1];
-  if (workflow == 1) {
-    enableOtherMoldelLoRA = promptsInput[0][2];
-    enableOtherMoldelControls = promptsInput[0][3];
-    enableCustomMoldePreset = promptsInput[0][4];
-  }
 }
 const promptsArray = prompts.split('\n\n').filter(prompts => prompts.trim() !== '');
 const promptsCount = promptsArray.length;
 
-function calcShift(h, w) {
-  const step1 = (h * w) / 256;
-  const step2 = (1.15 - 0.5) / (4096 - 256);
-  const step3 = (step1 - 256) * step2;
-  const step4 = step3 + 0.5;
-  const result = Math.exp(step4);
-  return Math.round(result * 100) / 100;
+var start = Number;
+
+var titleInfo = "";
+if (workflow == 0 || workflow == 1) {
+  titleInfo = `   ⎟   Prompts: ${promptsCount}  •  Images: ${batchCount * promptsCount}`;
+} else {
+  titleInfo = `   ⎟   Image Refiner Workflow`;
 }
 
-var start = Number;
-function fluxModel() {
-  var tip = ` •   If you need a more accurate quantization model, please set 'useFlux8bit' to 'false'.`;
-  if (useFlux8bit) {
-    const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"])
-    if (!isDownload[0]) {
-      tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please set 'useFlux8bit' to 'false' at the top of script.`;
-    }
-  }
-  var titleInfo = "";
-  if (workflow == 0) {
-    titleInfo = `   ⎟   Prompts: ${promptsCount}  •  Images: ${batchCount * promptsCount}`;
-  } else {
-    titleInfo = `   ⎟   Image Refine Workflow`;
-  }
-  const userInputs = requestFromUser(
-    `Flux Auto Workflow ${version}${titleInfo}`,
-    generateText,
-    function () {
-      var widgetA;
-      var widgetB;
-      var widgetC;
-      var d;
-      if (workflow == 0) {
-        d = 0;
-        widgetA = this.section(
-          "❖  Performance Mode",
-          ` •   Speed Mode: Use the Dev to Schnell LoRA to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
-          [
-            this.segmented(0, ["🚀  Speed   ", "⚖️  Balance   ", "🏆  Quality   "]),
-          ]
-        );
-        widgetB = this.switch(false, "✡︎   Keep Control");
-        widgetC = this.section(
+var generateText = "";
+if (workflow == 0 || workflow == 1) {
+  generateText = "🪄 Generate ";
+} else if (workflow == 2) {
+  generateText = "🪄 Refine ";
+}
+const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Dream Shaper", "Kolors", "SDXL", "SD3 Medium", "SD1"];
+const userInputs = requestFromUser(
+  `Flux Auto Workflow ${version}${titleInfo}`,
+  generateText,
+  function () {
+    let widget = [];
+    if (workflow == 0) {
+      let tip = ` •   When there are multiple Flux models with different precisions, the one with the highest precision is used first. The priority is: FLUX.1 [dev] (Exact) >> FLUX.1 [dev] >> FLUX.1 [dev] (8-bit). If it is not downloaded, FLUX.1 [dev] (8-bit) is used first.`;
+      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"])
+      if (!isDownload[0] && !isDownload[1] && !isDownload[2]) {
+        tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please download from the model list.`;
+      }
+      widget.push(
+        this.section(
           "❖  Image Size",
           "",
           [
             this.size(configuration.width, configuration.height, 128, 2048),
           ]
-        );
-      } else {
-        d = 1;
-        widgetA = this.section(
-          "❖  Batch Refine",
-          ` •   Select the images that needs to be refined in batches from folder. Support mixed resolution.`,
+        ),
+        this.section(
+          "❖  Performance Mode",
+          ` •   Speed Mode: Use the Dev to Schnell LoRA to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
           [
-            this.imageField("     Select The Images", true),
+            this.segmented(0, ["🚀  Speed   ", "⚖️  Balance   ", "🏆  Quality   "]),
           ]
-        );
-        widgetB = this.switch(false, "✡︎   Capture Image Description");
-        widgetC = this.section("", "", []);
-        tip = ` •   After enabling the 'Capture Image Description' function, more perfect prompt can be provided for batch refine, making the refined image closer to the original image, but it will increase the running time and require the download of approximately 1.7GB of model files. PNG images generated by DrawThings do not need to turn on this function.`;
-      }
-
-      return [
-        widgetC,
-        widgetA,
+        ),
         this.section(
           "❖  Detail Optimization",
           ` •   Standard Mode: helps to add more natural details and textures.\n •   Enhance Mode: will add stronger contrast and the composition will change more.`,
           [
-            this.segmented(d, ["📷  Standard   ", "📸  Enhance   "]),
+            this.segmented(0, ["📷  Standard   ", "📸  Enhance   "]),
           ]
         ),
         this.section(
@@ -2040,7 +1974,7 @@ function fluxModel() {
           " •   Make sure the LoRA and Control models are compatible with Flux before enabling.",
           [
             this.switch(false, "✡︎   Keep LoRA"),
-            widgetB,
+            this.switch(false, "✡︎   Keep Control"),
             this.switch(false, "✡︎   Allow Unofficial Flux-Dev"),
           ]
         ),
@@ -2048,53 +1982,143 @@ function fluxModel() {
           "⚠︎  Tip",
           tip,
           []
+        )
+      );
+    } else if (workflow == 1) {
+      const i = modelPresets.indexOf(checkModel());
+      const n = i == 0 ? "Unknown Model ⚠︎" : "Automatically Configured";
+      widget.push(
+        this.section(
+          "❖  Image Size",
+          "",
+          [
+            this.size(configuration.width, configuration.height, 128, 2048)
+          ]
         ),
-      ];
+        this.section(
+          `❖  Model Preset • ${n}`,
+          " •   The appropriate preset will be automatically selected for the model. If the model is not recognized, please select the preset manually.",
+          [
+            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "SDXL Turbo / Lightning", "Kolors", "SDXL", "SD3 Medium", "SD1"])
+          ]
+        ),
+        this.section(
+          "❖  Additional Model Settings",
+          " •   Make sure the LoRA and Control models are compatible with custom model before enabling.",
+          [
+            this.switch(false, "✡︎   Keep LoRA"),
+            this.switch(false, "✡︎   Keep Control")
+          ]
+        ),
+        this.section(
+          "⚠︎  Tip",
+          " •   If you want to use accelerate LoRA, or fully customized parameters, you need to set the parameters manually first and selecte the model preset to 'custom'.",
+          []
+        )
+      );
+    } else if (workflow == 2) {
+      widget.push(
+        this.section(
+          "❖  Batch Refine",
+          ` •   Select the images that needs to be refined in batches from folder. Support mixed resolution.`,
+          [
+            this.imageField("     Select The Images", true),
+          ]
+        ),
+        this.section(
+          "❖  Detail Optimization",
+          ` •   Standard Mode: helps to add more natural details and textures.\n •   Enhance Mode: will add stronger contrast and the composition will change more.`,
+          [
+            this.segmented(1, ["📷  Standard   ", "📸  Enhance   "]),
+          ]
+        ),
+        this.section(
+          "❖  Additional Model Settings",
+          " •   Make sure the LoRA and Control models are compatible with Flux before enabling.",
+          [
+            this.switch(false, "✡︎   Keep LoRA"),
+            this.switch(false, "✡︎   Capture Image Description"),
+            this.switch(false, "✡︎   Allow Unofficial Flux-Dev"),
+          ]
+        ),
+        this.section(
+          "⚠︎  Tip",
+          ` •   After enabling the 'Capture Image Description' function, more perfect prompt can be provided for batch refine, making the refined image closer to the original image, but it will increase the running time and require the download of approximately 1.7GB of model files. PNG images generated by DrawThings do not need to turn on this function.`,
+          []
+        ),
+      );
     }
-  );
-
-  var userSize = {};
-  if (workflow == 0) {
-    userSize = userInputs[0][0];
-  } else if (workflow == 2) {
-    userSize = {
-      "width": configuration.width,
-      "height": configuration.height
-    }
+    return widget;
   }
-  const size = JSON.parse(JSON.stringify(userSize));
-  var devShift = calcShift(size.height, size.width);
-  const mode = userInputs[1][0];
-  const detail = userInputs[2][0];
-  const keepLora = userInputs[3][0];
-  const keepControl = userInputs[3][1];
-  const capture = userInputs[3][1];
-  const imgFiles = userInputs[1][0];
-  const unofficialFlux = userInputs[3][2];
+);
 
-  var loras = [];
-  if (keepLora) {
-    loras = configuration.loras;
+var userSize = {};
+if (workflow == 0 || workflow == 1) {
+  userSize = userInputs[0][0];
+} else if (workflow == 2) {
+  userSize = {
+    "width": configuration.width,
+    "height": configuration.height
   }
+}
+const size = JSON.parse(JSON.stringify(userSize));
+var devShift = calcShift(size.height, size.width);
+var mode = 0;
+var detail = 0;
+var keepLora = false;
+var keepControl = false;
+var capture = false;
+var imgFiles = [];
+var unofficialFlux = false;
+var enableCustomModelLoRA = false;
+var enableCustomModelControls = false;
+var modelPresetIndex = 0;
+var currentModel = "";
+if (workflow == 0) {
+  mode = userInputs[1][0];
+  detail = userInputs[2][0];
+  keepLora = userInputs[3][0];
+  keepControl = userInputs[3][1];
+  unofficialFlux = userInputs[3][2];
+} else if (workflow == 1) {
+  enableCustomModelLoRA = userInputs[2][0];
+  enableCustomModelControls = userInputs[2][1];
+  modelPresetIndex = userInputs[1][0];
+  currentModel = modelPresets[modelPresetIndex];
+} else if (workflow == 2) {
+  detail = userInputs[1][0];
+  keepLora = userInputs[2][0];
+  keepControl = userInputs[2][1];
+  capture = userInputs[2][1];
+  imgFiles = userInputs[0][0];
+  unofficialFlux = userInputs[2][2];
+}
 
-  var controls = [];
-  if (keepControl) {
-    controls = configuration.controls;
-  }
+var loras = [];
+if (keepLora) {
+  loras = configuration.loras;
+}
 
+var controls = [];
+if (keepControl) {
+  controls = configuration.controls;
+}
+
+if (workflow != 1) {
   if (!unofficialFlux) {
-    if (useFlux8bit) {
-      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (8-bit)"]);
-      if (!isDownload[0]) {
-        pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
-      }
+    const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"]);
+    const isFluxF16 = isDownload[0];
+    const isFlux = isDownload[1];
+    const isFlux8bit = isDownload[2];
+    if (isFluxF16) {
+      configuration.model = "flux_1_dev_f16.ckpt";
+    } else if (isFlux) {
+      configuration.model = "flux_1_dev_q8p.ckpt";
+    } else if (isFlux8bit) {
       configuration.model = "flux_1_dev_q5p.ckpt";
     } else {
-      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev]"]);
-      if (!isDownload[0]) {
-        pipeline.downloadBuiltins(["FLUX.1 [dev]"]);
-      }
-      configuration.model = "flux_1_dev_q8p.ckpt";
+      pipeline.downloadBuiltins(["FLUX.1 [dev] (8-bit)"]);
+      configuration.model = "flux_1_dev_q5p.ckpt";
     }
   }
 
@@ -2102,15 +2126,20 @@ function fluxModel() {
   if (!isDownload[0]) {
     pipeline.downloadBuiltins(["FLUX.1 [dev] to [schnell] 4-Step"]);
   }
+}
 
-  if ((configuration.width != size.width || configuration.height != size.height) && (workflow == 0)) {
-    canvas.clear();
-  }
+if ((configuration.width != size.width || configuration.height != size.height) && (workflow != 2)) {
+  canvas.clear();
+}
 
-  configuration.width = size.width;
-  configuration.height = size.height;
-  configuration.batchCount = 1;
-  configuration.batchSize = 1;
+configuration.width = size.width;
+configuration.height = size.height;
+configuration.batchCount = 1;
+configuration.batchSize = 1;
+configuration.seed = -1;
+configuration.sharpness = 0;
+
+if (workflow != 1) {
   configuration.clipSkip = 1;
   configuration.resolutionDependentShift = false;
   configuration.speedUpWithGuidanceEmbed = true;
@@ -2118,185 +2147,167 @@ function fluxModel() {
   configuration.hiresFix = false;
   configuration.upscaler = null;
   configuration.refinerModel = null;
-  configuration.seed = -1;
-  start = Date.now();
-
-  if (workflow == 0) {
-    const totalBatches = batchCount * promptsCount;
-    for (var s = 0; s < promptsCount; s++) {
-      for (var i = 0; i < batchCount; i++) {
-        const completedBatches = batchCount * s + i + 1;
-        const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
-        var schnellLora = [];
-        if (loras.length > 0) {
-          for (var x = 0; x < loras.length; x++) {
-            const loraName = JSON.parse(JSON.stringify(loras[x]));
-            if (loraName.file == "flux.1__dev__to__schnell__4_step_lora_f16.ckpt") {
-              loras.splice(x, 1);
-              x--;
-            }
-          }
-        }
-        if (mode == 0) {
-          console.log(`🟢 Speed Mode ‣ Running the Flux Dev   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
-          schnellLora = loras;
-          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
-          configuration.loras = schnellLora;
-          configuration.controls = controls;
-          configuration.sampler = 15;
-          configuration.strength = 1.0;
-          configuration.shift = 1.0;
-          configuration.steps = 4;
-          if (detail == 0) {
-            configuration.guidanceScale = 3.5;
-          } else {
-            configuration.guidanceScale = 4.5;
-          }
-          pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
-        } else if (mode == 1) {
-          console.log(`🟠 Balance Mode ‣ ❶ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
-          schnellLora = loras;
-          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
-          configuration.loras = schnellLora;
-          configuration.controls = controls;
-          configuration.strength = 1.0;
-          configuration.guidanceScale = 3.5;
-          configuration.sampler = 15;
-          configuration.shift = 1.0;
-          configuration.steps = 4;
-          pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
-          console.log(`🟠 Balance Mode ‣ ❷ Refining the image    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
-          if (detail == 0) {
-            configuration.loras = [];
-            configuration.sampler = 15;
-            configuration.shift = devShift;
-            configuration.guidanceScale = 3.0;
-            configuration.strength = 0.35;
-            configuration.steps = 20;
-          } else {
-            configuration.loras = [{ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 0.35 }];
-            configuration.sampler = 10;
-            configuration.shift = 1.0;
-            configuration.guidanceScale = 3.8;
-            configuration.strength = 0.5;
-            configuration.steps = 8;
-          }
-          configuration.controls = [];
-          pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
-        } else if (mode == 2) {
-          console.log(`🔴 Quality Mode ‣ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
-          configuration.controls = controls;
-          configuration.sampler = 15;
-          configuration.strength = 1.0;
-          configuration.shift = devShift;
-          if (detail == 0) {
-            schnellLora = loras;
-            schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 0.08 });
-            configuration.loras = schnellLora;
-            configuration.guidanceScale = 3.5;
-            configuration.steps = 15;
-          } else {
-            configuration.loras = loras;
-            configuration.guidanceScale = 3.5;
-            configuration.steps = 20;
-          }
-          pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
-        }
-      }
-    }
-  } else if (workflow == 2) {
-    if (imgFiles.length == 0) {
-      const info = `Refining the image on the canvas`;
-      refine(info, null);
-    } else {
-      for (var i = 0; i < imgFiles.length; i++) {
-        const base64Data = imgFiles[i];
-        const binary = base64ToBinary(base64Data.split(',')[1]);
-        const exif = decodeExif(binary);
-        let srcPrompt = null;
-        if (exif) {
-          srcPrompt = exif.prompt;
-        }
-
-        const imageMetadata = new ImageMetadata(imgFiles[i]);
-        configuration.width = imageMetadata.width;
-        configuration.height = imageMetadata.height;
-        devShift = calcShift(imageMetadata.height, imageMetadata.width);
-        canvas.updateCanvasSize(configuration);
-        canvas.loadImageSrc(imgFiles[i]);
-        const eTime = i > 0 ? estimateTime(start, i, imgFiles.length) : ``;
-        const info = `Refining the images from folder   ⚙︎ Image batch progress ‣ ${i + 1}/${imgFiles.length}${eTime}`;
-        refine(info, srcPrompt);
-      }
-    }
-  }
-
-  function refine(info, srcPrompt) {
-    let p = imgFiles.length == 0 ? promptsArray[0] : "sharp focus, detailed texture, film particles, a high-quality image.";
-    if (srcPrompt) {
-      p = srcPrompt;
-    }
-    if (capture) {
-      console.log(`🟢 Capturing Image Description ‣ Running the MoonDream  ⚠️ Please do not move the canvas and other operations while capturing the image description.`);
-      const answer = canvas.answer("moondream2/20240520", "Describe this image, do not exceed 50 words.")
-      if (answer) {
-        p = answer;
-      }
-    }
-    configuration.controls = [];
-    if (detail == 0) {
-      console.log(`⚪️ Standard Mode ‣ ${info}`);
-      configuration.loras = [];
-      configuration.shift = devShift;
-      configuration.sampler = 15;
-      configuration.guidanceScale = 3.5;
-      configuration.strength = 0.35;
-      configuration.steps = 20;
-    } else {
-      console.log(`⚫️ Enhance Mode ‣ ${info}`);
-      configuration.loras = [{ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.0 }];
-      configuration.shift = 1.0;
-      configuration.sampler = 10;
-      configuration.guidanceScale = 1.0;
-      configuration.strength = 0.8;
-      configuration.steps = 5;
-    }
-    pipeline.run({ configuration: configuration, prompt: p });
-  }
+  configuration.faceRestoration = null;
 }
 
-function otherModel() {
-  start = Date.now();
-  const totalBatches = batchCount * promptsCount;
+start = Date.now();
+const totalBatches = batchCount * promptsCount;
+if (workflow == 0) {
   for (var s = 0; s < promptsCount; s++) {
     for (var i = 0; i < batchCount; i++) {
       const completedBatches = batchCount * s + i + 1;
       const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
-      console.log(`🟢 Running the ${customModelName.replace("🧩  ", "")}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+      var schnellLora = [];
+      if (loras.length > 0) {
+        for (var x = 0; x < loras.length; x++) {
+          const loraName = JSON.parse(JSON.stringify(loras[x]));
+          if (loraName.file == "flux.1__dev__to__schnell__4_step_lora_f16.ckpt") {
+            loras.splice(x, 1);
+            x--;
+          }
+        }
+      }
+      if (mode == 0) {
+        console.log(`🟢 Speed Mode ‣ Running the Flux Dev   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+        schnellLora = loras;
+        schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
+        configuration.loras = schnellLora;
+        configuration.controls = controls;
+        configuration.sampler = 15;
+        configuration.strength = 1.0;
+        configuration.shift = 1.0;
+        configuration.steps = 4;
+        if (detail == 0) {
+          configuration.guidanceScale = 3.5;
+        } else {
+          configuration.guidanceScale = 4.5;
+        }
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+      } else if (mode == 1) {
+        console.log(`🟠 Balance Mode ‣ ❶ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
+        schnellLora = loras;
+        schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.1 });
+        configuration.loras = schnellLora;
+        configuration.controls = controls;
+        configuration.strength = 1.0;
+        configuration.guidanceScale = 3.5;
+        configuration.sampler = 15;
+        configuration.shift = 1.0;
+        configuration.steps = 4;
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+        console.log(`🟠 Balance Mode ‣ ❷ Refining the image    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
+        if (detail == 0) {
+          configuration.loras = [];
+          configuration.sampler = 15;
+          configuration.shift = devShift;
+          configuration.guidanceScale = 3.0;
+          configuration.strength = 0.35;
+          configuration.steps = 20;
+        } else {
+          configuration.loras = [{ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 0.35 }];
+          configuration.sampler = 10;
+          configuration.shift = 1.0;
+          configuration.guidanceScale = 3.8;
+          configuration.strength = 0.5;
+          configuration.steps = 8;
+        }
+        configuration.controls = [];
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+      } else if (mode == 2) {
+        console.log(`🔴 Quality Mode ‣ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+        configuration.controls = controls;
+        configuration.sampler = 15;
+        configuration.strength = 1.0;
+        configuration.shift = devShift;
+        if (detail == 0) {
+          schnellLora = loras;
+          schnellLora.push({ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 0.08 });
+          configuration.loras = schnellLora;
+          configuration.guidanceScale = 3.5;
+          configuration.steps = 15;
+        } else {
+          configuration.loras = loras;
+          configuration.guidanceScale = 3.5;
+          configuration.steps = 20;
+        }
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+      }
+    }
+  }
+} else if (workflow == 1) {
+  initCustomModel();
+  for (var s = 0; s < promptsCount; s++) {
+    for (var i = 0; i < batchCount; i++) {
+      const completedBatches = batchCount * s + i + 1;
+      const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
+      console.log(`🟢 Running the ${currentModel}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
       pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+    }
+  }
+} else if (workflow == 2) {
+  if (imgFiles.length == 0) {
+    const info = `Refining the image on the canvas`;
+    refine(info, null);
+  } else {
+    for (var i = 0; i < imgFiles.length; i++) {
+      const base64Data = imgFiles[i];
+      const binary = base64ToBinary(base64Data.split(',')[1]);
+      const exif = decodeExif(binary);
+      let srcPrompt = null;
+      if (exif) {
+        srcPrompt = exif.prompt;
+      }
+
+      const imageMetadata = new ImageMetadata(imgFiles[i]);
+      configuration.width = imageMetadata.width;
+      configuration.height = imageMetadata.height;
+      devShift = calcShift(imageMetadata.height, imageMetadata.width);
+      canvas.updateCanvasSize(configuration);
+      canvas.loadImageSrc(imgFiles[i]);
+      const eTime = i > 0 ? estimateTime(start, i, imgFiles.length) : ``;
+      const info = `Refining the images from folder   ⚙︎ Image batch progress ‣ ${i + 1}/${imgFiles.length}${eTime}`;
+      refine(info, srcPrompt);
     }
   }
 }
 
-var generateText = "🪄 Generate ";
-if (workflow == 0) {
-  fluxModel();
-} else if (workflow == 2) {
-  generateText = "🪄 Refine ";
-  fluxModel();
-} else if (workflow == 1) {
-  initModel();
-  canvas.clear();
-  otherModel();
+function refine(info, srcPrompt) {
+  let p = imgFiles.length == 0 ? promptsArray[0] : "sharp focus, detailed texture, film particles, a high-quality image.";
+  if (srcPrompt) {
+    p = srcPrompt;
+  }
+  if (capture) {
+    console.log(`🟢 Capturing Image Description ‣ Running the MoonDream  ⚠️ Please do not move the canvas and other operations while capturing the image description.`);
+    const answer = canvas.answer("moondream2/20240520", "Describe this image, do not exceed 50 words.")
+    if (answer) {
+      p = answer;
+    }
+  }
+  configuration.controls = [];
+  if (detail == 0) {
+    console.log(`⚪️ Standard Mode ‣ ${info}`);
+    configuration.loras = [];
+    configuration.shift = devShift;
+    configuration.sampler = 15;
+    configuration.guidanceScale = 3.5;
+    configuration.strength = 0.35;
+    configuration.steps = 20;
+  } else {
+    console.log(`⚫️ Enhance Mode ‣ ${info}`);
+    configuration.loras = [{ "file": "flux.1__dev__to__schnell__4_step_lora_f16.ckpt", "weight": 1.0 }];
+    configuration.shift = 1.0;
+    configuration.sampler = 10;
+    configuration.guidanceScale = 1.0;
+    configuration.strength = 0.8;
+    configuration.steps = 5;
+  }
+  pipeline.run({ configuration: configuration, prompt: p });
 }
 
-function initModel() {
+function initCustomModel() {
   const width = configuration.width;
   const height = configuration.height;
-  configuration.seed = -1;
-  configuration.batchCount = 1;
-  configuration.batchSize = 1;
-  if (!enableCustomMoldePreset) {
+  if (modelPresetIndex == 0) {
     return;
   }
   configuration.clipSkip = 1;
@@ -2304,27 +2315,43 @@ function initModel() {
   configuration.hiresFix = false;
   configuration.upscaler = null;
   configuration.refinerModel = null;
-  configuration.resolutionDependentShift = false;
   configuration.shift = 1.0;
   configuration.strength = 1.0;
-  if (!enableOtherMoldelControls) {
+  if (!enableCustomModelControls) {
     configuration.controls = [];
   }
-  if (!enableOtherMoldelLoRA) {
+  if (!enableCustomModelLoRA) {
     configuration.loras = [];
   }
-  const currentModel = checkModel();
-  if (currentModel == "DreamShaper" || currentModel == "Kolors" || currentModel == "SDXL") {
+
+  if (currentModel == "Dream Shaper" || currentModel == "Kolors" || currentModel == "SDXL") {
     configuration.originalImageHeight = height;
     configuration.originalImageWidth = width;
     configuration.targetImageHeight = height;
     configuration.targetImageWidth = width;
     configuration.negativeOriginalImageHeight = 512;
     configuration.negativeOriginalImageWidth = 512;
+    configuration.cropLeft = 0;
+    configuration.cropTop = 0;
   }
 
   switch (currentModel) {
-    case "DreamShaper":
+    case "Flux Dev":
+      configuration.sampler = 15;
+      configuration.guidanceScale = 3.5;
+      configuration.steps = 20;
+      configuration.resolutionDependentShift = false;
+      configuration.speedUpWithGuidanceEmbed = true;
+      configuration.shift = devShift;
+      break;
+    case "Flux Schnell":
+      configuration.sampler = 15;
+      configuration.guidanceScale = 1.0;
+      configuration.steps = 4;
+      configuration.resolutionDependentShift = false;
+      configuration.speedUpWithGuidanceEmbed = true;
+      break;
+    case "Dream Shaper":
       configuration.sampler = 1;
       configuration.guidanceScale = 2.0;
       configuration.steps = 10;
@@ -2343,7 +2370,24 @@ function initModel() {
       configuration.sampler = 15;
       configuration.guidanceScale = 5.0;
       configuration.steps = 20;
-      configuration.shift = calcShift(height, width);
+      configuration.resolutionDependentShift = false;
+      configuration.shift = devShift;
+      break;
+    case "SD1":
+      configuration.sampler = 12;
+      configuration.guidanceScale = 6.0;
+      configuration.steps = 10;
+      const maxSize = 896;
+      if (width > maxSize || height > maxSize) {
+        if (width > height) {
+          configuration.width = maxSize;
+          configuration.height = Math.round(Math.round((height / width) * maxSize) / 64) * 64;
+
+        } else {
+          configuration.height = maxSize;
+          configuration.width = Math.round(Math.round((width / height) * maxSize) / 64) * 64;
+        }
+      }
       break;
     default:
       return;
@@ -2352,11 +2396,14 @@ function initModel() {
 
 function checkModel() {
   const model = configuration.model;
-  if (model.includes("flux_")) {
+  if (model.includes("flux_1_dev")) {
     return "Flux";
   }
+  if (model.includes("flux_1_schnell")) {
+    return "Flux Schnell";
+  }
   if (model.includes("dreamshaper_xl_v2.1_turbo")) {
-    return "DreamShaper";
+    return "Dream Shaper";
   }
   if (model.includes("kwai_kolors")) {
     return "Kolors";
@@ -2367,7 +2414,16 @@ function checkModel() {
   if (model.includes("sd3_medium")) {
     return "SD3 Medium";
   }
-  return null;
+  return "Custom";
+}
+
+function calcShift(h, w) {
+  const step1 = (h * w) / 256;
+  const step2 = (1.15 - 0.5) / (4096 - 256);
+  const step3 = (step1 - 256) * step2;
+  const step4 = step3 + 0.5;
+  const result = Math.exp(step4);
+  return Math.round(result * 100) / 100;
 }
 
 function base64ToBinary(base64) {
