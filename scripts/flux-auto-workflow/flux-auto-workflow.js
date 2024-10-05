@@ -2005,7 +2005,7 @@ const userInputs = requestFromUser(
           `❖  Model Preset • ${n}`,
           " •   The appropriate preset will be automatically selected for the model. If the model is not recognized, please select the preset manually.",
           [
-            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "Dream Shaper (SDXL Turbo / SDXL Lightning)", "Kolors", "SDXL", "SD3 Medium", "SD1"])
+            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "SDXL Turbo / Lightning", "Kolors", "SDXL", "SD3 Medium", "SD1"])
           ]
         ),
         this.section(
@@ -2079,7 +2079,7 @@ var unofficialFlux = false;
 var enableCustomModelLoRA = false;
 var enableCustomModelControls = false;
 var modelPresetIndex = 0;
-
+var currentModel = "";
 if (workflow == 0) {
   mode = userInputs[1][0];
   detail = userInputs[2][0];
@@ -2090,6 +2090,7 @@ if (workflow == 0) {
   enableCustomModelLoRA = userInputs[2][0];
   enableCustomModelControls = userInputs[2][1];
   modelPresetIndex = userInputs[1][0];
+  currentModel = modelPresets[modelPresetIndex];
 } else if (workflow == 2) {
   detail = userInputs[1][0];
   keepLora = userInputs[2][0];
@@ -2244,7 +2245,7 @@ if (workflow == 0) {
     for (var i = 0; i < batchCount; i++) {
       const completedBatches = batchCount * s + i + 1;
       const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
-      console.log(`🟢 Running the ${customModelName.replace("🧩  ", "")}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
+      console.log(`🟢 Running the ${currentModel}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
       pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
     }
   }
@@ -2327,7 +2328,7 @@ function initCustomModel() {
   if (!enableCustomModelLoRA) {
     configuration.loras = [];
   }
-  const currentModel = modelPresets[modelPresetIndex];
+
   if (currentModel == "Dream Shaper" || currentModel == "Kolors" || currentModel == "SDXL") {
     configuration.originalImageHeight = height;
     configuration.originalImageWidth = width;
@@ -2385,10 +2386,11 @@ function initCustomModel() {
       if (width > maxSize || height > maxSize) {
         if (width > height) {
           configuration.width = maxSize;
-          configuration.height = Math.round((height / width) * maxSize);
+          configuration.height = Math.round(Math.round((height / width) * maxSize) / 64) * 64;
+
         } else {
           configuration.height = maxSize;
-          configuration.width = Math.round((width / height) * maxSize);
+          configuration.width = Math.round(Math.round((width / height) * maxSize) / 64) * 64;
         }
       }
       break;
