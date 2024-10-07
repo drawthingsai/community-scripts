@@ -1,5 +1,5 @@
 //@api-1.0
-// v3.8
+// v3.9
 // Author: @czkoko
 // This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
 // Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
@@ -24,7 +24,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v3.8";
+const version = "v3.9";
 var promptsSource = pipeline.prompts.prompt;
 
 const stylePreview = [
@@ -91,7 +91,7 @@ const promptsSourceInput = requestFromUser(
         "❖  Random Prompt • Creative Mode",
         " •   🅿: Program Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt.",
         [
-          this.segmented(1, ["P", "S", "A", "M"]),
+          this.segmented(0, ["P", "S", "A", "M"]),
         ]
       ),
       this.section(
@@ -144,6 +144,11 @@ const promptsSourceInput = requestFromUser(
           this.switch(false, "✡︎   Vibrant Anime"),
           this.switch(false, "✡︎   Custom")
         ]
+      ),
+      this.section(
+        "❖  Help and Feedback",
+        " •   You can get help, submit feedback and check the update log in Draw Thing Discord:\n      Sharing >> Scripts >> Flux Auto Workflow.",
+        []
       )
     ];
   }
@@ -188,10 +193,10 @@ const style = [
   "A vibrant cinematic palette with strong orange and teal tones. Fine film grain and gaussian noise add texture",//Orange-Teal Cinematic
   "Desaturated color palette with slight orange and blue undertones, shadow is very light. Fine film grain and gaussian noise to give a gritty, atmospheric quality",//Desaturated Cinematic
   "Grainy, low-saturation film aesthetics with soft textures and muted colors, evoking the look of old films. Faded tones and nostalgic, retro atmospheres, Fine film grain and gaussian noise add texture",//Vintage Cinematic
-  "Symmetrical compositions with pastel and muted tones, often featuring warm yellows, soft pinks, and teal blues. Strong focus on meticulous framing, quirky characters, and vintage aesthetics. The style evokes a whimsical, nostalgic feel",//Retro Aesthetic Cinematic
+  "Symmetrical compositions with pastel and muted tones, often featuring warm yellows, soft pinks, and teal blues. Strong focus on meticulous framing and vintage aesthetics. Fine film grain and gaussian noise add texture",//Retro Aesthetic Cinematic
   "Desaturated, cold color palette dominated by greys, muted blues, and browns. Minimal contrast, with a focus on bleak, overcast lighting and a sense of emptiness. Ideal for dark, minimalist fashion themes with a gritty edge",//Cold Fashion
   "A cool-toned, industrial palette dominated by metallic grays, blues, and muted whites. Sharp details and reflections give a sleek, futuristic appearance with a subtle, polished sheen",//Cold Steel Futurism
-  "Deep reds, blacks, and purples, with an emphasis on dramatic shadows. The style creates a mysterious, romantic atmosphere, with a rich, almost baroque aesthetic",//Dark Gothic Romance
+  "Hyper-realistic photography, Deep reds, blacks, and purples, with an emphasis on dramatic shadows. The style creates a mysterious, romantic atmosphere, with a rich, almost baroque aesthetic",//Dark Gothic Romance
   "Dark, atmospheric visuals characterized by deep blues, vibrant oranges. Fine film grain and gaussian noise add texture. Cinematic compositions with a focus on shadows and reflections",//Futuristic Noir Aesthetic
   "Hyper-realistic photography, rich and warm colors with deep reds, golds, and dark shadows. Heavy textures, intricate details, and ornate patterns evoke the luxury and grandeur of baroque art",//Opulent Baroque
   "Soft pastel colors (pinks, light blues, lavender) blended with smooth gradients. Dreamy and surreal, often with a misty or glowing effect. Minimal contrast, focusing on soft, harmonious tones",//Pastel Dreamscape
@@ -213,24 +218,24 @@ const light = [
   "Dramatic spotlight cutting through darkness",
   "Neon light",
   "Dim light",
-  "Soft, diffused light",
+  "Soft and diffused light",
   "Cinematic lighting",
   "Warm light",
-  "Cool, bluish light",
-  "Gentle, soft glow",
-  "Sharp, focused beam of light",
+  "Cool and bluish light",
+  "Gentle and soft glow",
+  "Sharp and focused beam of light",
   "Pulsing light",
-  "Bright, glaring light",
-  "Soft, ambient light",
-  "Shimmering, scattered light",
-  "Muted, low light",
+  "Bright and glaring light",
+  "Soft and ambient light",
+  "Shimmering and scattered light",
+  "Muted and low light",
   "natural light",
-  "Bright, radiant light",
-  "Dappled, broken light",
-  "Hazy, diffused glow",
+  "Bright and radiant light",
+  "Dappled and broken light",
+  "Hazy and diffused glow",
   "contrasting light",
-  "Faint, barely-there light",
-  "Glowing, ethereal light",
+  "Faint and barely-there light",
+  "Glowing and ethereal light",
   "subtle light"
 ];
 
@@ -246,6 +251,21 @@ const male = [
   "A teen boy with long, shaggy hair and acne on his cheeks",
   "A young man with short, buzzed hair and a sharp jawline",
   "A young man with a man-bun and a thin mustache",
+  "A young man with a trendy undercut and tousled, light brown hair and bright blue eyes",
+  "A man in his mid-20s with vibrant purple hair styled in a messy quiff and a defined jawline",
+  "A fashionable young man with shoulder-length curly hair and a confident smile, exuding a laid-back vibe",
+  "A man in his early 30s with a sleek pompadour and perfectly shaped eyebrows, showcasing a charming demeanor",
+  "A young man with buzzed sides and a top knot, featuring striking green eyes and a fresh, youthful complexion",
+  "A man in his 20s with shoulder-length straight hair and a warm smile, framed by soft facial features",
+  "A young man with a chic, messy bun and a strong cheekbone structure, radiating confidence",
+  "A man in his late 20s with slicked-back dark hair and a subtle stubble, giving off an air of sophistication",
+  "A fashion-forward young man with asymmetrical short hair dyed a bold color and expressive facial features",
+  "A man in his early 30s with wavy dark hair and a well-defined jawline, often wearing a relaxed expression",
+  "A young man with a modern fade haircut and a bright smile, showcasing an approachable demeanor",
+  "A man in his mid-20s with tousled sandy blonde hair and a charismatic aura, embodying creativity",
+  "A stylish young man with straight, jet-black hair and a strong jawline, often seen with an intriguing gaze",
+  "A man in his late 20s with messy, layered hair and sun-kissed skin, radiating a natural charm",
+  "A young man with vibrant teal spikes in his hair, showcasing his adventurous personality and confidence",
   "A man in his 20s with wavy, medium-length hair and a clean-shaven face",
   "A man in his 20s with straight, parted hair and a light stubble",
   "A man in his early 20s with medium-length curly hair and a square jawline",
@@ -258,22 +278,11 @@ const male = [
   "A man in his 40s with a short beard and a scar over his left eyebrow",
   "A middle-aged man with thick glasses, a mustache, and thinning hair",
   "A middle-aged man with shoulder-length hair tied back and a rugged face",
-  "A man in his 50s with salt-and-pepper hair and a strong brow",
-  "A man in his 50s with a balding crown and a goatee",
   "A man in his 50s with thinning gray hair and a pair of reading glasses",
   "An older man with a full head of white hair and a bushy mustache",
   "An older man with a long beard and deep-set eyes",
-  "An elderly man with a bald head, deep wrinkles, and kind eyes",
-  "An elderly man with wispy white hair and sunken cheeks",
-  "A very old man with a stooped posture, thin white hair, and a gentle smile",
-  "A man in his 60s with a gray beard and a weathered face",
-  "A man in his 60s with slicked-back gray hair and a stern expression",
   "A man in his 60s with a long, white ponytail and a weathered face",
-  "A man in his 70s with a bald head, a prominent nose, and kind eyes",
-  "A man in his 70s with white hair combed to the side and a trimmed beard",
-  "A man in his 70s with a clean-shaven face, liver spots, and a gentle expression",
-  "An elderly man with a full white beard and a wrinkled, leathery face",
-  "An elderly man with sparse white hair, a wrinkled forehead, and bright, sharp eyes"
+  "A man in his 70s with a bald head, a prominent nose, and kind eyes"
 ];
 
 const female = [
@@ -298,6 +307,21 @@ const female = [
   "A woman in her 30s with medium-length hair and a few wrinkles around her eyes",
   "A woman in her 30s with long, straight hair and a confident expression",
   "A woman in her 30s with shoulder-length curls and a soft, relaxed expression",
+  "A woman in her late 20s with deep red hair styled in loose waves and bold, smoky eyeshadow",
+  "A young woman with platinum blonde pixie cut and subtle cat-eye eyeliner",
+  "A woman in her early 20s with shoulder-length black curls and a touch of shimmering highlighter on her cheeks",
+  "A woman in her 30s with sleek, straight dark brown hair and perfectly winged eyeliner",
+  "A young woman with auburn hair styled in a messy bun and vibrant, glossy red lipstick",
+  "A woman in her mid-20s with pastel pink hair and soft, glittery eyeshadow",
+  "A woman in her 30s with chestnut hair in loose waves and metallic eyeshadow that catches the light",
+  "A young woman with honey blonde, beachy waves and defined, thick eyebrows",
+  "A woman in her late 20s with jet-black hair in a sleek bob, accented by bold, matte lipstick",
+  "A woman in her 30s with golden-brown hair pulled into a high ponytail",
+  "A young woman with lilac-tinted curls framing her face and a natural, dewy makeup finish",
+  "A woman in her early 20s with chocolate brown hair in soft curls and a dramatic, dark eyeshadow look",
+  "A woman in her late 20s with dark blue, straight hair falling to her shoulders and a sharp, winged eyeliner",
+  "A young woman with silver hair in a short, edgy bob and shimmery, iridescent highlighter on her brow bones",
+  "A woman in her 30s with long, raven-black hair, styled with subtle waves and deep burgundy lipstick",
   "A middle-aged woman with shoulder-length wavy hair and laugh lines",
   "A middle-aged woman with a high ponytail and tired eyes",
   "A woman in her 40s with graying hair and a warm smile",
@@ -306,17 +330,10 @@ const female = [
   "A woman in her 50s with shoulder-length hair and slight crow's feet",
   "A woman in her 50s with a curly bob and a gentle expression",
   "A woman in her 50s with a graying bob, thin eyebrows, and a gentle smile",
-  "An older woman with a bun of white hair and a round, wrinkled face",
   "An older woman with long, graying hair and a serene expression",
   "An elderly woman with thin white hair and deep wrinkles around her mouth",
-  "An elderly woman with short, curly hair and sunken cheeks",
   "A very old woman with her hair in a tight bun and soft, kind eyes",
-  "A woman in her 60s with a bob of silver hair and a proud posture",
-  "A woman in her 60s with long, silver hair tied in a braid and laugh lines",
-  "A woman in her 70s with long, white hair and a gentle smile",
-  "A woman in her 70s with short white curls, a wrinkled forehead, and a bright expression",
-  "An elderly woman with a long white braid, prominent cheekbones, and warm eyes",
-  "An elderly woman with short white hair, deep-set eyes, and a frail frame"
+  "An elderly woman with a long white braid, prominent cheekbones, and warm eyes"
 ];
 
 const animal = [
@@ -336,80 +353,20 @@ const animal = [
   "A lion",
   "Five lions",
   "A dragon",
-  "A unicorn",
   "A squirrel",
-  "A giraffe",
-  "A zebra",
-  "An elephant",
   "A monkey",
   "A group of monkeys",
-  "A kangaroo",
   "A panda",
   "A penguin",
-  "A hedgehog",
   "A raccoon",
   "A cheetah",
   "An owl",
-  "A seal",
-  "A camel",
   "A llama",
   "Two llamas",
   "A koala",
-  "A moose",
   "A flamingo",
-  "A peacock",
   "A bison",
   "A mouse"
-];
-
-const job = [
-  "wizard",
-  "knight",
-  "robot",
-  "alien",
-  "supervillain",
-  "princess",
-  "prince",
-  "king",
-  "queen",
-  "farmer",
-  "chef",
-  "painter",
-  "dancer",
-  "group of dancers",
-  "astronaut",
-  "teacher",
-  "student",
-  "group of students",
-  "police officer",
-  "firefighter",
-  "doctor",
-  "nurse",
-  "soldier",
-  "group of soldiers",
-  "pirate",
-  "ninja",
-  "samurai",
-  "monk",
-  "priest",
-  "ghost",
-  "group of ghosts",
-  "vampire",
-  "zombie",
-  "mummy",
-  "skeleton",
-  "jester",
-  "blacksmith",
-  "fisherman",
-  "hunter",
-  "traveler",
-  "journalist",
-  "pilot",
-  "mechanic",
-  "gardener",
-  "artist",
-  "actor",
-  "photographer"
 ];
 
 const specialCharacters = [
@@ -436,15 +393,12 @@ const specialCharacters = [
   "The Joker",
   "Wonder Woman",
   "Batman",
-  "Iron Man",
-  "Spider-Man",
   "Daredevil",
   "Superman",
   "The Terminator",
   "Alexander the Great",
   "Napoleon Bonaparte",
   "Winston Churchill",
-  "Joan of Arc",
   "Bruce Lee",
   "Muhammad Ali",
   "Charlie Chaplin",
@@ -472,128 +426,168 @@ const groupPerson = [
   "A group of children of various ages",
   "A young couple",
   "A police officer and a thief",
-  "A wizard and a knight",
   "A robot and a human",
   "A pirate and a sailor",
-  "A spy and a diplomat",
-  "A vampire and a werewolf",
-  "A king and a rebel",
-  "A superhero and a villain",
-  "A zombie and a survivor",
-  "A dragon and a knight",
-  "A witch and a fairy",
-  "A time traveler and a historian",
-  "A samurai and a ninja",
-  "A detective and a ghost",
-  "A robot and an alien",
-  "A superhero and a mutant",
-  "A wizard and a scientist",
-  "A queen and a spy",
-  "A dragon and a sorcerer",
-  "A cowboy and a futuristic",
-  "A superhero and an alien"
+  "Donald John Trump and Elon Musk",
+  "Minions with their leader Gru",
+  "Harry Potter, Hermione Granger, and Ron Weasley",
+  "The Avengers team (Iron Man, Captain America, Thor, and Hulk)",
+  "SpongeBob SquarePants and Patrick Star",
+  "The Guardians of the Galaxy crew (Star-Lord, Gamora, Drax, Rocket, and Groot)",
+  "Sherlock Holmes and Dr. John Watson",
+  "Buzz Lightyear and Woody from Toy Story",
+  "Mario and Luigi from the Mario Bros",
+  "The X-Men team (Wolverine, Cyclops, Storm, Jean Grey, Professor X)",
+  "Shrek, Donkey, and Fiona",
+  "Ash Ketchum, Pikachu, and Misty from Pokémon",
+  "Rick and Morty from Rick and Morty",
+  "The Teenage Mutant Ninja Turtles (Leonardo, Michelangelo, Donatello, Raphael, and Splinter)",
+  "The Simpsons family (Homer, Marge, Bart, Lisa, and Maggie)",
+  "Mickey Mouse, Donald Duck, and Goofy",
+  "Po, Tigress, and Master Shifu from Kung Fu Panda"
 ];
 
 const maleClothes = [
   // Daily and modern clothing
-  "Business suit with a sharp tie",
-  "Casual T-shirt and shorts",
-  "A tuxedo with a red bowtie",
-  "A flannel shirt and rugged boots",
-  "Leather jacket and aviator sunglasses",
-  "A long trench coat with a hidden weapon",
-  "Modern, minimalist black suit",
-  "Sporty outfit with sneakers",
-  "Classic white shirt and denim overalls",
-  "A cowboy's hat, boots, and spurs",
-  "A samurai's full armor with a katana",
-  "A musketeer's tunic and feathered hat",
-  "A police officer's uniform with a badge",
-  "A firefighter's heavy protective gear",
-  "A soldier's camouflage uniform and helmet",
-  "A construction worker's hard hat and tool belt",
-  "A doctor's white lab coat with a stethoscope",
-  "A chef's hat",
-  "A scientist's lab coat covered in chemical stains",
-  "A teacher's cardigan and khaki pants",
+  "business suit with a sharp tie",
+  "casual T-shirt and shorts",
+  "a tuxedo with a red bowtie",
+  "a flannel shirt and rugged boots",
+  "leather jacket and aviator sunglasses",
+  "a long trench coat",
+  "modern, minimalist black suit",
+  "sporty outfit with sneakers",
+  "classic white shirt and denim overalls",
+  "a cowboy's hat, boots, and spurs",
+  "a police officer's uniform with a badge",
+  "a soldier's camouflage uniform and helmet",
+  "a chef's hat",
+  "a teacher's cardigan and khaki pants",
+
+  // Stylish daily wear
+  "slim-fit navy blazer with tailored trousers and a crisp white shirt, paired with leather loafers",
+  "casual bomber jacket with a graphic tee and distressed slim-fit jeans, finished with white sneakers",
+  "lightweight linen shirt with rolled-up sleeves, paired with khaki chinos and desert boots",
+  "tailored wool overcoat worn over a turtleneck sweater and dark jeans, with Chelsea boots",
+  "vintage-inspired denim jacket with a plain black tee and cargo pants, accessorized with a beanie and aviator sunglasses",
+  "sleek leather biker jacket over a fitted white henley, paired with dark-wash skinny jeans and ankle boots",
+  "minimalist monochrome outfit with a black crewneck sweater, tapered jogger pants, and stylish sneakers",
+  "layered look with a cozy knit cardigan over a basic tee, slim-fit jeans, and suede desert boots",
+  "sporty athleisure set with a zip-up track jacket, fitted joggers, and running shoes",
+  "modern streetwear outfit featuring an oversized hoodie, ripped jeans, and high-top sneakers",
+  "lightweight bomber jacket over a striped Breton shirt, paired with cuffed chinos and white canvas sneakers",
+  "tailored corduroy blazer with a wool crewneck sweater, slim-fit trousers, and leather brogues",
+  "oversized flannel shirt worn open over a graphic tee and skinny jeans, with high-top sneakers",
+  "fitted parka jacket layered over a hoodie, paired with tapered cargo pants and chunky hiking boots",
+  "sleek knit polo shirt tucked into slim cropped trousers, accessorized with a leather belt and loafers",
 
   // Traditional and cultural costumes
-  "Traditional Japanese kimono with a wide obi belt",
+  "traditional Japanese kimono with a wide obi belt",
   "Scottish tartan kilt with a sporran",
   "Middle Eastern kaftan with delicate patterns",
-  "A Viking tunic with fur accents",
-  "A Maasai shuka with beaded jewelry",
+  "a Viking tunic with fur accents",
+  "a Maasai shuka with beaded jewelry",
 
   // Historical clothing
-  "A Roman gladiator's armor with a crested helmet",
-  "A medieval peasant's tunic and belt",
-  "A musketeer's tunic and feathered hat",
-  "A knight's shining plate armor with a crest",
-  "A Roman senator's toga with golden laurel crown",
+  "a Roman gladiator's armor with a crested helmet",
+  "a medieval peasant's tunic and belt",
+  "a musketeer's tunic and feathered hat",
+  "a knight's shining plate armor with a crest",
+  "a Roman senator's toga with golden laurel crown",
 
   // Fantasy and mythical costumes
-  "A pirate's tattered coat and tricorne hat",
-  "A warrior's fur-lined cape and leather bracers",
-  "A dragon-scale armor with glowing runes",
-  "A steampunk adventurer's outfit",
-  "A futuristic bodysuit with armor plating",
-  "A futuristic police uniform with a tactical visor",
-  "A mech pilot's flight suit with tech interfaces",
-  "A space captain's uniform with insignias",
-  "A rebel fighter's rugged gear with gadgets",
-  "A battle suit with laser gauntlets and shields"
+  "a warrior's fur-lined cape and leather bracers",
+  "a steampunk adventurer's outfit",
+  "a futuristic bodysuit with armor plating",
+  "a space captain's uniform with insignias",
+  "a rebel fighter's rugged gear with gadgets",
+  "a battle suit with laser gauntlets and shields",
+  "a wizard's robe with a long staff and pointed hat",
+  "a king's royal robe with a golden crown",
+  "a farmer's overalls with muddy boots and a straw hat",
+  "a pirate's eyepatch and long coat with a cutlass",
+  "a ninja's stealthy black garb and mask",
+  "a robot's metallic suit with LED lights",
+  "a zombie's torn clothing with dirt and scars",
+  "a mummy's bandages wrapped tightly with ancient hieroglyphs",
+  "a jester's colorful outfit with a jingling hat",
+  "a blacksmith's apron with gloves and a hammer",
+  "a fisherman's waterproof jacket and boots",
+  "a hunter's camo jacket and hat",
+  "a journalist's notepad and fedora with a press badge",
+  "a mechanic's greasy coveralls with a wrench",
+  "a gardener's sunhat"
 ];
 
 const femaleClothes = [
   // Daily and modern clothing
-  "Flowing silk gown adorned with intricate embroidery",
-  "Elegant evening gown with sparkling sequins",
-  "Vintage polka dot dress",
-  "Summer dress with floral patterns",
-  "Casual jeans and a futuristic jacket",
-  "A comfy hoodie and jeans",
-  "A Victorian lace dress with a corset",
-  "A Renaissance-era gown with puffed sleeves",
-  "A business suit with a pencil skirt",
-  "Sporty outfit with leggings and sneakers",
-  "A summer sundress with floral patterns",
-  "A traditional Hawaiian hula skirt made of leaves",
-  "A librarian's glasses and cozy sweater",
-  "A painter's smock covered in colorful paint splatters",
-  "A nurse's scrubs with a comforting smile",
-  "A teacher's cardigan and pencil skirt",
+  "flowing silk gown adorned with intricate embroidery",
+  "elegant evening gown with sparkling sequins",
+  "vintage polka dot dress",
+  "summer dress with floral patterns",
+  "casual jeans and a futuristic jacket",
+  "a comfy hoodie and jeans",
+  "a Renaissance-era gown with puffed sleeves",
+  "a business suit with a pencil skirt",
+  "sporty outfit with leggings and sneakers",
+  "a summer sundress with floral patterns",
+  "a glasses and cozy sweater",
+  "a teacher's cardigan and pencil skirt",
+
+  // Stylish daily wear
+  "oversized blazer in a muted pastel tone, paired with high-waisted tailored pants and a silk camisole",
+  "cropped leather moto jacket worn over a fitted turtleneck sweater and high-rise skinny jeans, complemented by ankle boots",
+  "flowy midi skirt with abstract prints, paired with a tucked-in ribbed sweater and platform sneakers",
+  "relaxed-fit trench coat over a form-fitting knit dress, paired with knee-high leather boots",
+  "high-waisted wide-leg trousers with a tucked-in satin blouse, accessorized with a statement belt and pointed-toe heels",
+  "sleek oversized coat paired with slim-fit jeans, a tucked-in basic tee, and chunky sneakers",
+  "layered look with an oversized denim jacket over a cropped hoodie, paired with biker shorts and trendy sneakers",
+  "modern co-ord set with a crop top and matching high-waisted pants, styled with minimalistic jewelry and slide sandals",
+  "classic trench coat worn over a pleated midi dress, paired with ankle strap heels",
+  "off-the-shoulder knit sweater tucked into a faux leather mini skirt, finished with knee-high boots",
+  "tailored double-breasted blazer paired with wide-leg culottes, and finished with heeled ankle boots",
+  "longline cardigan layered over a fitted tee, high-rise mom jeans, and chunky sneakers",
+  "fitted denim jacket paired with a floral maxi dress and lace-up sandals, perfect for casual outings",
+  "statement puff-sleeve blouse tucked into high-rise flared jeans, accessorized with a crossbody bag and loafers",
+  "sleek wrap dress in bold geometric patterns, styled with minimal jewelry and pointed-toe flats",
 
   // Traditional and cultural costumes
   "Chinese qipao with intricate dragon embroidery",
   "Indian sari with golden thread details",
-  "A Spanish flamenco dress with ruffles",
-  "An embroidered Russian sarafan",
-  "A colorful Mexican huipil with floral patterns",
-  "A traditional African dashiki",
-  "A Middle Eastern kaftan with delicate patterns",
-  "A Viking tunic with fur accents",
+  "a Spanish flamenco dress with ruffles",
+  "an embroidered Russian sarafan",
+  "a colorful Mexican huipil with floral patterns",
+  "a traditional African dashiki",
+  "a Middle Eastern kaftan with delicate patterns",
+  "a Viking tunic with fur accents",
+  "a traditional Hawaiian hula skirt made of leaves",
 
   // Historical clothing
-  "A Victorian lace dress with a corset",
-  "A Baroque ball gown with intricate ruffles",
-  "A 1920s flapper dress with fringe",
-  "A 1950s poodle skirt with a scarf",
-  "A 1960s mod dress with bold geometric patterns",
-  "A medieval peasant's tunic and belt",
-  "A medieval nun's robe and cross",
+  "a Victorian lace dress with a corset",
+  "a Baroque ball gown with intricate ruffles",
+  "a 1920s flapper dress with fringe",
+  "a 1950s poodle skirt with a scarf",
+  "a 1960s mod dress with bold geometric patterns",
+  "a medieval peasant's tunic and belt",
+  "a medieval nun's robe and cross",
 
   // Fantasy and mythical costumes
-  "A fairy's delicate dress made of flower petals",
-  "A mystical cloak that shifts colors with the light",
-  "A witch's dark, flowing gown and pointed hat",
-  "A steampunk adventurer's outfit",
-  "A Valkyrie's armor with feathered wings",
-  "A futuristic bodysuit with glowing circuits",
-  "A dragon-scale armor with glowing runes",
-  "A pirate's tattered coat and tricorne hat",
-  "A princess's flowing gown with jeweled tiara",
-  "A sorcerer's robe with arcane symbols",
-  "A knight's shining plate armor with a crest"
+  "a fairy's delicate dress made of flower petals",
+  "a witch's dark, flowing gown and pointed hat",
+  "a steampunk adventurer's outfit",
+  "a futuristic bodysuit with glowing circuits",
+  "a princess's flowing gown with jeweled tiara",
+  "a knight's shining plate armor with a crest",
+  "a queen's royal gown with a jeweled tiara",
+  "a farmer's denim overalls with a wide-brimmed hat",
+  "a pirate's bandana and corset with high boots",
+  "a robot's futuristic silver outfit",
+  "a zombie's tattered dress",
+  "a jester's playful multicolored dress with bells",
+  "a huntress's camo outfit with a bow and arrows",
+  "a journalist's sleek trench coat",
+  "a pilot's tailored aviator jacket with insignias",
+  "a gardener's apron with gardening tools"
 ];
 
 const maleName = [
@@ -641,51 +635,24 @@ const commonActions = [
   "looking happy",
   "laughing",
   "smiling",
-  "yawning sleepily",
   "jump up happily",
-  "blowing dandelion",
-  "blow balloons",
   "hold a puppy",
-  "waving",
   "waving energetically at the viewer",
   "petting a kitten",
-  "nodding in agreement",
-  "giving a peace sign",
   "giving a thumbs-up with confidence",
-  "clapping hands slowly with approval",
-  "winking cheekily",
-  "raising eyebrows in amusement",
-  "crossing fingers for good luck",
-  "holding both hands up in surrender",
-  "gesturing to come closer",
-  "shrugging with a carefree smile",
   "placing one hand over the chest",
-  "rubbing chin thoughtfully",
   "blowing a kiss playfully",
   "making a heart shape with hands",
-  "holding up a finger to signal quiet",
-  "mocking a strongman pose",
-  "flexing arms to show off muscles",
   "making a silly face with tongue out",
-  "doing finger guns playfully",
-  "resting chin on hand with a smirk",
-  "nodding in agreement",
-  "shrugging with palms up",
-  "blowing bubbles",
   "clapping hands enthusiastically",
-  "pointing finger to lips in thought",
-  "raising eyebrows in amusement",
   "with the Hulk together",
-  "with a robot together",
-  "playing hopscotch with Thor",
-  "taking selfies with a vampire",
-  "with Doctor Strange together",
-  "with Minions together",
-  "with SpongeBob together",
-  "with Pikachu together"
+  "with a robot",
+  "with the Minions together",
+  "with the SpongeBob together",
+  "with the Pikachu together"
 ];
 
-const dailyScenes = [
+const scenes = [
   ["on a deserted road", [
     "riding a Harley",
     "driving a retro car",
@@ -743,7 +710,7 @@ const dailyScenes = [
     "taking clothes out of the closet"
   ]],
   ["in a flower-filled meadow at dawn", [
-    "walking through the field admiring the flowers",
+    "walks from the field admiring the flowers",
     "taking photographs of the sunrise",
     "lying down in the grass and looking at the sky",
     "picking a bouquet of wildflowers",
@@ -756,12 +723,11 @@ const dailyScenes = [
     "building a sandcastle",
     "sipping a drink from a coconut"
   ]],
-  ["in a quaint bakery on a cobblestone street", [
+  ["in a quaint bakery", [
     "looking at the pastries in the display case",
     "ordering a croissant and coffee",
     "carrying a bag of freshly baked bread",
-    "sitting at a small table enjoying a treat",
-    "talking to the baker about their craft"
+    "sitting at a small table enjoying a treat"
   ]],
   ["in a bustling airport terminal", [
     "checking in at the ticket counter",
@@ -773,8 +739,6 @@ const dailyScenes = [
   ["in a crowded subway station with commuters rushing", [
     "walking quickly through the station",
     "standing on the platform waiting for a train",
-    "checking the train schedule on a display",
-    "holding onto a handrail as the train arrives",
     "moving through the crowd to board the subway"
   ]],
   ["on a rooftop garden overlooking a bustling city", [
@@ -786,24 +750,13 @@ const dailyScenes = [
   ]],
   ["in a modern art gallery with abstract sculptures", [
     "looking at a sculpture thoughtfully",
-    "walking through the gallery observing the art",
-    "reading the information plaque next to a piece",
-    "discussing a sculpture with a companion",
-    "taking a photograph of a particularly striking piece"
-  ]],
-  ["in a quiet library with towering bookshelves", [
-    "browsing the bookshelves",
-    "reading a book at a table",
-    "using a computer at a workstation",
-    "returning a book to the shelves",
-    "whispering to a librarian at the help desk"
+    "walks from the gallery observing the art",
+    "discussing a sculpture with a companion"
   ]],
   ["in a large greenhouse filled with exotic plants", [
     "walking amongst the plants",
-    "examining a particular plant closely",
     "taking photographs of the flowers",
-    "watering plants with a watering can",
-    "talking to a gardener about the different species"
+    "watering plants with a watering can"
   ]],
   ["at a horse stable in a countryside manor", [
     "grooming a horse",
@@ -822,33 +775,24 @@ const dailyScenes = [
   ["in a lush vineyard in the countryside", [
     "walking through the rows of grapevines",
     "sampling grapes from a vine",
-    "talking to a winemaker about the vineyard",
-    "taking photographs of the landscape",
     "carrying a basket of harvested grapes"
   ]],
   ["at a train station in the middle of nowhere", [
     "waiting on the platform for a train",
-    "looking at the train schedule posted on the wall",
-    "sitting on a bench with luggage",
-    "walking around the empty platform",
-    "watching the train arrive at the station"
+    "sitting on a bench with luggage"
   ]],
   ["at a crowded amusement park with colorful rides", [
     "riding a roller coaster",
     "eating cotton candy",
-    "playing carnival games",
-    "walking through the park with friends",
-    "waiting in line for a ride"
+    "playing carnival games"
   ]],
-  ["in a busy sports stadium during a championship game", [
+  ["in a busy sports stadium", [
     "watching the game from the stands",
     "cheering for a team",
-    "eating stadium food",
     "high-fiving fellow fans",
     "holding up a sign supporting the team"
   ]],
   ["in a graffiti-covered alley in an industrial area", [
-    "taking photographs of the graffiti",
     "walking cautiously down the alley",
     "admiring the street art",
     "sketching in a notebook",
@@ -858,55 +802,33 @@ const dailyScenes = [
     "paddling a canoe across the lake",
     "fishing from a boat",
     "swimming in the lake",
-    "sitting on the shore and enjoying the view",
-    "taking photographs of the mountain reflections"
-  ]],
-  ["in a serene meadow filled with wildflowers", [
-    "walking through the meadow picking flowers",
-    "lying in the grass and looking at the clouds",
-    "taking photographs of the wildflowers",
-    "having a picnic with friends",
-    "chasing butterflies through the field"
-  ]],
-  ["at a bustling medieval marketplace", [
-    "browsing the stalls filled with goods",
-    "bartering with a merchant",
-    "eating a piece of roasted meat",
-    "watching a street performer juggle",
-    "carrying a purchase in a cloth bag"
+    "sitting on the shore and enjoying the view"
   ]],
   ["in a Viking village near a frozen fjord", [
     "walking between the wooden houses",
     "working on a fishing net by the shore",
     "chopping wood for a fire",
-    "wearing a fur cloak and carrying an axe",
     "talking to another villager near a longboat"
   ]],
   ["on a Victorian-era street filled with carriages", [
     "riding in a horse-drawn carriage",
     "walking along the cobblestone street",
     "greeting someone tipping their top hat",
-    "window shopping at a storefront",
     "carrying a parasol to shield from the sun"
   ]],
   ["at a samurai dojo surrounded by cherry blossoms", [
     "practicing swordsmanship with a wooden katana",
     "meditating in the dojo garden",
     "bowing respectfully to a sensei",
-    "sweeping the dojo floor with a broom",
-    "observing other samurai training"
   ]],
   ["at an Egyptian temple with towering obelisks", [
     "walking through the temple ruins",
     "looking up at the hieroglyphics carved on the walls",
-    "taking photographs of the obelisks",
-    "exploring the inner chambers of the temple",
-    "sketching the temple in a notebook"
+    "exploring the inner chambers of the temple"
   ]],
   ["in a 1920s jazz club filled with dancing and music", [
     "dancing the Charleston",
     "sipping a cocktail at a table",
-    "listening to the jazz band play",
     "talking to someone at the bar",
     "snapping fingers to the rhythm of the music"
   ]],
@@ -917,22 +839,14 @@ const dailyScenes = [
     "sitting at a long wooden table eating",
     "talking to a knight in armor"
   ]],
-  ["at a Roman bathhouse with steaming pools", [
-    "relaxing in a warm pool",
-    "receiving a massage",
-    "chatting with other bathers",
-    "wrapping a towel around oneself",
-    "walking on the mosaic tile floor"
-  ]],
   ["in a quiet suburban neighborhood", [
     "mowing the lawn",
-    "playing catch with a child",
+    "playing with a child",
     "walking a dog down the street",
     "washing a car in the driveway",
     "talking to a neighbor over the fence"
   ]],
   ["in a small-town diner with vintage decor", [
-    "sitting at the counter ordering food",
     "drinking coffee from a mug",
     "eating a slice of pie",
     "reading a newspaper at a booth",
@@ -940,17 +854,9 @@ const dailyScenes = [
   ]],
   ["in a sunny park with children playing", [
     "pushing a child on a swing",
-    "watching children play tag",
     "sitting on a park bench reading a book",
     "having a picnic on the grass",
     "throwing a frisbee to a dog"
-  ]],
-  ["at a local library with reading nooks", [
-    "reading a book in a comfortable chair",
-    "browsing the bookshelves",
-    "using a computer at a desk",
-    "studying at a table",
-    "talking quietly to a librarian"
   ]],
   ["in a farmer's field with ripe crops", [
     "harvesting crops by hand",
@@ -970,15 +876,7 @@ const dailyScenes = [
     "talking to neighbors",
     "eating food from the grill",
     "playing games with children",
-    "listening to music",
     "dancing in the street"
-  ]],
-  ["at a busy street market with fresh produce", [
-    "buying fruits and vegetables from vendors",
-    "sampling different cheeses",
-    "carrying a shopping bag filled with groceries",
-    "haggling over prices",
-    "smelling fresh herbs and spices"
   ]],
   ["in a family living room with cozy furniture", [
     "watching television together",
@@ -991,305 +889,109 @@ const dailyScenes = [
     "watering the flowers with a watering can",
     "pruning roses with gardening shears",
     "smelling the fragrant blooms",
-    "walking through the garden paths",
+    "walks from the garden paths",
     "sitting on a bench admiring the flowers"
   ]],
   ["at a quaint coffee shop with outdoor seating", [
     "sipping coffee at a table outside",
     "reading a book in the sunshine",
     "chatting with a friend over coffee",
-    "people-watching on the street",
     "using a laptop at a table"
-  ]],
-  ["in a suburban backyard with a barbecue grill", [
-    "grilling burgers and hot dogs",
-    "eating at a picnic table",
-    "playing lawn games",
-    "relaxing in lawn chairs",
-    "swimming in a backyard pool"
-  ]],
-  ["on a city street lined with boutique shops", [
-    "window shopping at the boutiques",
-    "carrying shopping bags filled with purchases",
-    "walking down the sidewalk",
-    "stopping to look at a street performer",
-    "entering a shop to browse"
   ]],
   ["at a playground with swings and slides", [
     "swinging on a swing set",
     "sliding down a slide",
     "climbing on the jungle gym",
-    "playing in the sandbox",
-    "sitting on a bench watching children play"
+    "playing in the sandbox"
   ]],
-  ["in a yoga studio with calming music", [
+  ["in a yoga studio", [
     "performing yoga poses",
     "meditating on a mat",
     "stretching on the floor",
-    "listening to calming music",
     "drinking water from a bottle"
   ]],
   ["at a riverside picnic with a checkered blanket", [
     "eating food from a picnic basket",
     "lying on a checkered blanket",
     "throwing rocks into the river",
-    "watching ducks swim by",
     "reading a book by the water"
   ]],
   ["in a vintage bookstore with wooden shelves", [
     "browsing the bookshelves",
     "reading a book in a comfy chair",
-    "talking to the bookstore owner",
-    "buying a stack of old books",
-    "smelling the musty scent of old paper"
-  ]],
-  ["in a botanical garden with exotic plants", [
-    "walking through the greenhouses",
-    "admiring the colorful flowers",
-    "taking photos of rare plants",
-    "reading information plaques about the plants",
-    "sitting on a bench enjoying the scenery"
+    "talking to the bookstore owner"
   ]],
   ["on a peaceful nature trail through the woods", [
     "hiking along the trail",
     "taking photos of the scenery",
-    "listening to the sounds of nature",
-    "identifying different types of trees and plants",
     "breathing in the fresh air"
-  ]],
-  ["at a weekend farmers' market with local goods", [
-    "buying fresh produce from local farmers",
-    "tasting samples of homemade jams and jellies",
-    "carrying a basket filled with groceries",
-    "talking to the farmers about their products",
-    "listening to live music"
-  ]],
-  ["at a contemporary art museum with interactive exhibits", [
-    "touching and interacting with the exhibits",
-    "watching videos and animations",
-    "listening to audio installations",
-    "reading descriptions of the artwork",
-    "discussing the art with a friend"
-  ]],
-  ["in a cozy cabin with a crackling fireplace", [
-    "sitting by the fire reading a book",
-    "drinking hot cocoa",
-    "watching the flames dance",
-    "talking with family and friends",
-    "playing board games"
-  ]],
-  ["on a beachside boardwalk with street performers", [
-    "watching street performers",
-    "eating ice cream",
-    "walking along the boardwalk",
-    "playing arcade games",
-    "buying souvenirs from a shop"
-  ]],
-  ["at a local bakery with freshly baked bread", [
-    "buying freshly baked bread and pastries",
-    "talking to the baker",
-    "smelling the aroma of bread",
-    "choosing from a variety of treats",
-    "carrying a bag of pastries home"
-  ]],
-  ["in a city park with a fountain and benches", [
-    "sitting on a bench watching people pass by",
-    "throwing coins in the fountain",
-    "reading a book under a tree",
-    "walking around the park",
-    "having a picnic on the grass"
   ]],
   ["on a suburban street with autumn leaves", [
     "raking leaves into a pile",
     "walking on crunchy leaves",
-    "taking photos of the colorful trees",
-    "jumping in a pile of leaves",
     "riding a bike down the street"
   ]],
   ["in a home garden with vegetable patches", [
     "watering the vegetable plants",
     "harvesting ripe vegetables",
     "weeding the garden beds",
-    "checking the plants for pests",
     "tying tomato plants to stakes"
-  ]],
-  ["at a crowded farmer's market with seasonal produce", [
-    "buying fresh fruits and vegetables",
-    "sampling locally made cheeses and jams",
-    "talking to the farmers",
-    "carrying a reusable shopping bag",
-    "navigating through the crowd"
-  ]],
-  ["on a beach with volleyball nets and sunbathers", [
-    "playing beach volleyball",
-    "sunbathing on a towel",
-    "swimming in the ocean",
-    "building a sandcastle",
-    "walking along the shoreline"
   ]],
   ["at a local theater with a community play", [
     "watching the play from the audience",
     "applauding the actors",
-    "reading the program",
-    "talking to other audience members during intermission",
-    "taking photos of the stage after the play"
-  ]],
-  ["at a suburban pool party with floats and music", [
-    "swimming in the pool",
-    "floating on an inflatable raft",
-    "eating snacks and drinking beverages",
-    "talking to friends and family",
-    "listening to music and dancing"
+    "talking to other audience members during intermission"
   ]],
   ["at a pet store with a variety of animals", [
     "looking at the animals in cages and tanks",
-    "holding a puppy or kitten",
-    "buying pet food and supplies",
-    "talking to the pet store employees",
+    "holding a kitten",
     "choosing a new pet to take home"
-  ]],
-  ["at a city zoo with family-friendly exhibits", [
-    "looking at the animals in their enclosures",
-    "reading information signs about the animals",
-    "taking photographs of the animals",
-    "watching animal demonstrations and feedings",
-    "riding the zoo train"
-  ]],
-  ["at a local craft fair with handmade goods", [
-    "browsing the handmade crafts",
-    "buying unique gifts and souvenirs",
-    "talking to the artists and craftspeople",
-    "eating food from local vendors",
-    "listening to live music"
-  ]],
-  ["at a vineyard with a wine tasting room", [
-    "sampling different wines",
-    "touring the vineyard",
-    "learning about the winemaking process",
-    "buying bottles of wine",
-    "enjoying the vineyard scenery"
   ]],
   ["at a rural farmhouse with a barn", [
     "feeding farm animals",
     "collecting eggs from the chicken coop",
     "milking a cow",
-    "riding a tractor",
-    "sitting on the porch swing"
-  ]],
-  ["on a sunny café patio with potted plants", [
-    "drinking coffee or tea at a table",
-    "reading a book or newspaper",
-    "talking with friends",
-    "people-watching",
-    "enjoying the sunshine"
-  ]],
-  ["on a city rooftop bar with skyline views", [
-    "drinking cocktails with friends",
-    "admiring the city skyline",
-    "taking photos of the view",
-    "listening to music",
-    "talking to other patrons"
-  ]],
-  ["in a town square with a weekly market", [
-    "browsing the market stalls",
-    "buying fresh produce and local goods",
-    "talking to vendors",
-    "watching street performers",
-    "eating food from street vendors"
+    "riding a tractor"
   ]],
   ["in a contemporary dance studio with a rehearsal", [
     "practicing dance moves",
-    "stretching and warming up",
-    "watching other dancers rehearse",
-    "receiving feedback from the instructor",
-    "marking choreography"
+    "stretching and warming up"
   ]],
   ["in a home workshop with DIY projects", [
     "working on a woodworking project",
-    "using power tools",
     "painting a piece of furniture",
     "organizing tools and supplies",
     "sweeping up sawdust"
   ]],
-  ["on a suburban street with holiday decorations", [
-    "walking down the street admiring the decorations",
-    "taking photos of decorated houses",
-    "carrying presents to a neighbor's house",
-    "singing carols with friends",
-    "putting up holiday decorations on one's own house"
-  ]],
-  ["in a minimalist, monochromatic urban neighborhood with tall, sleek buildings fading into misty horizons", [
-    "walking down the street, shrouded in mist",
-    "taking a photograph of a stark architectural detail",
-    "entering a sleek, minimalist cafe",
-    "hailing a futuristic, self-driving taxi",
-    "observing a drone silently delivering a package"
-  ]],
-  ["in a warm, golden-hued cafe with soft glowing lights and rain-soaked windows that reflect streaks of neon", [
-    "sipping a warm beverage, watching the rain",
-    "writing in a journal, the neon lights reflecting in the puddles outside",
-    "sketching the scene, capturing the interplay of light and shadow",
-    "quietly conversing with a friend, the warm light illuminating their faces",
-    "reading a book, lost in the cozy atmosphere"
-  ]],
   ["in an ultra-modern apartment with oversized geometric windows", [
-    "adjusting the smart lighting system to match the city's glow",
     "watering a geometrically arranged succulent garden",
     "practicing yoga, the city lights creating a dynamic backdrop",
     "preparing a meal in the sleek, minimalist kitchen",
     "relaxing on a chaise lounge, gazing at the refracted skyline"
   ]],
-  ["on a suburban street, adorned with extravagant holiday decorations", [
-    "walking down the street, mesmerized by the glowing decorations",
-    "taking photos of the otherworldly light displays",
-    "pointing out fantastical shapes in the shimmering lights to a child",
-    "stopping to admire a particularly intricate light sculpture",
-    "marveling at the transformation of familiar houses into dreamlike structures"
-  ]],
   ["in a foggy forest where towering trees merge into abstract lines", [
-    "walking cautiously through the fog, the trees looming like giants",
-    "photographing the ethereal beams of sunlight filtering through the fog",
+    "walks from the fog, the trees looming",
     "reaching out to touch the soft moss growing on a tree trunk",
     "pausing to listen to the quiet sounds of the forest",
     "observing the intricate patterns of light and shadow on the forest floor"
   ]],
   ["in a desert landscape with massive, abstract dunes sculpted by the wind", [
     "climbing a towering sand dune, the sand shifting beneath their feet",
-    "photographing the iridescent colors of the sand",
-    "sketching the abstract shapes of the dunes",
     "shielding their eyes from the sun, gazing at the vast expanse of desert",
     "running down a dune, leaving footprints in the shifting sand"
   ]],
-  ["on a Parisian street at dawn, while iconic rooftops and wrought-iron balconies create a timeless", [
-    "walking along the cobblestone street, taking in the quiet beauty",
-    "photographing the Parisian rooftops in the soft morning light",
-    "sketching the intricate details of a wrought-iron balcony",
-    "sipping a coffee at a small outdoor cafe",
-    "buying a fresh baguette from a nearby boulangerie"
-  ]],
-  ["in a lush, tropical rainforest, the dense foliage illuminated by shafts of sunlight that create patterns of light and shadow", [
-    "walking along a rainforest path, observing the diverse plant life",
-    "photographing the intricate patterns of light and shadow",
-    "listening to the sounds of the rainforest",
-    "carefully examining a colorful tropical flower",
-    "sketching the lush vegetation in a notebook"
-  ]],
   ["in a minimalist white wall in the centre of the room features wood framed artwork", [
-    "admiring the framed artwork",
     "sitting in the leather chair reading a book",
     "placing a cup of coffee on the black stone coffee table",
-    "adjusting the position of a decorative object on the table",
-    "walking around the room appreciating the minimalist aesthetic"
+    "walks from the room appreciating the minimalist aesthetic"
   ]],
   ["in a muted green room with a textured wallpaper, showcasing a round wooden table and a vintage armchair", [
     "sitting in the vintage armchair reading a book",
     "placing a vase of flowers on the round wooden table",
     "writing in a journal at the table",
-    "touching the textured wallpaper",
-    "admiring the room's calming atmosphere"
+    "touching the textured wallpaper"
   ]],
   ["in an elegant cream-colored room featuring a large mirror, a marble side table, and a decorative plant in the corner", [
-    "checking their reflection in the large mirror",
     "placing a decorative object on the marble side table",
     "watering the decorative plant",
     "admiring the elegant decor",
@@ -1299,78 +1001,12 @@ const dailyScenes = [
     "preparing a meal at the stainless steel island",
     "sitting on a wooden stool having a cup of coffee",
     "cleaning the stainless steel surfaces",
-    "placing fresh herbs in pots on the island",
-    "admiring the exposed brick walls"
-  ]],
-  ["in a serene yoga studio with light gray walls, featuring a wall of mirrors, yoga mats neatly arranged, and natural wood benches", [
-    "performing yoga poses in front of the mirrors",
-    "sitting on a yoga mat meditating",
-    "stretching on the floor",
-    "placing a water bottle on a wooden bench",
-    "rolling up a yoga mat after practice"
-  ]],
-  ["in a sleek bathroom with deep navy tiles, showcasing a freestanding tub, a minimalist vanity, and a touch of greenery in the corner", [
-    "filling the freestanding tub with water",
-    "placing a towel on the edge of the tub",
-    "brushing teeth at the minimalist vanity",
-    "adjusting the greenery in the corner",
-    "admiring the sleek navy tiles"
-  ]],
-  ["on an outdoor patio with warm wooden decking, featuring simple lounge chairs and a low table surrounded by lush greenery", [
-    "sitting in a lounge chair reading a book",
-    "placing a drink on the low table",
-    "watering the lush greenery",
-    "enjoying the fresh air and sunshine",
-    "chatting with a friend on the patio"
-  ]],
-  ["in a tranquil meditation room with soft beige walls, a small altar, and a few cushions arranged on the floor", [
-    "sitting on a cushion meditating",
-    "lighting a candle on the small altar",
-    "arranging the cushions on the floor",
-    "deep breathing exercises",
-    "practicing mindfulness"
+    "placing fresh herbs in pots on the island"
   ]],
   ["in a cozy bedroom with pastel walls, featuring a low platform bed and a minimalist bedside table", [
     "lying in the low platform bed reading a book",
     "placing a glass of water on the minimalist bedside table",
-    "turning off the bedside lamp",
-    "getting out of bed and stretching",
-    "folding clothes and placing them on the bedside table"
-  ]],
-  ["in a clean-lined workshop with gray walls, showcasing tools neatly organized on pegboards and a sturdy workbench in the center", [
-    "working on a project at the workbench",
-    "selecting a tool from the pegboard",
-    "sweeping the floor clean",
-    "organizing tools on the pegboard",
-    "measuring wood for a project"
-  ]],
-  ["in a chic hair salon with white walls, featuring minimalist styling stations and a simple waiting area adorned with plants", [
-    "getting a haircut at a styling station",
-    "reading a magazine in the waiting area",
-    "looking at hair product displays",
-    "talking to a hairstylist",
-    "checking their hair in the mirror"
-  ]],
-  ["in a bright and airy sunroom with glass walls, featuring a small table and chairs, surrounded by indoor plants", [
-    "sitting at the small table drinking tea",
-    "reading a book surrounded by plants",
-    "watering the indoor plants",
-    "enjoying the sunshine streaming through the glass walls",
-    "painting a picture at the table"
-  ]],
-  ["in a spacious garage with white walls, featuring organized storage shelves and a central workbench", [
-    "working on a car repair project",
-    "organizing tools and equipment on the shelves",
-    "sweeping the garage floor",
-    "parking a bicycle in the garage",
-    "painting a project at the workbench"
-  ]],
-  ["in a modern greenhouse with clear glass panels, showcasing neatly arranged potted plants and a simple seating area for plant enthusiasts", [
-    "watering the potted plants",
-    "checking the plants for pests and diseases",
-    "repotting a plant",
-    "sitting in the seating area enjoying the greenery",
-    "pruning a plant with gardening shears"
+    "getting out of bed and stretching"
   ]],
   ["in a minimalist classroom with soft blue walls, featuring simple desks arranged in rows and a chalkboard at the front", [
     "sitting at a desk writing in a notebook",
@@ -1379,53 +1015,13 @@ const dailyScenes = [
     "writing on the chalkboard",
     "reading a book at their desk"
   ]],
-  ["in an extremely dark room with the shadow of the window projected on the ground", [
-    "fumbling for a light switch",
-    "slowly walking towards the window",
-    "peering out the window cautiously",
-    "standing still, letting their eyes adjust to the darkness",
-    "tracing the outline of the window shadow with their hand"
-  ]],
-  ["in the front of a background of fashionable Morandi style color-blocking", commonActions],
-  ["in the front of a background of fashionable Morandi style solid color", commonActions],
-  ["in the front of a background of fashionable minimalist, youthful and energetic color matching", commonActions],
-  ["in the front of a background of white columns, with long shadows", commonActions],
-  ["in the front of a background of black and white stitching", commonActions],
-  ["in the front of a background of black and white light and shadow", commonActions],
-  ["in the front of a background of minimalist landscape of intersecting black and white lines", commonActions],
-  ["in the front of a background of abstract composition of overlapping translucent circles in pastel hues", commonActions],
-  ["in the front of a background of futuristic grid of perfect cubes and spheres", commonActions],
-  ["in the front of a background of deconstructed cityscape made entirely of sharp, angular triangles and rectangles", commonActions],
-  ["in the front of a background of surreal space of floating, interconnected rings and lines, each element glowing softly in pastel neon colors", commonActions],
-  ["in the front of a background of series of stacked, monochromatic cubes in various sizes, arranged in a staggered pattern", commonActions],
-  ["in the front of a background of minimalist design of smooth, continuous lines that form abstract, flowing shapes, suspended in midair", commonActions],
-  ["in the front of a background of soft, ethereal blend of thin, interweaving lines and geometric shapes", commonActions],
-  ["in the front of a background of seamless pattern of concentric circles and sharp intersecting lines, all in grayscale", commonActions],
-  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles", commonActions],
-  ["in the front of a background of intricate web of crisscrossing, neon-colored lines", commonActions],
-  ["in the front of a background of three-dimensional spiral of interlocked, metallic polygons, where light plays across the surfaces", commonActions]
-];
-
-const specialScenes = [
   ["in a dense, fog-covered forest at dusk", [
     "carefully stepping over exposed roots",
-    "listening intently to the rustling leaves",
     "shielding their eyes from the mist"
   ]],
   ["at a cascading waterfall in a lush jungle", [
     "gazing up at the cascading water",
-    "wading in the cool pool at the base",
-    "listening to the roar of the waterfall"
-  ]],
-  ["in a vast desert with sand dunes stretching to the horizon", [
-    "shielding their eyes from the sun",
-    "walking along the crest of a dune",
-    "leaving footprints in the sand"
-  ]],
-  ["on a stormy sea crashing against jagged cliffs", [
-    "holding onto the railing of a ship",
-    "watching the waves crash against the rocks",
-    "bracing against the strong wind"
+    "wading in the cool pool at the base"
   ]],
   ["in a glowing cave filled with crystals", [
     "running their hand along a crystal surface",
@@ -1439,8 +1035,7 @@ const specialScenes = [
   ]],
   ["in a dark forest with towering ancient trees", [
     "looking up at the towering trees",
-    "stepping over fallen branches",
-    "listening to the wind rustling through the leaves"
+    "stepping over fallen branches"
   ]],
   ["in a tropical rainforest with misty rain", [
     "feeling the mist on their skin",
@@ -1449,78 +1044,38 @@ const specialScenes = [
   ]],
   ["in a misty swamp with vines hanging from trees", [
     "carefully wading through the murky water",
-    "pushing aside hanging vines",
-    "listening to the croaking of frogs"
+    "pushing aside hanging vines"
   ]],
   ["in a rocky canyon illuminated by the setting sun", [
     "watching the colors of the sunset",
-    "standing on the edge of the canyon",
-    "admiring the shadows cast by the rocks"
-  ]],
-  ["on a volcanic landscape with molten lava flows", [
-    "feeling the heat radiating from the lava",
-    "watching the lava flow slowly down the slope",
-    "keeping a safe distance from the molten rock"
+    "standing on the edge of the canyon"
   ]],
   ["on a starry desert night with distant howling winds", [
     "looking up at the stars",
-    "listening to the wind howling in the distance",
     "wrapping themselves in a blanket"
   ]],
   ["in an enchanted forest with glowing mushrooms", [
     "bending down to examine a glowing mushroom",
-    "walking through a path lit by glowing mushrooms",
-    "admiring the magical glow of the forest"
-  ]],
-  ["in a mystical cave with glowing runes on the walls", [
-    "tracing the glowing runes with their fingers",
-    "trying to decipher the meaning of the runes",
-    "feeling a sense of awe and mystery"
+    "walks from a path lit by glowing mushrooms"
   ]],
   ["in a dark, abandoned castle", [
     "walking down a dusty hallway",
     "pushing open a creaking door",
     "holding a flickering lantern"
   ]],
-  ["in a magical library filled with levitating books", [
-    "reaching out to touch a levitating book",
-    "walking through rows of floating books",
-    "looking up at the high ceiling"
-  ]],
-  ["in a haunted mansion", [
-    "walking cautiously down a dark hallway",
-    "listening for strange noises",
-    "peering into a shadowy room"
-  ]],
   ["in an ancient temple hidden deep within a jungle", [
     "examining ancient carvings on the walls",
     "brushing dust off a stone statue",
-    "walking through crumbling ruins"
-  ]],
-  ["at a crystal palace in the middle of a frozen lake", [
-    "walking across the frozen lake towards the palace",
-    "admiring the reflections of the palace in the ice",
-    "touching the icy surface of the palace walls"
+    "walks from crumbling ruins"
   ]],
   ["in a forgotten city overgrown with vines", [
     "pushing aside thick vines",
-    "walking through crumbling streets",
-    "examining weathered statues"
-  ]],
-  ["in a dragon's lair filled with treasure", [
-    "picking up a gold coin",
-    "admiring a pile of jewels",
-    "carefully stepping over a sleeping dragon"
+    "walking through crumbling streets"
   ]],
   ["in a labyrinth of mirrors reflecting endless possibilities", [
     "looking into a mirror at their reflection",
     "trying to find their way through the maze",
     "touching the surface of a mirror"
-  ]],
-  ["at a tower in the middle of a mystical forest", [
-    "climbing the winding staircase of the tower",
-    "looking out from the top of the tower",
-    "touching the ancient stones of the tower walls"
   ]],
   ["on a ghostly ship", [
     "walking across the creaking deck",
@@ -1538,26 +1093,23 @@ const specialScenes = [
     "admiring the bright neon lights"
   ]],
   ["in a high-tech laboratory filled with robotic arms", [
-    "watching a robotic arm move",
     "examining a complex piece of equipment",
     "typing on a futuristic keyboard"
   ]],
   ["in a cyberpunk alleyway filled with neon signs and graffiti", [
     "looking at the neon signs",
-    "walking through the narrow alleyway",
-    "examining the graffiti on the walls"
+    "walking through the narrow alleyway"
   ]],
   ["on an alien planet with strange plants and floating rocks", [
     "looking at the strange plants",
-    "walking on the uneven surface",
-    "reaching out to touch a floating rock"
+    "walking on the uneven surface"
   ]],
   ["in a utopian city with glass towers and holograms", [
     "looking up at the glass towers",
-    "walking through a pristine park",
+    "walks from a pristine park",
     "interacting with a hologram"
   ]],
-  ["on a spaceship", [
+  ["in a spaceship", [
     "looking out the window at the stars",
     "sitting in the pilot's chair",
     "pushing buttons on a control panel"
@@ -1567,45 +1119,19 @@ const specialScenes = [
     "scavenging for supplies",
     "looking at the ruined buildings"
   ]],
-  ["in a robotic factory with assembly lines and sparks flying", [
-    "watching the robots work",
-    "listening to the sounds of machinery",
-    "avoiding the sparks"
-  ]],
   ["in a virtual reality world with pixelated landscapes", [
     "interacting with the virtual environment",
-    "walking through the pixelated landscape",
+    "walks from the pixelated landscape",
     "wearing a VR headset"
-  ]],
-  ["on a desert planet with two suns and endless dunes", [
-    "shielding their eyes from the two suns",
-    "walking across the hot sand",
-    "looking at the endless dunes"
-  ]],
-  ["at a futuristic marketplace filled with exotic goods", [
-    "looking at the exotic goods",
-    "talking to a vendor",
-    "holding a strange object"
-  ]],
-  ["in a cybernetic forest where trees are intertwined with machines", [
-    "touching a tree trunk intertwined with metal",
-    "walking through the unusual forest",
-    "looking at the glowing lights on the machines"
   ]],
   ["at a neon-lit nightclub in a futuristic metropolis", [
     "dancing to the music",
     "drinking a futuristic cocktail",
     "talking to someone at the bar"
   ]],
-  ["in a colossal spaceship hangar with advanced technology", [
-    "looking at the large spaceships",
-    "walking across the vast hangar floor",
-    "examining a piece of advanced technology"
-  ]],
   ["in a world where everything is made of candy", [
-    "taking a bite out of a candy house",
-    "walking on a candy path",
-    "licking a candy tree"
+    "taking a bite out of a candy",
+    "walking on a candy path"
   ]],
   ["in an underwater kingdom with glowing creatures", [
     "swimming through the underwater kingdom",
@@ -1615,42 +1141,15 @@ const specialScenes = [
   ["in a land where the sky is filled with floating lanterns", [
     "looking up at the floating lanterns",
     "releasing a lantern into the sky",
-    "walking through a field of lanterns"
-  ]],
-  ["in a realm where time flows backward", [
-    "watching events unfold in reverse",
-    "walking backward",
-    "catching a thrown object that returns to the thrower's hand"
-  ]],
-  ["on a desert of glass shards reflecting the stars", [
-    "carefully walking on the glass shards",
-    "admiring the reflections of the stars",
-    "picking up a shard of glass"
-  ]],
-  ["in a forest where the trees are made of light", [
-    "walking through the glowing forest",
-    "touching a tree made of light",
-    "looking up at the branches of light"
-  ]],
-  ["in a circus tent with acrobats performing high above", [
-    "watching the acrobats perform",
-    "clapping and cheering",
-    "eating popcorn"
+    "walks from a field of lanterns"
   ]],
   ["in a magical workshop filled with enchanted objects", [
     "looking at the enchanted objects",
-    "picking up a magical item",
     "mixing potions"
-  ]],
-  ["in an old-fashioned theater with red velvet seats", [
-    "sitting in a red velvet seat",
-    "watching a play on stage",
-    "reading the program"
   ]],
   ["on the Yellow Brick Road in *The Wizard of Oz*", [
     "following the Yellow Brick Road",
-    "skipping down the path",
-    "looking towards the Emerald City"
+    "skipping down the path"
   ]],
   ["in the floating diner in *Inception*", [
     "sitting at a table in the diner",
@@ -1664,23 +1163,11 @@ const specialScenes = [
   ]],
   ["in the Hogwarts Great Hall in *Harry Potter* series", [
     "sitting at a table in the Great Hall",
-    "looking up at the enchanted ceiling",
     "talking to another student"
   ]],
   ["on the space station in *2001: A Space Odyssey*", [
     "floating in zero gravity",
-    "looking out the window at Earth",
     "operating a control panel"
-  ]],
-  ["in the giant wave in *Interstellar*", [
-    "being tossed around by the wave",
-    "holding onto something for dear life",
-    "looking up at the massive wave"
-  ]],
-  ["at the Casablanca airport scene in *Casablanca*", [
-    "standing on the tarmac",
-    "watching a plane take off",
-    "talking to another character"
   ]],
   ["at the iconic dance scene in *Pulp Fiction*", [
     "dancing with a partner",
@@ -1694,19 +1181,144 @@ const specialScenes = [
   ]],
   ["on the battlefield in *Gladiator*", [
     "fighting with a sword",
-    "riding a horse",
-    "looking at the chaos of battle"
+    "riding a horse"
   ]],
   ["at the grand ball scene in *Beauty and the Beast*", [
     "dancing with a partner",
-    "walking down a grand staircase",
-    "talking to other guests"
+    "walking down a grand staircase"
   ]],
   ["in the iconic trench warfare in *All Quiet on the Western Front*", [
     "crouching in a trench",
     "looking out over no man's land",
     "holding a rifle"
-  ]]
+  ]],
+  ["on the surface of a mirror-like ocean reflecting a kaleidoscope sky", [
+    "walking on the water's surface, the sky reflecting in their footsteps",
+    "sitting on the water, legs crossed, the reflection distorting beneath",
+    "reaching down to touch the water, causing ripples to turn into colorful patterns"
+  ]],
+  ["on the floor covered with flowers", [
+    "lying and looking at the viewer with a smile",
+    "lying and close the eyes with smile happily",
+    "lying and open the hands"
+  ]],
+  ["in front of a minimalist concrete wall", [
+    "standing with one leg bent slightly, hand resting on the wall, gazing confidently",
+    "leaning against the wall with arms crossed, head tilted back with eyes closed",
+    "sitting on the floor with legs extended, one arm draped casually over a knee"
+  ]],
+  ["in a field of tall, windswept grass", [
+    "standing tall, one hand raised above the head as the wind blows through the hair",
+    "walking slowly, arms outstretched, fingertips brushing against the grass",
+    "kneeling in the grass, head tilted to the side, eyes focused intensely ahead"
+  ]],
+  ["on a staircase", [
+    "sitting on the stairs, legs crossed, leaning forward slightly with a serious expression",
+    "standing on the top step, one foot forward, gazing down with a bold stare",
+    "halfway up the stairs, leaning on the railing, one arm draped casually over the side"
+  ]],
+  ["in a room with large, floor-to-ceiling windows", [
+    "standing close to the window, arms crossed, looking out with a reflective expression",
+    "sitting on the windowsill, one leg bent up, looking down with a soft smile",
+    "leaning against the window, one hand pressed against the glass, gazing outward"
+  ]],
+  ["at the edge of a modern, empty pool", [
+    "standing at the pool's edge, back to the camera, looking over the shoulder",
+    "sitting on the pool's ledge, legs hanging down, head resting on one hand",
+    "standing in the empty pool, arms stretched out to the sides, body slightly arched back"
+  ]],
+  ["at a large, ornate doorway", [
+    "standing in front of the doorway, hands resting lightly on the frame, looking ahead",
+    "leaning against one side of the doorway, arms crossed, face turned slightly away",
+    "sitting on the steps in front of the doorway, arms resting on knees, staring directly at the camera"
+  ]],
+  ["on a rooftop at sunset", [
+    "standing near the edge, arms outstretched as if embracing the sky",
+    "sitting cross-legged, facing the horizon, hands resting casually on knees",
+    "standing with one foot on a ledge, leaning slightly forward with a focused gaze"
+  ]],
+  ["at the entrance of a tunnel with shadows stretching inside", [
+    "standing just inside the tunnel, one hand on the wall, looking out into the light",
+    "walking toward the tunnel, arms relaxed at the sides, eyes fixed on the darkness",
+    "leaning against the side of the tunnel entrance, head tilted back, eyes closed"
+  ]],
+  ["in a minimalist room with a single window casting soft light", [
+    "sitting cross-legged on the floor, bathed in the light from the window",
+    "standing in front of the window, one hand raised to touch the glass",
+    "leaning against the window frame, looking down thoughtfully"
+  ]],
+  ["in a narrow alley with high walls", [
+    "walking confidently down the alley, one hand grazing the wall",
+    "standing near the wall, arms crossed, with a soft gaze toward the camera",
+    "leaning against the wall, hands in pockets, with a relaxed posture"
+  ]],
+  ["on a platform surrounded by geometric shapes", [
+    "standing on the platform, arms by the sides, looking up at the shapes",
+    "sitting at the edge of the platform, legs hanging over, staring off into the distance",
+    "leaning on one of the shapes, with one leg bent slightly, gazing forward"
+  ]],
+  ["on a raised platform with a panoramic view of the city", [
+    "standing at the platform’s edge, hands resting on the railing, gazing out",
+    "sitting on the platform, legs crossed, facing the horizon with a relaxed expression",
+    "leaning against the railing, arms folded, looking down at the streets below"
+  ]],
+  ["in a garden with oversized flowers towering overhead", [
+    "standing beneath a giant flower, reaching up to gently touch its petal",
+    "sitting on a large leaf, legs crossed, gazing up at the towering stems",
+    "walking along a path of vines, brushing aside oversized leaves"
+  ]],
+  ["in a maze made of oversized dominoes", [
+    "standing at the entrance, hands on hips, studying the towering domino walls",
+    "pushing one domino, watching the chain reaction as it starts to fall",
+    "climbing up the side of a leaning domino, reaching for the top"
+  ]],
+  ["atop a giant snail shell spiraling into the horizon", [
+    "sitting near the center of the spiral, looking curiously down into its depths",
+    "walking along the spiral edge, arms stretched out for balance",
+    "lying flat on the shell, arms spread wide, feeling the texture beneath"
+  ]],
+  ["in a field of balloons, each tethered to the ground", [
+    "floating slightly off the ground, holding on to a balloon string with one hand",
+    "sitting on a balloon as if it were a chair, legs swinging playfully",
+    "reaching out to grab a floating balloon, standing on tiptoe"
+  ]],
+  ["on a staircase made of giant piano keys", [
+    "walking up the keys, each step making a sound, arms swinging with each step",
+    "sitting on one of the large keys, tapping on another as if playing a tune",
+    "jumping from key to key, making playful musical sounds with every landing"
+  ]],
+  ["inside a giant bottle floating on a sea", [
+    "sitting cross-legged inside the bottle, looking out through the glass at the ocean",
+    "standing at the edge of the bottle opening, arms spread as if about to dive into the water",
+    "leaning against the bottle’s wall, gazing dreamily out at the waves"
+  ]],
+  ["on a giant clock face", [
+    "walking along the clock hand, carefully balancing with arms stretched out",
+    "sitting on the edge of the clock face, legs dangling between the numbers",
+    "standing near the center, watching the hands pass by with a thoughtful expression"
+  ]],
+  ["in a boat made of leaves, floating on a calm pond", [
+    "sitting in the center of the leaf boat, dipping a hand into the water",
+    "lying back in the boat, arms crossed behind the head, floating peacefully",
+    "standing at the tip of the boat, arms stretched out as if sailing on the breeze"
+  ]],
+  ["inside a hollowed-out pumpkin, with windows carved in", [
+    "sitting at one of the windows, looking out thoughtfully at the surroundings",
+    "lying inside the pumpkin, arms behind the head, relaxed in the cozy space",
+    "standing at the opening of the pumpkin, one hand resting on the carved edge"
+  ]],
+  ["in the front of a background of fashionable Morandi style color-blocking", commonActions],
+  ["in the front of a background of fashionable Morandi style solid color", commonActions],
+  ["in the front of a background of fashionable minimalist, youthful and energetic color matching", commonActions],
+  ["in the front of a background of white columns, with long shadows", commonActions],
+  ["in the front of a background of black and white stitching", commonActions],
+  ["in the front of a background of black and white light and shadow", commonActions],
+  ["in the front of a background of minimalist landscape of intersecting black and white lines", commonActions],
+  ["in the front of a background of abstract composition of overlapping translucent circles in pastel hues", commonActions],
+  ["in the front of a background of futuristic grid of perfect cubes and spheres", commonActions],
+  ["in the front of a background of series of stacked, monochromatic cubes in various sizes", commonActions],
+  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles", commonActions],
+  ["in the front of a background of intricate web of crisscrossing, neon-colored lines", commonActions]
 ];
 
 function getRandom(array) {
@@ -1742,20 +1354,11 @@ function generatePrompt() {
     randomLight = "";
   }
 
-  if (rand < 0.8) {
-    const sceneArray = getRandom(dailyScenes);
-    randomScene = sceneArray[0];
-    randomAction = getRandom(sceneArray[1]);
-    if (rand < 0.25) {
-      randomAction = getRandom(commonActions);
-    }
-  } else {
-    const sceneArray = getRandom(specialScenes);
-    randomScene = sceneArray[0];
-    randomAction = getRandom(sceneArray[1]);
-    if (rand > 0.95) {
-      randomAction = getRandom(commonActions);
-    }
+  const sceneArray = getRandom(scenes);
+  randomScene = sceneArray[0];
+  randomAction = getRandom(sceneArray[1]);
+  if (Math.random() < 0.15) {
+    randomAction = getRandom(commonActions);
   }
 
   if (rand < 0.1) {
@@ -1765,43 +1368,26 @@ function generatePrompt() {
     } else {
       randomClothes = "";
     }
-  } else if (rand < 0.4) {
+  } else if (rand < 0.5) {
     randomSubject = getRandom(male);
     randomClothes = getRandom(maleClothes);
-    if (Math.random() < 0.4) {
+    if (Math.random() < 0.3) {
       const name = getRandom(maleName);
       randomSubject += " named \"" + name + "\"";
     }
-  } else if (rand < 0.7) {
+  } else if (rand < 0.9) {
     randomSubject = getRandom(female);
     randomClothes = getRandom(femaleClothes);
-    if (Math.random() < 0.4) {
+    if (Math.random() < 0.3) {
       const name = getRandom(femaleName);
       randomSubject += " named \"" + name + "\"";
     }
-  } else if (rand < 0.85) {
-    randomSubject = getRandom(job);
-    if (Math.random() < 0.5) {
-      randomClothes = getRandom(maleClothes);
-      randomSubject = "A male " + randomSubject;
-      if (Math.random() < 0.4) {
-        const name = getRandom(maleName);
-        randomSubject += " named \"" + name + "\"";
-      }
-    } else {
-      randomClothes = getRandom(femaleClothes);
-      randomSubject = "A female " + randomSubject;
-      if (Math.random() < 0.4) {
-        const name = getRandom(femaleName);
-        randomSubject += " named \"" + name + "\"";
-      }
-    }
-  } else if (rand < 0.9) {
+  } else if (rand < 0.95) {
     randomSubject = getRandom(specialCharacters);
     randomClothes = "";
   } else {
     if (Math.random() < 0.5) {
-      randomSubject = getRandom(male) + " with " + getRandom(female) + "  together";
+      randomSubject = getRandom(male) + " with " + getRandom(female) + " together";
       randomClothes = "";
     } else {
       randomSubject = getRandom(groupPerson);
@@ -1935,18 +1521,21 @@ if (workflow == 0 || workflow == 1) {
 } else if (workflow == 2) {
   generateText = "🪄 Refine ";
 }
-const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Dream Shaper", "Kolors", "SDXL", "SD3 Medium", "SD1"];
+const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "Dream Shaper", "SDXL", "SD3 Medium", "SD1"];
+const isFluxDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"]);
+let tip = ` •   When there are multiple Flux models with different precisions, the one with the highest precision is used first. The priority is: FLUX.1 [dev] (Exact) >> FLUX.1 [dev] >> FLUX.1 [dev] (8-bit). If it is not downloaded, FLUX.1 [dev] (8-bit) is used first.`;
+
+if (!isFluxDownload[0] && !isFluxDownload[1] && !isFluxDownload[2]) {
+  titleInfo = `   ⎟   Flux will be downloaded later`;
+  tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please download from the model list.`;
+}
+
 const userInputs = requestFromUser(
   `Flux Auto Workflow ${version}${titleInfo}`,
   generateText,
   function () {
     let widget = [];
     if (workflow == 0) {
-      let tip = ` •   When there are multiple Flux models with different precisions, the one with the highest precision is used first. The priority is: FLUX.1 [dev] (Exact) >> FLUX.1 [dev] >> FLUX.1 [dev] (8-bit). If it is not downloaded, FLUX.1 [dev] (8-bit) is used first.`;
-      const isDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"])
-      if (!isDownload[0] && !isDownload[1] && !isDownload[2]) {
-        tip = ` •   After clicking Generate, FLUX.1 [dev] (8-bit) will be automatically downloaded, which requires about 14GB storage space. If you need a more accurate quantization model, please download from the model list.`;
-      }
       widget.push(
         this.section(
           "❖  Image Size",
@@ -1957,14 +1546,14 @@ const userInputs = requestFromUser(
         ),
         this.section(
           "❖  Performance Mode",
-          ` •   Speed Mode: Use the Dev to Schnell LoRA to provide the fastest speed.\n •   Balance Mode: Use Flux Dev as refiner to balance speed and quality.\n •   Quality Mode: Use high steps to provide the best color and aesthetic style.`,
+          ` •   Speed Mode: Use the Dev to Schnell LoRA to provide the fastest speed\n      and reliable results.\n •   Balance Mode: Will improve the texture or fine structure based on Speed Mode,\n      need to run Flux twice.\n •   Quality Mode: Use high steps to get the best detail and structure,\n      but the results won't necessarily be better than other modes.`,
           [
             this.segmented(0, ["🚀  Speed   ", "⚖️  Balance   ", "🏆  Quality   "]),
           ]
         ),
         this.section(
           "❖  Detail Optimization",
-          ` •   Standard Mode: helps to add more natural details and textures.\n •   Enhance Mode: will add stronger contrast and the composition will change more.`,
+          ` •   Standard Mode: Helps to add more natural details and textures.\n •   Enhance Mode: Will add stronger contrast and the composition will change more.`,
           [
             this.segmented(0, ["📷  Standard   ", "📸  Enhance   "]),
           ]
@@ -1999,7 +1588,7 @@ const userInputs = requestFromUser(
           `❖  Model Preset • ${n}`,
           " •   The appropriate preset will be automatically selected for the model. If the model is not recognized, please select the preset manually.",
           [
-            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "SDXL Turbo / Lightning", "Kolors", "SDXL", "SD3 Medium", "SD1"])
+            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "SDXL Turbo / Lightning", "SDXL", "SD3 Medium", "SD1"])
           ]
         ),
         this.section(
@@ -2027,7 +1616,7 @@ const userInputs = requestFromUser(
         ),
         this.section(
           "❖  Detail Optimization",
-          ` •   Standard Mode: helps to add more natural details and textures.\n •   Enhance Mode: will add stronger contrast and the composition will change more.`,
+          ` •   Standard Mode: Helps to add more natural details and textures.\n •   Enhance Mode: Will add stronger contrast and the composition will change more.`,
           [
             this.segmented(1, ["📷  Standard   ", "📸  Enhance   "]),
           ]
