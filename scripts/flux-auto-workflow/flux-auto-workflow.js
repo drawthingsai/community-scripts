@@ -1,5 +1,5 @@
 //@api-1.0
-// v4.0
+// v4.0.1
 // Author: @czkoko
 // Automatic workflow for Flux, including text - to - image, batch image refine, batch prompts, random prompt, etc.
 //
@@ -30,7 +30,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v4.0";
+const version = "v4.0.1";
 var promptsSource = pipeline.prompts.prompt;
 
 const themePreview = [
@@ -1754,6 +1754,10 @@ function generatePrompt() {
       const isMan = words.some(word => man.includes(word));
       const isWoman = words.some(word => woman.includes(word));
 
+      let maleClothes = [];
+      let femaleClothes = [];
+      maleClothes.push(...maleDailyClothes, ...maleFashionClothes, ...maleFantasticClothes);
+      femaleClothes.push(...femaleDailyClothes, ...femaleFashionClothes, ...femaleFantasticClothes);
       if (isMan) {
         randomClothes = getRandom(maleClothes);
       } else if (isWoman) {
