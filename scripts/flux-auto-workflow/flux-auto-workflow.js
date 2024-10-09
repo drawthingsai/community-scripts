@@ -1,10 +1,16 @@
 //@api-1.0
-// v3.9
+// v4.0
 // Author: @czkoko
-// This workflow will require two models Flux Dev and Dev to Schnell 4-Step lora at the same time. 
-// Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
-// You only need to fill in the prompts and select the Performance Mode and Image Size. 
-
+// Automatic workflow for Flux, including text - to - image, batch image refine, batch prompts, random prompt, etc.
+//
+// - This workflow will require two models Flux Dev(8 - bit) and Dev to Schnell lora at the same time. 
+//   When there are multiple Flux models with different precisions, the one with the highest precision is used first.
+//   The priority is: FLUX.1[dev](Exact) >> FLUX.1[dev] >> FLUX.1[dev](8 - bit).If it is not downloaded, FLUX.1[dev](8 - bit) is used first.
+// - Designed for the Flux model, but also supports the automatic setting of parameters for popular models. Like: DreamShaper Turbo, Kolors, SDXL, SD3, Schnell downloaded from the model list of Draw Things. 
+// - Provide three different performance modes for users to choose from, optimized parameters, suitable for beginners.
+// - The random prompt engine can automatically generate good prompts for you in batches, and can also customize them according to your preferences.
+// - A variety of workflows and modes can be switched to achieve different effects.
+//
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -24,8 +30,15 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v3.9";
+const version = "v4.0";
 var promptsSource = pipeline.prompts.prompt;
+
+const themePreview = [
+  "data:image/png;base64,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",
+  "data:image/png;base64,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",
+  "data:image/png;base64,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",
+  "data:image/png;base64,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"
+];
 
 const stylePreview = [
   "data:image/png;base64,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",
@@ -89,7 +102,7 @@ const promptsSourceInput = requestFromUser(
       ),
       this.section(
         "❖  Random Prompt • Creative Mode",
-        " •   🅿: Program Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt.",
+        " •   🅿: Program Automatic Mode, Automatic combination of style, subject, action, clothes, etc., more whimsical images.\n •   🆂: Subject Priority Mode, Action is matched by the model according to the subject and scene, which is relatively monotonous, but more natural.\n •   🅰: Action Priority Mode, Subject is matched by the model according to the action and scene, which is more vivid and natural.\n •   🅼: Manual Mode, You can manually combine the parts of the prompt through [Manual Options].",
         [
           this.segmented(0, ["P", "S", "A", "M"]),
         ]
@@ -120,8 +133,15 @@ const promptsSourceInput = requestFromUser(
         ]
       ),
       this.section(
+        "❖  Random Prompt • Theme Filter        (🅿 / 🆂 / 🅰 / 🅼 Mode)",
+        " •   Choose the theme you want from the theme preview, default is random.",
+        [
+          this.image(themePreview, null, true)
+        ]
+      ),
+      this.section(
         "❖  Random Prompt • Style Filter           (🅿 / 🆂 / 🅰 / 🅼 Mode)",
-        " •   Filter the styles you don't need.\n •   If you want to only use one style, choose directly from the style preview.\n •   The custom style can be set at the beginning of the source code.",
+        " •   Choose the style you want from the style preview, default is random.\n •   After selecting the random icon, you can select multiple styles below\n      to choose randomly.\n •   The custom style can be set at the beginning of the source code.",
         [
           this.image(stylePreview, null, true),
           this.switch(true, "✡︎   Hasselblad Master Photography"),
@@ -186,22 +206,22 @@ const angle = [
 ];
 
 const style = [
-  "Hyper-realistic photography, captured with Hasselblad XCD, masterpieces of photography, sharp and intricate details, life-like textures, high-resolution clarity, and true-to-life colors",//Hasselblad Master Photography
-  "Bright, white-dominant images with soft shadows and very subtle details. The focus is on high key lighting with minimal color, often in grayscale or with just a hint of pastel shades",//Soft High-Key Photography
-  "Hyper-realistic photography, Bold lighting, sharp contrasts, and dramatic poses. Emphasizes luxury and glamour with sleek, polished visuals. Perfect for runway or fashion magazine aesthetics",//High-Fashion Portrait
-  "Rich, vibrant colors with a slight warmth, with slightly saturated tones of red, yellow, and green. Subtle film grain adds texture. Captures the essence of classic Kodak color film",//Kodak Film Aesthetic
-  "A vibrant cinematic palette with strong orange and teal tones. Fine film grain and gaussian noise add texture",//Orange-Teal Cinematic
+  "Hyper-realistic photography, captured with Hasselblad XCD, masterpieces of photography, life-like textures, high-resolution clarity, and true-to-life colors",//Hasselblad Master Photography
+  "Bright, white-dominant images with soft shadows and very subtle details. The focus is on high key lighting with minimal color, with just a hint of pastel shades",//Soft High-Key Photography
+  "Hyper-realistic photography, Bold lighting, sharp contrasts, and dramatic poses. Emphasizes luxury and glamour with sleek, polished visuals. Perfect for fashion magazine aesthetics",//High-Fashion Portrait
+  "Rich, vibrant colors with a slight warmth, with slightly saturated tones of red, yellow, and green. classic Kodak color film",//Kodak Film Aesthetic
+  "A vibrant cinematic palette with strong orange and teal tones. Fine film grain and gaussian noise",//Orange-Teal Cinematic
   "Desaturated color palette with slight orange and blue undertones, shadow is very light. Fine film grain and gaussian noise to give a gritty, atmospheric quality",//Desaturated Cinematic
-  "Grainy, low-saturation film aesthetics with soft textures and muted colors, evoking the look of old films. Faded tones and nostalgic, retro atmospheres, Fine film grain and gaussian noise add texture",//Vintage Cinematic
-  "Symmetrical compositions with pastel and muted tones, often featuring warm yellows, soft pinks, and teal blues. Strong focus on meticulous framing and vintage aesthetics. Fine film grain and gaussian noise add texture",//Retro Aesthetic Cinematic
-  "Desaturated, cold color palette dominated by greys, muted blues, and browns. Minimal contrast, with a focus on bleak, overcast lighting and a sense of emptiness. Ideal for dark, minimalist fashion themes with a gritty edge",//Cold Fashion
+  "Grainy, low-saturation film aesthetics with soft textures and muted colors, evoking the look of old films. Faded tones and nostalgic. Fine film grain and gaussian noise",//Vintage Cinematic
+  "Symmetrical compositions with pastel and muted tones, featuring warm yellows, soft pinks, and teal blues. Strong focus on meticulous framing and vintage aesthetics. Fine film grain and gaussian noise",//Retro Aesthetic Cinematic
+  "Desaturated, cold color palette dominated by greys, muted blues, and browns. Minimal contrast, with a focus on bleak, overcast lighting and a sense of emptiness",//Cold Fashion
   "A cool-toned, industrial palette dominated by metallic grays, blues, and muted whites. Sharp details and reflections give a sleek, futuristic appearance with a subtle, polished sheen",//Cold Steel Futurism
   "Hyper-realistic photography, Deep reds, blacks, and purples, with an emphasis on dramatic shadows. The style creates a mysterious, romantic atmosphere, with a rich, almost baroque aesthetic",//Dark Gothic Romance
   "Dark, atmospheric visuals characterized by deep blues, vibrant oranges. Fine film grain and gaussian noise add texture. Cinematic compositions with a focus on shadows and reflections",//Futuristic Noir Aesthetic
   "Hyper-realistic photography, rich and warm colors with deep reds, golds, and dark shadows. Heavy textures, intricate details, and ornate patterns evoke the luxury and grandeur of baroque art",//Opulent Baroque
   "Soft pastel colors (pinks, light blues, lavender) blended with smooth gradients. Dreamy and surreal, often with a misty or glowing effect. Minimal contrast, focusing on soft, harmonious tones",//Pastel Dreamscape
   "Minimalist conceptual illustration, flat design with bold shapes, vibrant colors, and clean lines. Perfect for fashion ads, offering a trendy, modern look",//Conceptual Illustration
-  "Ethereal 3D fantasy artwork with a vibrant color palette. Dreamy, whimsical worlds featuring purples, blues, and golds. Mystical elements evoke a magical, otherworldly atmosphere",//Mystical Fantasy
+  "Ethereal 3D fantasy artwork with a vibrant color palette. Dreamy, whimsical worlds featuring purples, blues, and golds. Mystical elements evoke a magical atmosphere",//Mystical Fantasy
   "Bright, vibrant 3D cartoon artwork with a Pixar-inspired style. High attention to realistic details, smooth textures, and expressive characters",//Pixar Cartoon Universe
   "Dynamic anime art style with vibrant, saturated colors, detailed character designs, bold outlines, and lively, expressive scenes. A balance of stylization and realism"//Vibrant Anime
 ];
@@ -339,6 +359,8 @@ const female = [
 const animal = [
   "A dog",
   "Three dogs",
+  "A Alaskan Malamute",
+  "A Welsh Corgi",
   "A cute kitten",
   "A cat",
   "Two cats",
@@ -351,7 +373,7 @@ const animal = [
   "A wolf",
   "A group of wolfs",
   "A lion",
-  "Five lions",
+  "Two lions",
   "A dragon",
   "A squirrel",
   "A monkey",
@@ -447,8 +469,7 @@ const groupPerson = [
   "Po, Tigress, and Master Shifu from Kung Fu Panda"
 ];
 
-const maleClothes = [
-  // Daily and modern clothing
+const maleDailyClothes = [
   "business suit with a sharp tie",
   "casual T-shirt and shorts",
   "a tuxedo with a red bowtie",
@@ -461,10 +482,10 @@ const maleClothes = [
   "a cowboy's hat, boots, and spurs",
   "a police officer's uniform with a badge",
   "a soldier's camouflage uniform and helmet",
-  "a chef's hat",
+  "a training suit",
   "a teacher's cardigan and khaki pants",
+  "a warm plaid shirt",
 
-  // Stylish daily wear
   "slim-fit navy blazer with tailored trousers and a crisp white shirt, paired with leather loafers",
   "casual bomber jacket with a graphic tee and distressed slim-fit jeans, finished with white sneakers",
   "lightweight linen shirt with rolled-up sleeves, paired with khaki chinos and desert boots",
@@ -481,21 +502,134 @@ const maleClothes = [
   "fitted parka jacket layered over a hoodie, paired with tapered cargo pants and chunky hiking boots",
   "sleek knit polo shirt tucked into slim cropped trousers, accessorized with a leather belt and loafers",
 
-  // Traditional and cultural costumes
   "traditional Japanese kimono with a wide obi belt",
   "Scottish tartan kilt with a sporran",
   "Middle Eastern kaftan with delicate patterns",
   "a Viking tunic with fur accents",
-  "a Maasai shuka with beaded jewelry",
+  "a Maasai shuka with beaded jewelry"
+];
 
-  // Historical clothing
+const femaleDailyClothes = [
+  "flowing silk gown adorned with intricate embroidery",
+  "elegant evening gown with sparkling sequins",
+  "vintage polka dot dress",
+  "summer dress with floral patterns",
+  "casual jeans and a futuristic jacket",
+  "a comfy hoodie and jeans",
+  "a Renaissance-era gown with puffed sleeves",
+  "a business suit with a pencil skirt",
+  "sporty outfit with leggings and sneakers",
+  "a summer sundress with floral patterns",
+  "a glasses and cozy sweater",
+  "a teacher's cardigan and pencil skirt",
+
+  "oversized blazer in a muted pastel tone, paired with high-waisted tailored pants and a silk camisole",
+  "cropped leather moto jacket worn over a fitted turtleneck sweater and high-rise skinny jeans, complemented by ankle boots",
+  "flowy midi skirt with abstract prints, paired with a tucked-in ribbed sweater and platform sneakers",
+  "relaxed-fit trench coat over a form-fitting knit dress, paired with knee-high leather boots",
+  "high-waisted wide-leg trousers with a tucked-in satin blouse, accessorized with a statement belt and pointed-toe heels",
+  "sleek oversized coat paired with slim-fit jeans, a tucked-in basic tee, and chunky sneakers",
+  "layered look with an oversized denim jacket over a cropped hoodie, paired with biker shorts and trendy sneakers",
+  "modern co-ord set with a crop top and matching high-waisted pants, styled with minimalistic jewelry and slide sandals",
+  "classic trench coat worn over a pleated midi dress, paired with ankle strap heels",
+  "off-the-shoulder knit sweater tucked into a faux leather mini skirt, finished with knee-high boots",
+  "tailored double-breasted blazer paired with wide-leg culottes, and finished with heeled ankle boots",
+  "longline cardigan layered over a fitted tee, high-rise mom jeans, and chunky sneakers",
+  "fitted denim jacket paired with a floral maxi dress and lace-up sandals, perfect for casual outings",
+  "statement puff-sleeve blouse tucked into high-rise flared jeans, accessorized with a crossbody bag and loafers",
+  "sleek wrap dress in bold geometric patterns, styled with minimal jewelry and pointed-toe flats",
+
+  "Chinese qipao",
+  "Indian sari with golden thread details",
+  "a Spanish flamenco dress with ruffles",
+  "an embroidered Russian sarafan",
+  "a colorful Mexican huipil with floral patterns",
+  "a traditional African dashiki",
+  "a Middle Eastern kaftan with delicate patterns",
+  "a Viking tunic with fur accents",
+  "a traditional Hawaiian hula skirt made of leaves",
+
+  "a Victorian lace dress with a corset",
+  "a Baroque ball gown with intricate ruffles",
+  "a 1920s flapper dress with fringe",
+  "a 1950s poodle skirt with a scarf",
+  "a 1960s mod dress with bold geometric patterns",
+  "a medieval peasant's tunic and belt",
+  "a medieval nun's robe and cross"
+];
+
+const maleFashionClothes = [
+  "casual T-shirt and shorts",
+  "a flannel shirt and rugged boots",
+  "leather jacket and aviator sunglasses",
+  "a long trench coat",
+  "sporty outfit with sneakers",
+  "slim-fit navy blazer with tailored trousers and a crisp white shirt, paired with leather loafers",
+  "casual bomber jacket with a graphic tee and distressed slim-fit jeans, finished with white sneakers",
+  "lightweight linen shirt with rolled-up sleeves, paired with khaki chinos and desert boots",
+  "tailored wool overcoat worn over a turtleneck sweater and dark jeans, with Chelsea boots",
+  "vintage-inspired denim jacket with a plain black tee and cargo pants, accessorized with a beanie and aviator sunglasses",
+  "sleek leather biker jacket over a fitted white henley, paired with dark-wash skinny jeans and ankle boots",
+  "minimalist monochrome outfit with a black crewneck sweater, tapered jogger pants, and stylish sneakers",
+  "layered look with a cozy knit cardigan over a basic tee, slim-fit jeans, and suede desert boots",
+  "sporty athleisure set with a zip-up track jacket, fitted joggers, and running shoes",
+  "modern streetwear outfit featuring an oversized hoodie, ripped jeans, and high-top sneakers",
+  "lightweight bomber jacket over a striped Breton shirt, paired with cuffed chinos and white canvas sneakers",
+  "tailored corduroy blazer with a wool crewneck sweater, slim-fit trousers, and leather brogues",
+  "oversized flannel shirt worn open over a graphic tee and skinny jeans, with high-top sneakers",
+  "fitted parka jacket layered over a hoodie, paired with tapered cargo pants and chunky hiking boots",
+  "sleek knit polo shirt tucked into slim cropped trousers, accessorized with a leather belt and loafers",
+];
+
+const femaleFashionClothes = [
+  "vintage polka dot dress",
+  "summer dress with floral patterns",
+  "casual jeans and a futuristic jacket",
+  "a comfy hoodie and jeans",
+  "a business suit with a pencil skirt",
+  "sporty outfit with leggings and sneakers",
+  "a summer sundress with floral patterns",
+  "a glasses and cozy sweater",
+  "oversized blazer in a muted pastel tone, paired with high-waisted tailored pants and a silk camisole",
+  "cropped leather moto jacket worn over a fitted turtleneck sweater and high-rise skinny jeans, complemented by ankle boots",
+  "flowy midi skirt with abstract prints, paired with a tucked-in ribbed sweater and platform sneakers",
+  "relaxed-fit trench coat over a form-fitting knit dress, paired with knee-high leather boots",
+  "high-waisted wide-leg trousers with a tucked-in satin blouse, accessorized with a statement belt and pointed-toe heels",
+  "sleek oversized coat paired with slim-fit jeans, a tucked-in basic tee, and chunky sneakers",
+  "layered look with an oversized denim jacket over a cropped hoodie, paired with biker shorts and trendy sneakers",
+  "modern co-ord set with a crop top and matching high-waisted pants, styled with minimalistic jewelry and slide sandals",
+  "classic trench coat worn over a pleated midi dress, paired with ankle strap heels",
+  "off-the-shoulder knit sweater tucked into a faux leather mini skirt, finished with knee-high boots",
+  "tailored double-breasted blazer paired with wide-leg culottes, and finished with heeled ankle boots",
+  "longline cardigan layered over a fitted tee, high-rise mom jeans, and chunky sneakers",
+  "fitted denim jacket paired with a floral maxi dress and lace-up sandals, perfect for casual outings",
+  "statement puff-sleeve blouse tucked into high-rise flared jeans, accessorized with a crossbody bag and loafers",
+  "sleek wrap dress in bold geometric patterns, styled with minimal jewelry and pointed-toe flats",
+];
+
+const maleFantasticClothes = [
+  "yellow raincoat with a hood shaped like a duck's head",
+  "spacesuit-themed hoodie with star patches and shiny silver pants",
+  "pirate hat with a parrot on the shoulder and matching striped shorts",
+  "dinosaur-shaped backpack with matching dino-print sneakers",
+  "shark-shaped hoodie with fin on the back and toothy hood",
+  "robot-patterned jacket with buttons that look like gears",
+  "superhero cape with matching mask and lightning-bolt patterned pants",
+  "a black leather trench coat with silver accents and a high collar",
+  "a royal outfit with a velvet doublet and gold embroidery, paired with a crimson cape",
+  "a rugged explorer's outfit with a wide-brimmed hat, leather jacket, and heavy boots",
+  "a tech-powered suit with glowing chest emblem, but the emblem is a giant smiling emoji",
+  "a hammer-wielding warrior costume, but the hammer is a giant inflatable squeaky toy",
+  "a hotdog costume with mustard and ketchup bottles as shoulder pads",
+  "a giant banana suit with tiny monkeys hanging from the pockets",
+  "a cowboy outfit where the hat is so big",
+  "a knight's armor made entirely of oversized LEGO bricks",
+  "a Coca-Cola can-shaped costume with the words \"Hit Me\" written on it",
   "a Roman gladiator's armor with a crested helmet",
   "a medieval peasant's tunic and belt",
   "a musketeer's tunic and feathered hat",
   "a knight's shining plate armor with a crest",
   "a Roman senator's toga with golden laurel crown",
-
-  // Fantasy and mythical costumes
   "a warrior's fur-lined cape and leather bracers",
   "a steampunk adventurer's outfit",
   "a futuristic bodysuit with armor plating",
@@ -519,50 +653,16 @@ const maleClothes = [
   "a gardener's sunhat"
 ];
 
-const femaleClothes = [
-  // Daily and modern clothing
-  "flowing silk gown adorned with intricate embroidery",
-  "elegant evening gown with sparkling sequins",
-  "vintage polka dot dress",
-  "summer dress with floral patterns",
-  "casual jeans and a futuristic jacket",
-  "a comfy hoodie and jeans",
-  "a Renaissance-era gown with puffed sleeves",
-  "a business suit with a pencil skirt",
-  "sporty outfit with leggings and sneakers",
-  "a summer sundress with floral patterns",
-  "a glasses and cozy sweater",
-  "a teacher's cardigan and pencil skirt",
-
-  // Stylish daily wear
-  "oversized blazer in a muted pastel tone, paired with high-waisted tailored pants and a silk camisole",
-  "cropped leather moto jacket worn over a fitted turtleneck sweater and high-rise skinny jeans, complemented by ankle boots",
-  "flowy midi skirt with abstract prints, paired with a tucked-in ribbed sweater and platform sneakers",
-  "relaxed-fit trench coat over a form-fitting knit dress, paired with knee-high leather boots",
-  "high-waisted wide-leg trousers with a tucked-in satin blouse, accessorized with a statement belt and pointed-toe heels",
-  "sleek oversized coat paired with slim-fit jeans, a tucked-in basic tee, and chunky sneakers",
-  "layered look with an oversized denim jacket over a cropped hoodie, paired with biker shorts and trendy sneakers",
-  "modern co-ord set with a crop top and matching high-waisted pants, styled with minimalistic jewelry and slide sandals",
-  "classic trench coat worn over a pleated midi dress, paired with ankle strap heels",
-  "off-the-shoulder knit sweater tucked into a faux leather mini skirt, finished with knee-high boots",
-  "tailored double-breasted blazer paired with wide-leg culottes, and finished with heeled ankle boots",
-  "longline cardigan layered over a fitted tee, high-rise mom jeans, and chunky sneakers",
-  "fitted denim jacket paired with a floral maxi dress and lace-up sandals, perfect for casual outings",
-  "statement puff-sleeve blouse tucked into high-rise flared jeans, accessorized with a crossbody bag and loafers",
-  "sleek wrap dress in bold geometric patterns, styled with minimal jewelry and pointed-toe flats",
-
-  // Traditional and cultural costumes
-  "Chinese qipao with intricate dragon embroidery",
-  "Indian sari with golden thread details",
-  "a Spanish flamenco dress with ruffles",
-  "an embroidered Russian sarafan",
-  "a colorful Mexican huipil with floral patterns",
-  "a traditional African dashiki",
-  "a Middle Eastern kaftan with delicate patterns",
-  "a Viking tunic with fur accents",
-  "a traditional Hawaiian hula skirt made of leaves",
-
-  // Historical clothing
+const femaleFantasticClothes = [
+  "duck-patterned bikini top with matching shorts",
+  "white tank top with a colorful popcorn print",
+  "cat-shaped hoodie with little ears and paw prints on the sleeves",
+  "ice cream cone-patterned dress with a scoop-shaped handbag",
+  "rainbow-striped overalls with star-shaped buttons and glittery sneakers",
+  "ladybug-themed cape with a matching polka-dot dress",
+  "a battle-ready leather suit with high boots and armored shoulder plates",
+  "a watermelon slice dress with seeds that are tiny hidden pockets",
+  "a Coca-Cola can-shaped costume with the words \"Kiss Me\" written on it",
   "a Victorian lace dress with a corset",
   "a Baroque ball gown with intricate ruffles",
   "a 1920s flapper dress with fringe",
@@ -570,8 +670,6 @@ const femaleClothes = [
   "a 1960s mod dress with bold geometric patterns",
   "a medieval peasant's tunic and belt",
   "a medieval nun's robe and cross",
-
-  // Fantasy and mythical costumes
   "a fairy's delicate dress made of flower petals",
   "a witch's dark, flowing gown and pointed hat",
   "a steampunk adventurer's outfit",
@@ -626,15 +724,12 @@ const femaleName = [
   "Xemena Porter"
 ];
 
-const commonActions = [
+const commonDailyActions = [
   "looking surprised",
-  "looking confused",
   "looking angry",
-  "looking scared",
   "looking sad",
   "looking happy",
-  "laughing",
-  "smiling",
+  "with a relaxed expression",
   "jump up happily",
   "hold a puppy",
   "waving energetically at the viewer",
@@ -645,14 +740,53 @@ const commonActions = [
   "making a heart shape with hands",
   "making a silly face with tongue out",
   "clapping hands enthusiastically",
-  "with the Hulk together",
-  "with a robot",
-  "with the Minions together",
-  "with the SpongeBob together",
-  "with the Pikachu together"
 ];
 
-const scenes = [
+const commonFashionActions = [
+  "with a Saluki together",
+  "sitting on the floor with legs extended, one arm draped casually over a knee",
+  "standing tall, one hand raised above the head as the wind blows through the hair",
+  "head tilted back, eyes closed",
+  "hands in pockets, with a relaxed posture",
+  "standing with one leg bent slightly, hand resting on the wall, gazing confidently",
+  "one leg bent up, looking down with a soft smile",
+  "standing on tiptoes, body slightly turned, arms crossed over the chest, with a determined gaze",
+  "hands relaxed behind the back, shoulders leaning slightly, back facing the viewer with a casual glance over the shoulder",
+  "tilting forward slightly while holding the brim of a hat, one hand in a pocket, with a relaxed posture",
+  "standing with legs crossed, one hand gently touching the chin in a thoughtful expression, gazing into the distance",
+  "kneeling on a ground, body leaning forward with a playful expression",
+  "half-crouching on the ground, hands resting casually on the knees, head tilted, exuding elegance and confidence",
+  "one leg in front, arms swinging naturally with a wind-swept look, eyes focused ahead"
+];
+
+const commonFantasticActions = [
+  "looking surprised",
+  "looking angry",
+  "looking happy",
+  "crying sadly",
+  "with a exaggerated expression, shouting",
+  "with a playful and eccentric expression",
+  "have a very fat figure, but very cute",
+  "jump up happily",
+  "floating in the air",
+  "hold a puppy",
+  "petting a kitten",
+  "making a silly face with tongue out",
+  "riding a lion",
+  "holding a huge lollipop happily",
+  "eating ice cream happily",
+  "with a Siamese cat together",
+  "with a super big Garfield cat together",
+  "with a wolf together",
+  "with the Hulk together",
+  "with a robot together",
+  "with the Minions together",
+  "with the SpongeBob together",
+  "with the Pikachu together",
+  "with a monkey sitting on shoulder"
+];
+
+const dailyScenes = [
   ["on a deserted road", [
     "riding a Harley",
     "driving a retro car",
@@ -985,30 +1119,30 @@ const scenes = [
     "placing a cup of coffee on the black stone coffee table",
     "walks from the room appreciating the minimalist aesthetic"
   ]],
-  ["in a muted green room with a textured wallpaper, showcasing a round wooden table and a vintage armchair", [
+  ["in a muted green room with a textured wallpaper, showcasing a round wooden table", [
     "sitting in the vintage armchair reading a book",
     "placing a vase of flowers on the round wooden table",
     "writing in a journal at the table",
     "touching the textured wallpaper"
   ]],
-  ["in an elegant cream-colored room featuring a large mirror, a marble side table, and a decorative plant in the corner", [
+  ["in an elegant cream-colored room featuring a large mirror, a marble side table", [
     "placing a decorative object on the marble side table",
     "watering the decorative plant",
     "admiring the elegant decor",
     "arranging flowers in a vase on the side table"
   ]],
-  ["in an industrial kitchen with exposed brick walls, showcasing a stainless steel island and simple wooden stools", [
+  ["in an industrial kitchen with exposed brick walls, showcasing a stainless steel island", [
     "preparing a meal at the stainless steel island",
     "sitting on a wooden stool having a cup of coffee",
-    "cleaning the stainless steel surfaces",
+    "eating a piece of pizza in a big mouthful",
     "placing fresh herbs in pots on the island"
   ]],
-  ["in a cozy bedroom with pastel walls, featuring a low platform bed and a minimalist bedside table", [
+  ["in a cozy bedroom with pastel walls, featuring a low platform bed", [
     "lying in the low platform bed reading a book",
     "placing a glass of water on the minimalist bedside table",
     "getting out of bed and stretching"
   ]],
-  ["in a minimalist classroom with soft blue walls, featuring simple desks arranged in rows and a chalkboard at the front", [
+  ["in a minimalist classroom with soft blue walls", [
     "sitting at a desk writing in a notebook",
     "listening to the teacher lecture",
     "raising their hand to ask a question",
@@ -1017,16 +1151,11 @@ const scenes = [
   ]],
   ["in a dense, fog-covered forest at dusk", [
     "carefully stepping over exposed roots",
-    "shielding their eyes from the mist"
+    "look up at the sky"
   ]],
   ["at a cascading waterfall in a lush jungle", [
     "gazing up at the cascading water",
     "wading in the cool pool at the base"
-  ]],
-  ["in a glowing cave filled with crystals", [
-    "running their hand along a crystal surface",
-    "admiring the light refracting through the crystals",
-    "carefully navigating the uneven cave floor"
   ]],
   ["on a frozen tundra with icy winds", [
     "pulling their coat tighter against the wind",
@@ -1053,6 +1182,145 @@ const scenes = [
   ["on a starry desert night with distant howling winds", [
     "looking up at the stars",
     "wrapping themselves in a blanket"
+  ]],
+  ["at the beachfront sunset in *The Graduate*", [
+    "standing on the beach",
+    "watching the sunset",
+    "talking to another character"
+  ]],
+  ["at the iconic dance scene in *Pulp Fiction*", [
+    "dancing with a partner",
+    "snapping their fingers to the music",
+    "drinking a milkshake"
+  ]],
+  ["at the concert site of a rock band", [
+    "play the electric guitar passionately",
+    "beat the drums passionately",
+    "raise the microphone and shout passionately"
+  ]],
+  ["lying in a bathtub full of bubbles", [
+    "drinking beer",
+    "smoking a cigar"
+  ]]
+];
+
+const fashionScenes = [
+  ["on the floor covered with flowers", [
+    "lying and looking at the viewer with a smile",
+    "lying and close the eyes with smile happily",
+    "lying and open the hands"
+  ]],
+  ["in front of a minimalist concrete wall", [
+    "standing with one leg bent slightly, hand resting on the wall, gazing confidently",
+    "leaning against the wall with arms crossed, head tilted back with eyes closed",
+    "sitting on the floor with legs extended, one arm draped casually over a knee"
+  ]],
+  ["in a field of tall, windswept grass", [
+    "standing tall, one hand raised above the head as the wind blows through the hair",
+    "walking slowly, arms outstretched, fingertips brushing against the grass",
+    "kneeling in the grass, head tilted to the side, eyes focused intensely ahead"
+  ]],
+  ["on a staircase", [
+    "sitting on the stairs, legs crossed, leaning forward slightly with a serious expression",
+    "standing on the top step, one foot forward, gazing down with a bold stare",
+    "halfway up the stairs, leaning on the railing, one arm draped casually over the side"
+  ]],
+  ["in a room with large, floor-to-ceiling windows", [
+    "standing close to the window, arms crossed, looking out with a reflective expression",
+    "sitting on the windowsill, one leg bent up, looking down with a soft smile",
+    "leaning against the window, one hand pressed against the glass, gazing outward"
+  ]],
+  ["at a large, ornate doorway", [
+    "standing in front of the doorway, hands resting lightly on the frame, looking ahead",
+    "leaning against one side of the doorway, arms crossed, face turned slightly away",
+    "sitting on the steps in front of the doorway, arms resting on knees, look at the viewer"
+  ]],
+  ["on a rooftop at sunset", [
+    "standing near the edge, arms outstretched as if embracing the sky",
+    "sitting cross-legged, facing the horizon, hands resting casually on knees",
+    "standing with one foot on a ledge, leaning slightly forward with a focused gaze"
+  ]],
+  ["at the entrance of a tunnel with shadows stretching inside", [
+    "standing just inside the tunnel, one hand on the wall, looking out into the light",
+    "walking from the tunnel, arms relaxed at the sides, eyes fixed on the darkness",
+    "leaning against the side of the tunnel entrance, head tilted back, eyes closed"
+  ]],
+  ["in a minimalist room with a single window casting soft light", [
+    "sitting cross-legged on the floor, bathed in the light from the window",
+    "standing in front of the window, one hand raised to touch the glass",
+    "leaning against the window frame, looking down thoughtfully"
+  ]],
+  ["in a narrow alley with high walls", [
+    "walking confidently down the alley, one hand grazing the wall",
+    "standing near the wall, arms crossed, with a soft gaze toward the viewer",
+    "leaning against the wall, hands in pockets, with a relaxed posture"
+  ]],
+  ["on a platform surrounded by geometric shapes", [
+    "standing on the platform, arms by the sides, looking up at the shapes",
+    "sitting at the edge of the platform, legs hanging over, staring off into the distance",
+    "leaning on one of the shapes, with one leg bent slightly, gazing forward"
+  ]],
+  ["in an underground parking garage with harsh lighting", [
+    "standing in the middle of an empty space, arms crossed, looking intensely ahead",
+    "sitting on the hood of a sleek car, leaning slightly forward, a small smirk on the face",
+    "walking between the rows of cars, one hand in a pocket, eyes focused straight ahead"
+  ]],
+  ["in a brightly lit, open atrium with geometric designs", [
+    "standing in the middle of the space, arms stretched wide, gazing up at the ceiling",
+    "leaning against a pillar, one leg bent at the knee, looking casually to the side",
+    "sitting on a minimalist bench, arms resting on the backrest, gazing forward"
+  ]],
+  ["in a clean, white corridor with large glass panels", [
+    "walking confidently through the corridor, head held high, looking forward",
+    "standing near the glass panels, one hand resting on the glass, gazing outside",
+    "leaning casually against the wall, arms crossed, with a relaxed posture"
+  ]],
+  ["in front of a dark backdrop with a single spotlight casting sharp shadows", [
+    "half-turned to the light, one hand gently touching the chin, eyes gazing into the distance",
+    "facing the viewer directly, one hand partially covering the face, fingers spread delicately",
+    "tilting the head slightly, one hand resting on the collarbone, soft light highlighting the face, close-up shot"
+  ]],
+  ["in front of a soft gradient background with dramatic side lighting", [
+    "with one hand gently brushing the hair back, light catching the edge of the face, medium close-up shot",
+    "facing forward, hands framing the face, fingers spread delicately across the cheeks",
+    "head tilted downward, hand resting on the forehead, shadows creating depth across the features"
+  ]],
+  ["against a textured wall with a single beam of light cutting across", [
+    "turning toward the light, hand raised to shield the eyes, with a soft, contemplative expression",
+    "facing the viewer, one hand lightly touching the lips, shadows creating sharp contrast on the face",
+    "gazing off to the side, fingers lightly resting on the neck, the light catching the curve of the jawline"
+  ]],
+  ["in front of a backdrop with geometric light patterns", [
+    "face partially illuminated by angular light, one hand touching the cheek, gaze focused forward",
+    "head turned toward the light, one hand lightly tracing the jawline, shadows accentuating the features",
+    "leaning slightly forward, hands intertwined under the chin, with a subtle smile"
+  ]],
+  ["against a moody backdrop with a soft spotlight creating dramatic shadows", [
+    "looking directly at the viewer, one hand gently cradling the face, eyes intense and focused",
+    "head tilted slightly downward, hand raised to touch the temple, shadows playing across the face, close-up shot",
+    "half-turned to the side, hand resting on the shoulder, light highlighting the cheekbones and hands"
+  ]],
+  ["in the front of a fashionable Morandi style color-blocking background", commonFashionActions],
+  ["in the front of a fashionable Morandi style solid color background", commonFashionActions],
+  ["in the front of a fashionable minimalist, youthful and energetic color matching background", commonFashionActions],
+  ["in the front of a white columns, with long shadows background", commonFashionActions],
+  ["in the front of a black and white stitching background", commonFashionActions],
+  ["in the front of a black and white light and shadow background", commonFashionActions],
+  ["in the front of a minimalist landscape of black and white color block background", commonFashionActions],
+  ["in the front of a abstract composition of overlapping translucent circles in pastel hues background", commonFashionActions],
+  ["in the front of a futuristic grid of perfect cubes and spheres background", commonFashionActions]
+];
+
+const fantasticScenes = [
+  ["on the surface of a mirror-like ocean reflecting a kaleidoscope sky", [
+    "walking on the water's surface, the sky reflecting in their footsteps",
+    "sitting on the water, legs crossed, the reflection distorting beneath",
+    "reaching down to touch the water, causing ripples to turn into colorful patterns"
+  ]],
+  ["in a glowing cave filled with crystals", [
+    "running their hand along a crystal surface",
+    "admiring the light refracting through the crystals",
+    "carefully navigating the uneven cave floor"
   ]],
   ["in an enchanted forest with glowing mushrooms", [
     "bending down to examine a glowing mushroom",
@@ -1095,10 +1363,6 @@ const scenes = [
   ["in a high-tech laboratory filled with robotic arms", [
     "examining a complex piece of equipment",
     "typing on a futuristic keyboard"
-  ]],
-  ["in a cyberpunk alleyway filled with neon signs and graffiti", [
-    "looking at the neon signs",
-    "walking through the narrow alleyway"
   ]],
   ["on an alien planet with strange plants and floating rocks", [
     "looking at the strange plants",
@@ -1147,15 +1411,6 @@ const scenes = [
     "looking at the enchanted objects",
     "mixing potions"
   ]],
-  ["on the Yellow Brick Road in *The Wizard of Oz*", [
-    "following the Yellow Brick Road",
-    "skipping down the path"
-  ]],
-  ["in the floating diner in *Inception*", [
-    "sitting at a table in the diner",
-    "watching objects float around",
-    "talking to another character"
-  ]],
   ["at the end of the world in *Mad Max: Fury Road*", [
     "driving a vehicle across the wasteland",
     "looking out at the desolate landscape",
@@ -1169,16 +1424,6 @@ const scenes = [
     "floating in zero gravity",
     "operating a control panel"
   ]],
-  ["at the iconic dance scene in *Pulp Fiction*", [
-    "dancing with a partner",
-    "snapping their fingers to the music",
-    "drinking a milkshake"
-  ]],
-  ["at the beachfront sunset in *The Graduate*", [
-    "standing on the beach",
-    "watching the sunset",
-    "talking to another character"
-  ]],
   ["on the battlefield in *Gladiator*", [
     "fighting with a sword",
     "riding a horse"
@@ -1186,81 +1431,6 @@ const scenes = [
   ["at the grand ball scene in *Beauty and the Beast*", [
     "dancing with a partner",
     "walking down a grand staircase"
-  ]],
-  ["in the iconic trench warfare in *All Quiet on the Western Front*", [
-    "crouching in a trench",
-    "looking out over no man's land",
-    "holding a rifle"
-  ]],
-  ["on the surface of a mirror-like ocean reflecting a kaleidoscope sky", [
-    "walking on the water's surface, the sky reflecting in their footsteps",
-    "sitting on the water, legs crossed, the reflection distorting beneath",
-    "reaching down to touch the water, causing ripples to turn into colorful patterns"
-  ]],
-  ["on the floor covered with flowers", [
-    "lying and looking at the viewer with a smile",
-    "lying and close the eyes with smile happily",
-    "lying and open the hands"
-  ]],
-  ["in front of a minimalist concrete wall", [
-    "standing with one leg bent slightly, hand resting on the wall, gazing confidently",
-    "leaning against the wall with arms crossed, head tilted back with eyes closed",
-    "sitting on the floor with legs extended, one arm draped casually over a knee"
-  ]],
-  ["in a field of tall, windswept grass", [
-    "standing tall, one hand raised above the head as the wind blows through the hair",
-    "walking slowly, arms outstretched, fingertips brushing against the grass",
-    "kneeling in the grass, head tilted to the side, eyes focused intensely ahead"
-  ]],
-  ["on a staircase", [
-    "sitting on the stairs, legs crossed, leaning forward slightly with a serious expression",
-    "standing on the top step, one foot forward, gazing down with a bold stare",
-    "halfway up the stairs, leaning on the railing, one arm draped casually over the side"
-  ]],
-  ["in a room with large, floor-to-ceiling windows", [
-    "standing close to the window, arms crossed, looking out with a reflective expression",
-    "sitting on the windowsill, one leg bent up, looking down with a soft smile",
-    "leaning against the window, one hand pressed against the glass, gazing outward"
-  ]],
-  ["at the edge of a modern, empty pool", [
-    "standing at the pool's edge, back to the camera, looking over the shoulder",
-    "sitting on the pool's ledge, legs hanging down, head resting on one hand",
-    "standing in the empty pool, arms stretched out to the sides, body slightly arched back"
-  ]],
-  ["at a large, ornate doorway", [
-    "standing in front of the doorway, hands resting lightly on the frame, looking ahead",
-    "leaning against one side of the doorway, arms crossed, face turned slightly away",
-    "sitting on the steps in front of the doorway, arms resting on knees, staring directly at the camera"
-  ]],
-  ["on a rooftop at sunset", [
-    "standing near the edge, arms outstretched as if embracing the sky",
-    "sitting cross-legged, facing the horizon, hands resting casually on knees",
-    "standing with one foot on a ledge, leaning slightly forward with a focused gaze"
-  ]],
-  ["at the entrance of a tunnel with shadows stretching inside", [
-    "standing just inside the tunnel, one hand on the wall, looking out into the light",
-    "walking toward the tunnel, arms relaxed at the sides, eyes fixed on the darkness",
-    "leaning against the side of the tunnel entrance, head tilted back, eyes closed"
-  ]],
-  ["in a minimalist room with a single window casting soft light", [
-    "sitting cross-legged on the floor, bathed in the light from the window",
-    "standing in front of the window, one hand raised to touch the glass",
-    "leaning against the window frame, looking down thoughtfully"
-  ]],
-  ["in a narrow alley with high walls", [
-    "walking confidently down the alley, one hand grazing the wall",
-    "standing near the wall, arms crossed, with a soft gaze toward the camera",
-    "leaning against the wall, hands in pockets, with a relaxed posture"
-  ]],
-  ["on a platform surrounded by geometric shapes", [
-    "standing on the platform, arms by the sides, looking up at the shapes",
-    "sitting at the edge of the platform, legs hanging over, staring off into the distance",
-    "leaning on one of the shapes, with one leg bent slightly, gazing forward"
-  ]],
-  ["on a raised platform with a panoramic view of the city", [
-    "standing at the platform’s edge, hands resting on the railing, gazing out",
-    "sitting on the platform, legs crossed, facing the horizon with a relaxed expression",
-    "leaning against the railing, arms folded, looking down at the streets below"
   ]],
   ["in a garden with oversized flowers towering overhead", [
     "standing beneath a giant flower, reaching up to gently touch its petal",
@@ -1290,7 +1460,7 @@ const scenes = [
   ["inside a giant bottle floating on a sea", [
     "sitting cross-legged inside the bottle, looking out through the glass at the ocean",
     "standing at the edge of the bottle opening, arms spread as if about to dive into the water",
-    "leaning against the bottle’s wall, gazing dreamily out at the waves"
+    "leaning against the bottle's wall, gazing dreamily out at the waves"
   ]],
   ["on a giant clock face", [
     "walking along the clock hand, carefully balancing with arms stretched out",
@@ -1307,18 +1477,103 @@ const scenes = [
     "lying inside the pumpkin, arms behind the head, relaxed in the cozy space",
     "standing at the opening of the pumpkin, one hand resting on the carved edge"
   ]],
-  ["in the front of a background of fashionable Morandi style color-blocking", commonActions],
-  ["in the front of a background of fashionable Morandi style solid color", commonActions],
-  ["in the front of a background of fashionable minimalist, youthful and energetic color matching", commonActions],
-  ["in the front of a background of white columns, with long shadows", commonActions],
-  ["in the front of a background of black and white stitching", commonActions],
-  ["in the front of a background of black and white light and shadow", commonActions],
-  ["in the front of a background of minimalist landscape of intersecting black and white lines", commonActions],
-  ["in the front of a background of abstract composition of overlapping translucent circles in pastel hues", commonActions],
-  ["in the front of a background of futuristic grid of perfect cubes and spheres", commonActions],
-  ["in the front of a background of series of stacked, monochromatic cubes in various sizes", commonActions],
-  ["in the front of a background of minimalist composition of floating, translucent squares and rectangles", commonActions],
-  ["in the front of a background of intricate web of crisscrossing, neon-colored lines", commonActions]
+  ["on a giant pizza slice", [
+    "sliding down the cheese like a water slide, arms flailing",
+    "sitting on the crust, holding a giant pepperoni like a steering wheel",
+    "trying to balance on the slippery cheese, arms waving to stay upright"
+  ]],
+  ["in a bathtub full of popcorn", [
+    "sitting in the tub, tossing popcorn in the air and catching it with their mouth",
+    "lying in the popcorn",
+    "trying to paddle through the popcorn like it's water, but getting stuck"
+  ]],
+  ["on a giant banana peel", [
+    "slipping and falling dramatically, arms and legs flailing",
+    "sitting on the peel, sliding downhill like a sled, laughing",
+    "trying to stand on the slippery surface, wobbling comically"
+  ]],
+  ["inside a giant sandwich", [
+    "peeking out between two slices of bread, looking surprised",
+    "sitting in the sandwich, holding a tomato slice like an umbrella",
+    "trying to push up the top slice of bread like it's too heavy"
+  ]],
+  ["on a giant stack of pancakes", [
+    "sliding down the syrupy surface, laughing as they go",
+    "sitting on top, holding a fork bigger than them, ready to dig in",
+    "stuck in the syrup, trying to pull their feet free with exaggerated effort"
+  ]],
+  ["in a field of rubber ducks", [
+    "standing among the ducks, holding a giant rubber duck and looking confused",
+    "sitting on a giant duck, paddling through the field like it's water",
+    "pretending to give a serious speech to the rubber ducks, arms raised dramatically"
+  ]],
+  ["inside a giant bowl of spaghetti", [
+    "swinging on a giant spaghetti strand like a vine, Tarzan-style",
+    "sitting in the bowl, twirling a forkful of giant noodles",
+    "getting tangled in the noodles, trying to escape but only getting more wrapped up"
+  ]],
+  ["on a giant seesaw made of breadsticks", [
+    "teetering back and forth, holding onto the breadsticks for dear life",
+    "sitting on one end, launching a friend into the air as they jump",
+    "balancing in the middle, arms out like a tightrope walker"
+  ]],
+  ["in a massive bowl of jelly", [
+    "bouncing up and down like a trampoline, arms flapping for balance",
+    "sinking slowly into the jelly, looking panicked but amused",
+    "lying on top of the jelly, bouncing slightly with every movement"
+  ]],
+  ["on a giant stack of books, teetering precariously", [
+    "trying to balance while standing on the top book, arms waving",
+    "sitting cross-legged on the top book, reading another, completely calm",
+    "sliding down the side of the stack like a makeshift slide, laughing"
+  ]],
+  ["in a swimming pool full of jelly beans", [
+    "swimming through the jelly beans, throwing them in the air joyfully",
+    "sitting in an inner tube, slowly sinking into the jelly beans",
+    "diving into the jelly beans, disappearing beneath the surface"
+  ]],
+  ["on a giant chessboard", [
+    "riding a knight like a horse, pretending to charge into battle",
+    "hiding behind a rook, peeking out cautiously",
+    "standing on top of a queen piece, striking a victory pose"
+  ]],
+  ["in a room filled with oversized feathers", [
+    "trying to walk through the room, getting tickled with every step",
+    "lying in the feathers, laughing uncontrollably as they get tickled",
+    "trying to blow the feathers away, but they keep floating back"
+  ]],
+  ["on a giant cookie", [
+    "sitting at the edge of the cookie, dunking it into a giant cup of milk",
+    "lying on the cookie, pretending to take a nap on the chocolate chips",
+    "holding a giant glass of milk, ready to dip the cookie"
+  ]],
+  ["on a stack of giant waffles", [
+    "sliding down the waffle stack like a playground slide, grinning",
+    "trying to pull their foot out of sticky syrup, looking frustrated"
+  ]],
+  ["inside a giant cereal bowl", [
+    "floating on a piece of cereal like it's a raft, looking around",
+    "splashing around in the milk, having a great time",
+    "trying to swim through the milk, pushing pieces of cereal aside"
+  ]],
+  ["in a field of giant mushrooms", [
+    "sitting on top of a mushroom, feet dangling, looking relaxed",
+    "jumping from mushroom to mushroom like stepping stones",
+    "using a giant mushroom cap as an umbrella in an imaginary rainstorm"
+  ]],
+  ["on a beach with giant ice cream cones", [
+    "trying to lick a giant ice cream",
+    "catching the melting ice cream with their hands, looking panicked"
+  ]],
+  ["on a giant soccer ball rolling down a hill", [
+    "running on top of the ball like a circus act, arms flailing",
+    "sitting on the ball, rolling uncontrollably down the hill, laughing",
+    "hanging onto the ball for dear life, feet dragging along the ground"
+  ]],
+  ["lying in a bathtub full of colorful bubbles", [
+    "drinking a big bucket of milk",
+    "cover chest with hands and laugh at the viewer"
+  ]]
 ];
 
 function getRandom(array) {
@@ -1328,18 +1583,37 @@ function getRandom(array) {
 
 var newStyle = [];
 function styleFilter() {
-  const singleStyle = promptsSourceInput[7][0];
+  const singleStyle = promptsSourceInput[8][0];
   if (singleStyle == 0) {
     for (var x = 0; x < style.length; x++) {
-      if (promptsSourceInput[7][x + 1] == true) {
+      if (promptsSourceInput[8][x + 1] == true) {
         newStyle.push(style[x]);
       }
     }
-    if (promptsSourceInput[7][style.length + 1] == true) {
+    if (promptsSourceInput[8][style.length + 1] == true) {
       newStyle.push(...customStyle);
     }
   } else {
     newStyle.push(style[singleStyle - 1]);
+  }
+}
+
+var newScene = [];
+const selectedScene = promptsSourceInput[7][0];
+function sceneFilter() {
+  switch (selectedScene) {
+    case 0:
+      newScene.push(...dailyScenes, ...fashionScenes, ...fantasticScenes);
+      break;
+    case 1:
+      newScene.push(...dailyScenes);
+      break;
+    case 2:
+      newScene.push(...fashionScenes);
+      break;
+    case 3:
+      newScene.push(...fantasticScenes);
+      break;
   }
 }
 
@@ -1354,30 +1628,106 @@ function generatePrompt() {
     randomLight = "";
   }
 
-  const sceneArray = getRandom(scenes);
+  const sceneArray = getRandom(newScene);
   randomScene = sceneArray[0];
   randomAction = getRandom(sceneArray[1]);
   if (Math.random() < 0.15) {
-    randomAction = getRandom(commonActions);
+    switch (selectedScene) {
+      case 0:
+        if (dailyScenes.includes(sceneArray)) {
+          randomAction = getRandom(commonDailyActions);
+        } else if (fashionScenes.includes(sceneArray)) {
+          randomAction = getRandom(commonFashionActions);
+        } else if (fantasticScenes.includes(sceneArray)) {
+          randomAction = getRandom(commonFantasticActions);
+        }
+        break;
+      case 1:
+        randomAction = getRandom(commonDailyActions);
+        break;
+      case 2:
+        randomAction = getRandom(commonFashionActions);
+        break;
+      case 3:
+        randomAction = getRandom(commonFantasticActions);
+        break;
+    }
   }
 
   if (rand < 0.1) {
     randomSubject = getRandom(animal);
-    if (creativeMode == 0 || creativeMode == 3) {
-      randomClothes = Math.random() < 0.5 ? getRandom(maleClothes) : getRandom(femaleClothes);
-    } else {
-      randomClothes = "";
+    switch (selectedScene) {
+      case 0:
+        if (dailyScenes.includes(sceneArray)) {
+          randomClothes = "";
+          randomAction = "";
+        } else if (fashionScenes.includes(sceneArray)) {
+          randomClothes = "";
+          randomAction = "";
+        } else if (fantasticScenes.includes(sceneArray)) {
+          randomClothes = Math.random() < 0.5 ? getRandom(maleFantasticClothes) : getRandom(femaleFantasticClothes);
+        }
+        break;
+      case 1:
+        randomClothes = "";
+        randomAction = "";
+        break;
+      case 2:
+        randomClothes = "";
+        randomAction = "";
+        break;
+      case 3:
+        randomClothes = Math.random() < 0.5 ? getRandom(maleFantasticClothes) : getRandom(femaleFantasticClothes);
+        break;
     }
   } else if (rand < 0.5) {
     randomSubject = getRandom(male);
-    randomClothes = getRandom(maleClothes);
+    switch (selectedScene) {
+      case 0:
+        if (dailyScenes.includes(sceneArray)) {
+          randomClothes = getRandom(maleDailyClothes);
+        } else if (fashionScenes.includes(sceneArray)) {
+          randomClothes = getRandom(maleFashionClothes);
+        } else if (fantasticScenes.includes(sceneArray)) {
+          randomClothes = getRandom(maleFantasticClothes);
+        }
+        break;
+      case 1:
+        randomClothes = getRandom(maleDailyClothes);
+        break;
+      case 2:
+        randomClothes = getRandom(maleFashionClothes);
+        break;
+      case 3:
+        randomClothes = getRandom(maleFantasticClothes);
+        break;
+    }
     if (Math.random() < 0.3) {
       const name = getRandom(maleName);
       randomSubject += " named \"" + name + "\"";
     }
   } else if (rand < 0.9) {
     randomSubject = getRandom(female);
-    randomClothes = getRandom(femaleClothes);
+    switch (selectedScene) {
+      case 0:
+        if (dailyScenes.includes(sceneArray)) {
+          randomClothes = getRandom(femaleDailyClothes);
+        } else if (fashionScenes.includes(sceneArray)) {
+          randomClothes = getRandom(femaleFashionClothes);
+        } else if (fantasticScenes.includes(sceneArray)) {
+          randomClothes = getRandom(femaleFantasticClothes);
+        }
+        break;
+      case 1:
+        randomClothes = getRandom(femaleDailyClothes);
+        break;
+      case 2:
+        randomClothes = getRandom(femaleFashionClothes);
+        break;
+      case 3:
+        randomClothes = getRandom(femaleFantasticClothes);
+        break;
+    }
     if (Math.random() < 0.3) {
       const name = getRandom(femaleName);
       randomSubject += " named \"" + name + "\"";
@@ -1456,8 +1806,6 @@ function generatePrompt() {
     case 3:
       buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
       break;
-    default:
-      buildPrompt = `${randomStyle}, ${view}, ${randomLight}. ${randomSubject}${w}${randomClothes}, ${randomAction} ${randomScene}.`;
   }
 
   if (promptsSourceInput[5][0].trim() != "") {
@@ -1470,6 +1818,7 @@ if (promptsSourceInput[1][0] == 1) {
   const randomPromptCount = promptsSourceInput[2][0];
   promptsSource = "";
   styleFilter();
+  sceneFilter();
   for (var x = 0; x < randomPromptCount; x++) {
     promptsSource += generatePrompt() + "\n\n";
   }
@@ -1579,7 +1928,7 @@ const userInputs = requestFromUser(
       widget.push(
         this.section(
           "❖  Image Size",
-          "",
+          " •   When the SD1 model is selected, the longest side will be limited to '896'\n      to avoid affecting the performance.",
           [
             this.size(configuration.width, configuration.height, 128, 2048)
           ]
