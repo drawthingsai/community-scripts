@@ -763,7 +763,10 @@ const commonFantasticActions = [
   "looking surprised",
   "looking angry",
   "looking happy",
+  "crying sadly",
   "with a exaggerated expression, shouting",
+  "with a playful and eccentric expression",
+  "have a very fat figure, but very cute",
   "jump up happily",
   "floating in the air",
   "hold a puppy",
@@ -2289,7 +2292,7 @@ function initCustomModel() {
     case "Dream Shaper":
       configuration.sampler = 1;
       configuration.guidanceScale = 2.0;
-      configuration.steps = 11;
+      configuration.steps = 10;
       break;
     case "Kolors":
       configuration.sampler = 12;
