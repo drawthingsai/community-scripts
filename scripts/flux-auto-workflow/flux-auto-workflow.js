@@ -1,5 +1,5 @@
 //@api-1.0
-// v4.0.1
+// v4.0.2
 // Author: @czkoko
 // Automatic workflow for Flux, including text - to - image, batch image refine, batch prompts, random prompt, etc.
 //
@@ -30,7 +30,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v4.0.1";
+const version = "v4.0.2";
 var promptsSource = pipeline.prompts.prompt;
 
 const themePreview = [
@@ -1756,8 +1756,33 @@ function generatePrompt() {
 
       let maleClothes = [];
       let femaleClothes = [];
-      maleClothes.push(...maleDailyClothes, ...maleFashionClothes, ...maleFantasticClothes);
-      femaleClothes.push(...femaleDailyClothes, ...femaleFashionClothes, ...femaleFantasticClothes);
+      switch (selectedScene) {
+        case 0:
+          if (dailyScenes.includes(sceneArray)) {
+            maleClothes = maleDailyClothes;
+            femaleClothes = femaleDailyClothes;
+          } else if (fashionScenes.includes(sceneArray)) {
+            maleClothes = maleFashionClothes;
+            femaleClothes = femaleFashionClothes;
+          } else if (fantasticScenes.includes(sceneArray)) {
+            maleClothes = maleFantasticClothes;
+            femaleClothes = femaleFantasticClothes;
+          }
+          break;
+        case 1:
+          maleClothes = maleDailyClothes;
+          femaleClothes = femaleDailyClothes;
+          break;
+        case 2:
+          maleClothes = maleFashionClothes;
+          femaleClothes = femaleFashionClothes;
+          break;
+        case 3:
+          maleClothes = maleFantasticClothes;
+          femaleClothes = femaleFantasticClothes;
+          break;
+      }
+
       if (isMan) {
         randomClothes = getRandom(maleClothes);
       } else if (isWoman) {
