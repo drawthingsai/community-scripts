@@ -42,6 +42,16 @@ configuration.diffusionTileOverlap = 128;
 configuration.sampler = SamplerType.TCD;
 configuration.stochasticSamplingGamma = 0.3;
 configuration.upscaler = null;
+configuration.preserveOriginalAfterInpaint = true;
+configuration.faceRestoration = null;
+configuration.batchSize = 1;
+configuration.batchCount = 1;
+configuration.hiresFix = false;
+configuration.clipSkip = 1;
+configuration.shift = 1;
+configuration.refinerModel = null;
+configuration.sharpness = 0;
+configuration.zeroNegativePrompt = false;
 
 configuration.model = "juggernaut_reborn_q6p_q8p.ckpt";
 configuration.strength = 0.4;
