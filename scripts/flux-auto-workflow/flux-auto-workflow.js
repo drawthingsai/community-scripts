@@ -1,5 +1,5 @@
 //@api-1.0
-// v4.1
+// v4.1.1
 // Author: @czkoko
 // Automatic workflow for Flux, including text-to-image, batch image refine, outpainting, batch prompts, random prompt, etc.
 //
@@ -30,7 +30,7 @@ const customStyle = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-const version = "v4.1";
+const version = "v4.1.1";
 var promptsSource = pipeline.prompts.prompt;
 
 const themePreview = [
@@ -2079,7 +2079,7 @@ if (workflow == 0) {
   imgFiles = userInputs[1][0];
   unofficialFlux = userInputs[4][2];
   processingMode = userInputs[0][0];
-  position = userInputs[3][0];
+  positionOffset = userInputs[3][0];
   zoom = userInputs[3][1];
 }
 
