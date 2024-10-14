@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author zanshinmu
-// v3.5
+// v3.5.1
 /**
  * Documentation for "Dynamic Prompts" Script (Version 3.5) for "Draw Things"
  *
@@ -37,14 +37,14 @@
  */
 
 //Version
-const versionString = "3.5"
+const versionString = "3.5.1"
 //Maximum iterations for Iterate Mode
 const maxIter = 500
 //store selected prompt/LoRA data
 let promptData;
 let userPrompt = '';
 // Default example prompt for UI demonstrating category use
-const defaultPrompt = "Cybervenues wide-angle shot of {weather} {time} {locale}"
+const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 /* These are the prompts randomly selected from if UI Prompt isn't valid.
    Modify prompts to provide dynamic prompts with LoRAs which will be randomly selected from if a valid dynamic prompt is not found in the UI.
@@ -272,9 +272,9 @@ if (isPromptValid(uiPrompt, categories)) {
 // Main batch loop
 if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
-        render(getPrompt());
-        let batchCountLog = `batch ${i + 1} of ${batchCount}\n`;
+        let batchCountLog = `Rendering batch ${i + 1} of ${batchCount}`;
         console.log(batchCountLog);
+        render(getPrompt());
     }
 } else {
     let dynprompt;
@@ -286,15 +286,15 @@ if (!iterateMode){
     p = computeTotalPromptCount(dynPrompt);
     if (p > maxIter){
         console.log(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
-        console.log("Reduce the number of categories used in prompt.")
-        return;
-    }
-    let k = 1;
-    console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
-    for (let generatedPrompt of generatePrompts(dynPrompt)) {
-        console.log(`iterating render ${k} of ${p}\n`);
-        render(generatedPrompt); // Do something with each generated prompt
-        k++;
+        console.log("Reduce the number of categories used in prompt.");
+    } else {
+        let k = 1;
+        console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
+        for (let generatedPrompt of generatePrompts(dynPrompt)) {
+            console.log(`iterating render ${k} of ${p}\n`);
+            render(generatedPrompt); // Do something with each generated prompt
+            k++;
+        }
     }
 }
 
@@ -331,7 +331,7 @@ function* generatePrompts(dynamicPrompt) {
 function selectRandomPrompt() {
   // Generate a random index to select a random prompt
   const randomIndex = Math.floor(Math.random() * prompts.length);
-  console.log(`Selected ${randomIndex} of ${prompts.length}`)
+  console.log(`Selected prompt/configuration ${randomIndex} of ${prompts.length}`)
   // Get the randomly selected prompt object
   const selectedPrompt = prompts[randomIndex];
   // Extract prompt string, LoRa filenames, and weights
@@ -423,7 +423,6 @@ function getPrompt () {
         console.log("Using UI Prompt");
         promptString = userPrompt;
         } else {
-        console.log("Selecting dynamic prompt and configuration.");
         promptData = selectRandomPrompt();
         //console.log(promptData);
         promptString = getPromptString(promptData);
@@ -466,8 +465,18 @@ function setLoras (myLoras){
     return loras
 }
 
+function timer (start){
+    const end = Date.now();
+    const duration = end - start;
+    const minutes = Math.floor(duration / 60000);
+    let seconds = Math.floor((duration % 60000) / 1000);
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+    console.log(`✔︎ Render time ‣ ${minutes}:${seconds}\n`);
+}
+
 // Run pipeline
 function render (promptString){
+    let start = Date.now();
     let editedString = replaceWildcards(promptString, categories);
     let neg;
     let myConfiguration = configuration;
@@ -491,6 +500,8 @@ function render (promptString){
         prompt: editedString,
         negativePrompt: neg
     });
+    //Output render time elapsed
+    timer(start);
 }
 
 // Function to replace wildcards with random options
