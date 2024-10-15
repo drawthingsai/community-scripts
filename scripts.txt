@@ -2,6 +2,7 @@ flux-auto-workflow
 wildcards
 detailer
 single-detailer
+dynamic-prompts
 edit-background
 wallpaper
 creative-upscale
