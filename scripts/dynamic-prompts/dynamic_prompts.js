@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author zanshinmu
-// v3.5.1
+// v3.5.2
 /**
  * Documentation for "Dynamic Prompts" Script (Version 3.5) for "Draw Things"
  *
@@ -37,7 +37,7 @@
  */
 
 //Version
-const versionString = "3.5.1"
+const versionString = "3.5.2"
 //Maximum iterations for Iterate Mode
 const maxIter = 500
 //store selected prompt/LoRA data
@@ -504,7 +504,6 @@ function render (promptString){
     timer(start);
 }
 
-// Function to replace wildcards with random options
 function replaceWildcards(promptString, categories) {
     const wildcardRegex = /{(\w+)(?::(\d+)(?:-(\d+))?)?}/g;
 
@@ -516,13 +515,10 @@ function replaceWildcards(promptString, categories) {
 
             while (options.size < count) {
                 let randomOption = categoryOptions[Math.floor(Math.random() * categoryOptions.length)];
-                
-                // Check if the selected option contains another wildcard
-                if (wildcardRegex.test(randomOption)) {
-                    // Recursively expand the wildcard in the selected option
-                    randomOption = replaceWildcards(randomOption, categories);
-                }
-                
+
+                // Recursively expand the wildcard in the selected option
+                randomOption = replaceWildcards(randomOption, categories);
+
                 options.add(randomOption);
             }
 
@@ -531,11 +527,16 @@ function replaceWildcards(promptString, categories) {
         return match; // If category not found, return the original match
     }
 
-    // Recursively replace all wildcards in the prompt string
-    let editedString = promptString.replace(wildcardRegex, replaceWildcard);
+    let editedString = promptString;
+
+    // Recursively replace wildcards until there are none left
+    while (wildcardRegex.test(editedString)) {
+        editedString = editedString.replace(wildcardRegex, replaceWildcard);
+    }
 
     return editedString;
 }
+
 
 // Function to get a random count within the specified range or default to 1 if range not provided
 function getRandomCount(minCount, maxCount) {
