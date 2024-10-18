@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.5
+// v3.5.6
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -41,7 +41,7 @@
  */
 
 //Version
-const versionString = "v3.5.5"
+const versionString = "v3.5.6"
 //Maximum iterations for Iterate Mode
 const maxIter = 500
 //store selected prompt/LoRA data
@@ -237,31 +237,36 @@ const categories = {
 
 // UI
 const categoryNames = Object.keys(categories).join(', ');
+const seedOptions = ["Random","Increment","Static"];
 const okButton = "Start";
 const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
 const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
                   " located in the script's 'const prompts' object.";
+
 const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
   return [
     this.section(header, aboutText, [
-        this.switch(false, "Enter UI Prompt"),
-        this.switch(false, "Lock configuration"),
-        this.switch(false, "Iterate Mode"),
-        this.switch(true, "Download Models"),
-        this.slider(10, this.slider.fractional(0), 1, 2000, "batch count"),
-        ]),
-    this.section("Output:", "Output rendered images to custom location", [
-                this.directory('${filesystem.pictures.path}')
+      this.section("Seed Mode", "", [this.segmented(1, seedOptions),
+             this.slider(10, this.slider.fractional(0), 1, 2000, "batch count")]),
+      this.section("Output:", "Output rendered images to custom location", [
+        this.directory(`${filesystem.pictures.path}`)]),
+      this.switch(false, "Enter UI Prompt"),
+      this.switch(false, "Lock configuration"),
+      this.switch(false, "Iterate Mode"),
+      this.switch(true, "Download Models"),
     ])
   ];
 });
+
 // Parse UI input
-let useUiPrompt = userSelection[0][0];
-let overrideModels = userSelection[0][1];
-let iterateMode = userSelection[0][2];
-let downloadModels = userSelection[0][3];
-let batchCount = userSelection[0][4];
-let outputDir = userSelection[1][0];
+const seedMode = userSelection[0][0][0];
+const batchCount = userSelection[0][0][1];
+const outputDir = userSelection[0][1][0];
+const useUiPrompt = userSelection[0][2];
+const overrideModels = userSelection[0][3];
+const iterateMode = userSelection[0][4];
+const downloadModels = userSelection[0][5];
+
 
 if (iterateMode){
     console.log("Iterate Mode");
@@ -283,7 +288,7 @@ if (useUiPrompt) {
     });
     uiPrompt = userSelection[0][3][0];
 }
-//console.log(JSON.stringify(userSelection));
+
 
 // Get configuration
 const configuration = pipeline.configuration;
@@ -527,7 +532,11 @@ function render (promptString){
     let editedString = replaceWildcards(promptString, categories);
     let neg;
     let myConfiguration = configuration;
+    let mySeed = configuration.seed;
     myConfiguration.batchSize = 1;
+    // Set seed
+    myConfiguration.seed = getSeed(mySeed);
+    
     if (useUiPrompt){
        neg = uiNegPrompt;
     } else {
@@ -548,6 +557,29 @@ function render (promptString){
     });
     //Output render time elapsed
     timer(start);
+}
+
+function getSeed(oldSeed){
+    const MAX_INT_32 = 2147483647;
+    let seed = 0;
+    
+    switch (seedMode) {
+        case 0: // Random
+            seed = Math.floor(Math.random() * (MAX_INT_32));
+            break;
+        
+        case 1: // Iterate
+            if (seed < MAX_INT_32){ //Wrap if seed exceeds MAX_INT_32
+                seed = ++oldSeed;
+            }
+            break;
+            
+        case 2: // Static
+            seed = oldSeed;
+            break;
+    }
+    console.log(`${seedOptions[seedMode]} Seed Mode, Seed: ${seed}`);
+    return seed;
 }
 
 function replaceWildcards(promptString, categories) {
