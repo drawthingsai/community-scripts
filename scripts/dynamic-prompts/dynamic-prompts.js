@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.4
+// v3.5.5
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -41,7 +41,7 @@
  */
 
 //Version
-const versionString = "v3.5.4"
+const versionString = "v3.5.5"
 //Maximum iterations for Iterate Mode
 const maxIter = 500
 //store selected prompt/LoRA data
@@ -527,14 +527,13 @@ function render (promptString){
     let editedString = replaceWildcards(promptString, categories);
     let neg;
     let myConfiguration = configuration;
+    myConfiguration.batchSize = 1;
     if (useUiPrompt){
        neg = uiNegPrompt;
     } else {
        neg = promptData.negativePrompt;
         if (!overrideModels){
             myConfiguration.model = promptData.model;
-            //Default to random seed, configuration overrides
-            myConfiguration.seed = -1;
             //Apply configuration changes, if any
             myConfiguration = Object.assign(configuration, promptData.configuration);
             myConfiguration.loras = loraNamestoFiles(promptData.configuration.loras);
