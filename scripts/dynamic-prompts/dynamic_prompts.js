@@ -1,9 +1,11 @@
 //@api-1.0
 // dynamic prompts
-// author zanshinmu
-// v3.5.2
+// author: zanshinmu
+// v3.5.4
+// Discord Thread for Dynamic Prompts:
+// https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
- * Documentation for "Dynamic Prompts" Script (Version 3.5) for "Draw Things"
+ * Documentation for "Dynamic Prompts" Script (Version 3.5.4) for "Draw Things"
  *
  * This script generates dynamic prompts for the "Draw Things" application. Customize it to enhance your creative experience.
  *
@@ -28,27 +30,32 @@
  * User Interface:
  * - Use UI Prompt:
  *   Process the prompt in the UI box instead of selecting random prompts.
+ 
  * - Lock configuration:
  *   When selecting random prompts, do not change configurations.
+ 
  * - Iterate Mode:
  *   Iterated generation of all combinations of dynamic prompt.  Best used with UI Prompt.
- *   BatchCount is not used. Iterate mode can create very large numbers.
- *   To reduce the numbers, eliminate a few dynamic categories from your prompt.
+ *   BatchCount is not used in Iterate mode. Iterate mode can create very large numbers.
+ *   To reduce the numbers, eliminate categories from your prompt.
  */
 
 //Version
-const versionString = "3.5.2"
+const versionString = "v3.5.4"
 //Maximum iterations for Iterate Mode
 const maxIter = 500
 //store selected prompt/LoRA data
 let promptData;
 let userPrompt = '';
+let uiPrompt = '';
 // Default example prompt for UI demonstrating category use
 const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 /* These are the prompts randomly selected from if UI Prompt isn't valid.
    Modify prompts to provide dynamic prompts with LoRAs which will be randomly selected from if a valid dynamic prompt is not found in the UI.
+ 
    As of 3.0.1 there can be a 'configuration' object for each prompt which contains arbitrary settings which will be passed on to the pipeline at runtime.  These settings correspond to the possible values of pipeline.configuration
+ 
    There is an important caveat: Sampler is tricky because it looks like a string with the sampler name but it's actually an integer from a lookup table, so you want to find the number that corresponds to the desired sampler and use that instead (without quotes).
  
  Here is the current sampler lookup table:
@@ -230,51 +237,77 @@ const categories = {
 
 // UI
 const categoryNames = Object.keys(categories).join(', ');
+const okButton = "Start";
 const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
-const aboutText = "Selects randomly from " + `${prompts.length}`+ " dynamic prompts" + "\nGenerates batch images using '{}' to randomize categories in prompt"
-const userSelection = requestFromUser("Dynamic Prompts", "Start", function() {
+const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
+                  " located in the script's 'const prompts' object.";
+const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
   return [
-    this.section(header, aboutText, []),
-    this.section("Categories", categoryNames, [
-        this.textField(defaultPrompt, pipeline.prompts.prompt, true, 60),
-        this.slider(10, this.slider.fractional(0), 1, 2000, "batch count"),
-        this.switch(false, "Use UI Prompt"),
+    this.section(header, aboutText, [
+        this.switch(false, "Enter UI Prompt"),
         this.switch(false, "Lock configuration"),
         this.switch(false, "Iterate Mode"),
-        this.switch(true, "Download Models")
+        this.switch(true, "Download Models"),
+        this.slider(10, this.slider.fractional(0), 1, 2000, "batch count"),
+        ]),
+    this.section("Output:", "Output rendered images to custom location", [
+                this.directory('${filesystem.pictures.path}')
     ])
   ];
 });
-// Number of prompts to generate
-let batchCount = userSelection[1][1];
-let uiPrompt = userSelection[1][0];
-let useUiPrompt = userSelection[1][2];
-let overrideModels = userSelection[1][3];
-let iterateMode = userSelection[1][4];
-let downloadModels = userSelection[1][5];
+// Parse UI input
+let useUiPrompt = userSelection[0][0];
+let overrideModels = userSelection[0][1];
+let iterateMode = userSelection[0][2];
+let downloadModels = userSelection[0][3];
+let batchCount = userSelection[0][4];
+let outputDir = userSelection[1][0];
+
 if (iterateMode){
     console.log("Iterate Mode");
+}
+
+if (useUiPrompt) {
+    const userSelection = requestFromUser("Dynamic Prompts: UI Prompt", okButton, function() {
+        return [
+            this.section("Dynamic Prompt Syntax","", [
+                this.section("{category}","Replaces category with random item", []),
+                this.section("{category:2}","Replaces category with 2 random items", []),
+                this.section("{category:1-3}","Replaces category with 1 to 3 random items", []),
+            this.section("UI Prompt", "Modify the dynamic prompt to your desire", [
+                this.textField(defaultPrompt, pipeline.prompts.prompt, true, 80),
+                this.section("Available Categories", categoryNames, [])
+                ])
+            ])
+        ]; // Closing bracket for the return array
+    });
+    uiPrompt = userSelection[0][3][0];
 }
 //console.log(JSON.stringify(userSelection));
 
 // Get configuration
 const configuration = pipeline.configuration;
 const defaultLoras = pipeline.configuration.loras;
-//console.log(JSON.stringify(configuration));
 const uiNegPrompt = pipeline.prompts.negativePrompt;
-if (isPromptValid(uiPrompt, categories)) {
-    if(useUiPrompt){
+
+if(useUiPrompt){
+    if(isPromptValid(uiPrompt, categories)){
         console.log("Valid UI prompt detected.");
         userPrompt = uiPrompt; // Use the UI prompt
+    } else {
+        console.log("Error, Invalid UI Prompt");
+        return;
     }
 }
 
 // Main batch loop
 if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
-        let batchCountLog = `Rendering batch ${i + 1} of ${batchCount}`;
+        let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
         console.log(batchCountLog);
         render(getPrompt());
+        //Save to custom location
+        customImageSave(pipeline, i);
     }
 } else {
     let dynprompt;
@@ -291,10 +324,22 @@ if (!iterateMode){
         let k = 1;
         console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
         for (let generatedPrompt of generatePrompts(dynPrompt)) {
-            console.log(`iterating render ${k} of ${p}\n`);
-            render(generatedPrompt); // Do something with each generated prompt
+            console.log(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
+            render(generatedPrompt);
+            //Save to custom location
+            customImageSave(pipeline, k);
             k++;
         }
+    }
+}
+
+function customImageSave(pipeline, batchCount){
+    if(outputDir) {
+          // Save File
+          let saveLocation = `${outputDir}/${pipeline.configuration.seed}_${Date.now()}_${batchCount}.png`
+          console.log(`Saving to ${saveLocation}\n\n`);
+          canvas.saveImage(saveLocation, true); // save the image currently on canvas to a file.
+        return saveLocation;
     }
 }
 
@@ -310,7 +355,10 @@ function computeTotalPromptCount(dynamicPrompt) {
 
 function* generatePrompts(dynamicPrompt) {
     function cartesian(...arrays) {
-        return arrays.reduce((acc, curr) => acc.flatMap(d => curr.map(e => [d, e].flat())));
+        if (arrays.length === 0) return [];
+        return arrays.reduce((acc, curr) => {
+            return acc.flatMap(a => curr.map(b => [].concat(a, b)));
+        }, [[]]);
     }
 
     let placeholders = dynamicPrompt.match(/{(\w+)}/g).map(p => p.replace(/[{}]/g, ''));
@@ -327,11 +375,10 @@ function* generatePrompts(dynamicPrompt) {
     }
 }
 
-
 function selectRandomPrompt() {
   // Generate a random index to select a random prompt
   const randomIndex = Math.floor(Math.random() * prompts.length);
-  console.log(`Selected prompt/configuration ${randomIndex} of ${prompts.length}`)
+  console.log(`Selected dynamic prompt ${randomIndex} of ${prompts.length}`)
   // Get the randomly selected prompt object
   const selectedPrompt = prompts[randomIndex];
   // Extract prompt string, LoRa filenames, and weights
