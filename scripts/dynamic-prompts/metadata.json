@@ -1,6 +1,6 @@
 {
- "name": "Dynamic Prompts for Draw Things",
+ "name": "Dynamic Prompts",
  "author": "Zanshinmu",
- "file": "dynamic_prompts.js",
+ "file": "dynamic-prompts.js",
  "description": "Allows dynamic prompts features similar to sd-dynamic-prompts in Draw Things."
 }
