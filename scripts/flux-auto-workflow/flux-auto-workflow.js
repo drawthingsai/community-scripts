@@ -1,5 +1,5 @@
 //@api-1.0
-// v4.1.2
+// v4.2
 // Author: @czkoko
 // Automatic workflow for Flux, including text-to-image, batch image refine, outpainting, batch prompts, random prompt, etc.
 //
@@ -25,12 +25,14 @@ const customStyle = [
   "Style of the movie \"The Grand Budapest Hotel\", by Wes Anderson",
   "Dynamic Marvel comic book layout with multiple scene transitions, rich character expressions, and storytelling through irregular panel design. Bold, graphic illustration with a strong visual hierarchy and narrative flow",
   "Hyper-realistic photography, Vibrant, saturated colors like electric pinks, greens, and yellows with sharp, high-contrast shadows. A bold, energetic style that feels modern and dynamic, reminiscent of pop art or street art",
+  "Hyperrealistic photographs with a tilt-shift effect, blurring the background and creating a miniature world feel. Bright, cheerful colours and playful subjects", // Miniature World Photography
+  "Abstract art with bold geometric shapes and vibrant colours. Clean lines and simple compositions create a modern and minimalist aesthetic", // Geometric Abstraction
+  "Double exposure photography blending two or more images together. Creates a surreal, layered effect with ghostly figures and dreamlike landscapes", // Double Exposure Art
 ];
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-const version = "v4.1.2";
+const version = "v4.2";
 var promptsSource = pipeline.prompts.prompt;
 
 const themePreview = [
@@ -63,15 +65,16 @@ const stylePreview = [
 ];
 
 const configuration = pipeline.configuration;
+const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "Dream Shaper", "SDXL", "SD3 Medium", "SD1"];
 let customModelName = checkModel();
-if (checkModel() != "Custom") {
-  if (customModelName == "Flux") {
-    customModelName = `🧩  Custom Model `;
+if (customModelName != "Flux") {
+  if (modelPresets.indexOf(customModelName) == -1) {
+    customModelName = `⚠️  ${customModelName} `;
   } else {
     customModelName = `🧩  ${customModelName} `;
   }
 } else {
-  customModelName = `⚠️  Unknown Model `;
+  customModelName = `🧩  Custom Model `;
 }
 
 const promptsSourceInput = requestFromUser(
@@ -787,6 +790,20 @@ const commonFantasticActions = [
 ];
 
 const dailyScenes = [
+  ["at a competitive eating contest", [
+    "shoveling food into mouth with impressive speed",
+    "trying not to gag on the sheer volume of food consumed",
+    "strategically pacing oneself to outlast the competition",
+    "experiencing a severe case of the meat sweats",
+    "emerging victorious, covered in food, but feeling strangely proud"
+  ]],
+  ["at a lively bonfire on a cool autumn evening", [
+    "roasting marshmallows over the fire",
+    "telling stories and sharing laughter with friends",
+    "warming hands by the flames",
+    "watching the embers glow in the darkness",
+    "singing songs accompanied by a guitar"
+  ]],
   ["on a deserted road", [
     "riding a Harley",
     "driving a retro car",
@@ -1312,6 +1329,46 @@ const fashionScenes = [
 ];
 
 const fantasticScenes = [
+  ["inside a giant music box, surrounded by intricate gears and melodies", [
+    "reaching out to touch a spinning gear, watching the music change",
+    "dancing to the tinkling melody, twirling among the moving parts",
+    "sitting on a tiny bench, listening to the enchanting music"
+  ]],
+  ["in a room filled with giant balloons of different shapes and sizes", [
+    "bouncing off a giant balloon, feeling the soft, rubbery surface",
+    "floating through the room, holding onto a cluster of balloons",
+    "popping a balloon and watching the confetti rain down"
+  ]],
+  ["on a giant, spinning record player", [
+    "carefully walking across the spinning record, trying not to fall off",
+    "dancing to the music, feeling the vibrations through their feet",
+    "sitting on the needle, enjoying the ride as the music plays"
+  ]],
+  ["in a world made entirely of paper", [
+    "folding themselves into a paper airplane and gliding through the air",
+    "writing a message on a giant piece of paper, using a giant pen",
+    "creating origami animals and watching them come to life"
+  ]],
+  ["on a giant dandelion seed head, floating on the breeze", [
+    "making a wish and blowing on the seeds, watching them scatter in the wind",
+    "lying on the fluffy seed head, feeling the gentle breeze",
+    "holding onto the seed head as it floats across the sky, enjoying the journey"
+  ]],
+  ["on a cloud, drifting lazily across a vibrant sunset sky", [
+    "lying on their back, gazing up at the swirling colors",
+    "reaching out to touch the fluffy clouds surrounding them",
+    "sitting cross-legged, meditating peacefully as the sun dips below the horizon"
+  ]],
+  ["in a field of fireflies that illuminate the night", [
+    "catching a firefly in their hand and watching it glow",
+    "walking through the field, surrounded by a swirling dance of light",
+    "lying on the ground, gazing up at the twinkling fireflies like stars"
+  ]],
+  ["in a giant bird's nest high in a tree", [
+    "looking down at the world below from the edge of the nest",
+    "curling up in the soft nest, feeling safe and secure",
+    "reaching out to touch the giant eggs nestled beside them"
+  ]],
   ["on the surface of a mirror-like ocean reflecting a kaleidoscope sky", [
     "walking on the water's surface, the sky reflecting in their footsteps",
     "sitting on the water, legs crossed, the reflection distorting beneath",
@@ -1899,7 +1956,7 @@ if (workflow == 0 || workflow == 1) {
 } else if (workflow == 2) {
   generateText = "🪄 Processing ";
 }
-const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "Dream Shaper", "SDXL", "SD3 Medium", "SD1"];
+
 const isFluxDownload = pipeline.areModelsDownloaded(["FLUX.1 [dev] (Exact)", "FLUX.1 [dev]", "FLUX.1 [dev] (8-bit)"]);
 let tip = ` •   When there are multiple Flux models with different precisions, the one with the highest precision is used first. The priority is: FLUX.1 [dev] (Exact) >> FLUX.1 [dev] >> FLUX.1 [dev] (8-bit). If it is not downloaded, FLUX.1 [dev] (8-bit) is used first.`;
 
@@ -1952,7 +2009,10 @@ const userInputs = requestFromUser(
         )
       );
     } else if (workflow == 1) {
-      const i = modelPresets.indexOf(checkModel());
+      var i = modelPresets.indexOf(checkModel());
+      if (i == -1) {
+        i = 0;
+      }
       const n = i == 0 ? "Unknown Model ⚠︎" : "Automatically Configured";
       widget.push(
         this.section(
@@ -2000,7 +2060,7 @@ const userInputs = requestFromUser(
           ]
         ),
         this.section(
-          "❖  Detail Optimization",
+          "❖  Refine Strength",
           ` •   Standard Mode: Slightly enhances texture details, improves fine structures,\n      and maintains similarity to the original image.\n •   Enhance Mode: Significantly enhances details and clarity, can improve limb problems,\n      but will drastically change the original appearance of the image.`,
           [
             this.segmented(1, ["📷  Standard   ", "📸  Enhance   "]),
@@ -2368,11 +2428,11 @@ function outpainting(info, srcPrompt) {
       y = (-imageHeight / zoom / 2) + (imageHeight / 2);
       break;
     case 3:
-      x = (-imageWidth / zoom / 2) + (imageWidth / 2 + imageHeight * (1 - zoom) * (1 - zoom));
+      x = (-imageWidth / zoom / 2) + (imageWidth / 2 + imageWidth * (1 - zoom) * (1 - zoom));
       y = (-imageHeight / zoom / 2) + (imageHeight / 2);
       break;
     case 4:
-      x = (-imageWidth / zoom / 2) + (imageWidth / 2 - imageHeight * (1 - zoom) * (1 - zoom));
+      x = (-imageWidth / zoom / 2) + (imageWidth / 2 - imageWidth * (1 - zoom) * (1 - zoom));
       y = (-imageHeight / zoom / 2) + (imageHeight / 2);
       break;
   }
@@ -2430,7 +2490,7 @@ function initCustomModel() {
     case "Dream Shaper":
       configuration.sampler = 1;
       configuration.guidanceScale = 2.0;
-      configuration.steps = 10;
+      configuration.steps = 12;
       break;
     case "Kolors":
       configuration.sampler = 12;
@@ -2490,7 +2550,7 @@ function checkModel() {
   if (model.includes("sd3_medium")) {
     return "SD3 Medium";
   }
-  return "Custom";
+  return model.split("_")[0];
 }
 
 function calcShift(h, w) {
@@ -2556,3 +2616,25 @@ const minutes = Math.floor(duration / 60000);
 let seconds = Math.floor((duration % 60000) / 1000);
 seconds = seconds < 10 ? '0' + seconds : seconds;
 console.log(`✔︎ Total time ‣ ${minutes}:${seconds}`);
+
+let msg = "";
+if (workflow != 2) {
+  msg = "Next, you can select the Image Processor workflow to Refine or Outpainting the images.";
+} else {
+  msg = "If you are not satisfied with the results, you can adjust the options to get different Refine or Outpainting result.";
+}
+
+requestFromUser(
+  `Flux Auto Workflow ${version}`,
+  "Exit",
+  function () {
+    return [
+      this.section(
+        "                                  🎉 Image generation completed",
+        "",
+        []
+      ),
+      this.textField(msg, "", true, 430),
+    ];
+  }
+);
