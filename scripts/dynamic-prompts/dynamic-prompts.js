@@ -41,13 +41,15 @@
  */
 
 //Version
-const versionString = "v3.5.6"
+const versionString = "v3.5.7";
 //Maximum iterations for Iterate Mode
-const maxIter = 500
+const maxIter = 500;
+const DEBUG = false;
 //store selected prompt/LoRA data
 let promptData;
 let userPrompt = '';
 let uiPrompt = '';
+
 // Default example prompt for UI demonstrating category use
 const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
@@ -292,7 +294,6 @@ if (useUiPrompt) {
 
 // Get configuration
 const configuration = pipeline.configuration;
-const defaultLoras = pipeline.configuration.loras;
 const uiNegPrompt = pipeline.prompts.negativePrompt;
 
 if(useUiPrompt){
@@ -309,7 +310,7 @@ if(useUiPrompt){
 if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
         let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
-        console.log(batchCountLog);
+        console.warn(batchCountLog);
         render(getPrompt());
         //Save to custom location
         customImageSave(pipeline, i);
@@ -323,13 +324,13 @@ if (!iterateMode){
     }
     p = computeTotalPromptCount(dynPrompt);
     if (p > maxIter){
-        console.log(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
-        console.log("Reduce the number of categories used in prompt.");
+        console.warn(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
+        console.warn("Reduce the number of categories used in prompt.");
     } else {
         let k = 1;
         console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
         for (let generatedPrompt of generatePrompts(dynPrompt)) {
-            console.log(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
+            console.warn(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
             render(generatedPrompt);
             //Save to custom location
             customImageSave(pipeline, k);
@@ -391,10 +392,11 @@ function selectRandomPrompt() {
   let myneg = selectedPrompt.negativePrompt;
   let mymodel = selectedPrompt.model;
   let myconfig = selectedPrompt.configuration;
-  const loras = selectedPrompt.loras.map(lora => ({ file: lora.file, weight: lora.weight }));
-  let myloras = getAssociatedLoRas(loras);
+  //Prepare LoRAs
+  const myLoras = resolveLoras(selectedPrompt.loras);
+  const loras = myLoras.map(lora => ({ file: lora.file, weight: lora.weight }));
   myconfig.model = mymodel;
-  myconfig.loras=myloras;
+  myconfig.loras = loras;
   // Store the promptData object
   let promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
   if (downloadModels){
@@ -420,11 +422,17 @@ function getModels(promptData){
     pipeline.downloadBuiltins(models);
 }
 
-function loraNamestoFiles(loras){
+// Resolves whether LoRAs are filenames or
+function resolveLoras(loras){
+    const FILESUFFIX = ".ckpt";
     for (let i = 0; i < loras.length; i++) {
-        let loraname = loras[i].file;
-        let lorafile = pipeline.findLoRAByName(loraname);
-        loras[i]=lorafile;
+        if (!loras[i].file.endsWith(FILESUFFIX)){
+            let myfile = pipeline.findLoRAByName(loras[i].file).file;
+            if (DEBUG){
+                console.log(`Filename ${loras[i].file} resolved to ${JSON.stringify(myfile)}`);
+            }
+            loras[i].file = myfile;
+        }
     }
     return loras;
 }
@@ -482,41 +490,6 @@ function getPrompt () {
     return promptString
 }
 
-function getAssociatedLoRas(loras) {
-    if(!overrideModels){
-      let validLoras = setLoras(loras);
-      const mergedLoras = defaultLoras.concat(validLoras);
-      return mergedLoras
-    }else{
-      return defaultLoras
-    }
-}
-
-// is name in defaultLoras?
-function isDefaultLora(lora){
-    for (let i = 0; i < defaultLoras.length; i++) {
-        if (defaultLoras[i].file === lora.file){
-            return true;
-        } else{
-            return false;
-        }
-    }
-}
-
-
-// Only overwrite valid Loras from prompts
-function setLoras (myLoras){
-    let loras=[];
-    for (let i = 0; i < myLoras.length; i++) {
-        if (myLoras[i].file !== ''){
-            if(!isDefaultLora(myLoras[i])){
-                loras.push(myLoras[i]);
-            }
-        }
-    }
-    return loras
-}
-
 function timer (start){
     const end = Date.now();
     const duration = end - start;
@@ -545,7 +518,7 @@ function render (promptString){
             myConfiguration.model = promptData.model;
             //Apply configuration changes, if any
             myConfiguration = Object.assign(configuration, promptData.configuration);
-            myConfiguration.loras = loraNamestoFiles(promptData.configuration.loras);
+            myConfiguration.loras = promptData.configuration.loras;
         }
     }
     //Clear canvas
