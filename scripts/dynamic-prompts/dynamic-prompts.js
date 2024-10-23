@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.6
+// v3.5.7
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -45,8 +45,8 @@ const versionString = "v3.5.7";
 //Maximum iterations for Iterate Mode
 const maxIter = 500;
 const DEBUG = false;
-//store selected prompt/LoRA data
-let promptData;
+//store selected prompt data and UI config
+let UICONFIG = pipeline.configuration;
 let userPrompt = '';
 let uiPrompt = '';
 
@@ -291,9 +291,7 @@ if (useUiPrompt) {
     uiPrompt = userSelection[0][3][0];
 }
 
-
-// Get configuration
-const configuration = pipeline.configuration;
+// Store UI negative prompt for later
 const uiNegPrompt = pipeline.prompts.negativePrompt;
 
 if(useUiPrompt){
@@ -311,18 +309,11 @@ if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
         let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
         console.warn(batchCountLog);
-        render(getPrompt());
-        //Save to custom location
-        customImageSave(pipeline, i);
+        render(getPrompt(), i);
     }
 } else {
-    let dynprompt;
-    if (useUiPrompt){
-        dynPrompt = userPrompt;
-    } else {
-        dynPrompt = getPromptString(selectRandomPrompt());
-    }
-    p = computeTotalPromptCount(dynPrompt);
+    let promptData = getPrompt();
+    p = computeTotalPromptCount(promptData.prompt);
     if (p > maxIter){
         console.warn(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
         console.warn("Reduce the number of categories used in prompt.");
@@ -330,22 +321,12 @@ if (!iterateMode){
         let k = 1;
         console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
         for (let generatedPrompt of generatePrompts(dynPrompt)) {
+            let myConfig = promptData;
+            promptData.prompt = dynPrompt;
             console.warn(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
-            render(generatedPrompt);
-            //Save to custom location
-            customImageSave(pipeline, k);
+            render(generatedPrompt, k);
             k++;
         }
-    }
-}
-
-function customImageSave(pipeline, batchCount){
-    if(outputDir) {
-          // Save File
-          let saveLocation = `${outputDir}/${pipeline.configuration.seed}_${Date.now()}_${batchCount}.png`
-          console.log(`Saving to ${saveLocation}\n\n`);
-          canvas.saveImage(saveLocation, true); // save the image currently on canvas to a file.
-        return saveLocation;
     }
 }
 
@@ -402,6 +383,7 @@ function selectRandomPrompt() {
   if (downloadModels){
       getModels(promptData);
   }
+  console.warn(JSON.stringify(promptData));
   return promptData;
 }
 
@@ -435,11 +417,6 @@ function resolveLoras(loras){
         }
     }
     return loras;
-}
-
-// Function to get the prompt string from the object returned by selectRandomPrompt
-function getPromptString(p) {
-  return p.prompt;
 }
 
 // Function to extract and validate category names and their requested item count or range from the uiPrompt
@@ -479,15 +456,14 @@ function isPromptValid(uiPrompt, categories) {
 
 //get prompt each iteration
 function getPrompt () {
+    let promptData = {};
     if (useUiPrompt) {
         console.log("Using UI Prompt");
-        promptString = userPrompt;
+        promptData.prompt = userPrompt;
         } else {
         promptData = selectRandomPrompt();
-        //console.log(promptData);
-        promptString = getPromptString(promptData);
         }
-    return promptString
+    return promptData;
 }
 
 function timer (start){
@@ -500,36 +476,51 @@ function timer (start){
 }
 
 // Run pipeline
-function render (promptString){
+function render (promptData, batchCount){
+    // start timer
     let start = Date.now();
-    let editedString = replaceWildcards(promptString, categories);
+    // set generated prompt
+    let generatedPrompt = replaceWildcards(promptData.prompt, categories);
     let neg;
-    let myConfiguration = configuration;
-    let mySeed = configuration.seed;
-    myConfiguration.batchSize = 1;
-    // Set seed
-    myConfiguration.seed = getSeed(mySeed);
+    let finalConfiguration = {};
+    // Set seed according to user selection
+    let mySeed = getSeed(pipeline.configuration.seed);
+    console.log(JSON.stringify(UICONFIG));
     
     if (useUiPrompt){
+       finalConfiguration = UICONFIG;
+       finalConfiguration.loras = UICONFIG.loras;
        neg = uiNegPrompt;
     } else {
-       neg = promptData.negativePrompt;
+        neg = promptData.negativePrompt;
         if (!overrideModels){
-            myConfiguration.model = promptData.model;
             //Apply configuration changes, if any
-            myConfiguration = Object.assign(configuration, promptData.configuration);
-            myConfiguration.loras = promptData.configuration.loras;
+            finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
+            finalConfiguration.loras = promptData.configuration.loras;
+            console.log(finalConfiguration.model);
         }
     }
+    // Batch > 1 is no bueno
+    finalConfiguration.batchSize = 1;
+    finalConfiguration.seed = mySeed;
     //Clear canvas
     canvas.clear();
+    console.warn(JSON.stringify(finalConfiguration));
     pipeline.run({
-        configuration: myConfiguration,
-        prompt: editedString,
+        configuration: finalConfiguration,
+        prompt: generatedPrompt,
         negativePrompt: neg
     });
     //Output render time elapsed
     timer(start);
+    //Save Image if enabled
+    if(outputDir) {
+          // working around metadata bug by forcing our config onto the UI before saving
+          pipeline.configuration = finalConfiguration;
+          let savePath = `${outputDir}/${finalConfiguration.seed}_${Date.now()}_${batchCount}.png`
+          console.log(`Saving to ${savePath}\n\n`);
+          canvas.saveImage(savePath, true); // save the image currently on canvas to a file.
+    }
 }
 
 function getSeed(oldSeed){
