@@ -41,16 +41,15 @@
  */
 
 //Version
-const versionString = "v3.5.7";
+const versionString = "v3.5.8";
 //Maximum iterations for Iterate Mode
 const maxIter = 500;
 const DEBUG = false;
 //store selected prompt data and UI config
-let UICONFIG = pipeline.configuration;
 let userPrompt = '';
 let uiPrompt = '';
-
-// Default example prompt for UI demonstrating category use
+const UICONFIG = pipeline.configuration;
+//Default example prompt for UI demonstrating category use
 const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 /* These are the prompts randomly selected from if UI Prompt isn't valid.
@@ -309,11 +308,12 @@ if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
         let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
         console.warn(batchCountLog);
-        render(getPrompt(), i);
+        render(getDynamicPrompt(), i);
     }
 } else {
-    let promptData = getPrompt();
-    p = computeTotalPromptCount(promptData.prompt);
+    const promptData = getDynamicPrompt();
+    const dynPrompt = promptData.prompt;
+    p = computeTotalPromptCount(dynPrompt);
     if (p > maxIter){
         console.warn(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
         console.warn("Reduce the number of categories used in prompt.");
@@ -331,34 +331,105 @@ if (!iterateMode){
 }
 
 function computeTotalPromptCount(dynamicPrompt) {
-    let placeholders = dynamicPrompt.match(/{(\w+)}/g).map(p => p.replace(/[{}]/g, ''));
-    let totalCombinationCount = 1;
-    for (let placeholder of placeholders) {
-        const valueCount = categories[placeholder].length; // Get the number of values in each category
-        totalCombinationCount *= valueCount; // Multiply the counts to calculate the maximum possible number of combinations
+    // Find all unique top-level placeholders in the prompt
+    const regex = /{(\w+)}/g;
+    let match;
+    let placeholders = new Set();
+    while ((match = regex.exec(dynamicPrompt)) !== null) {
+        placeholders.add(match[1]);
     }
-    return totalCombinationCount;
+
+    // If no placeholders, return 1
+    if (placeholders.size === 0) {
+        return 1;
+    }
+
+    let totalCombinations = 1;
+
+    for (let placeholder of placeholders) {
+        const optionsCount = countPlaceholderOptions(placeholder, new Set());
+        totalCombinations *= optionsCount;
+    }
+
+    return totalCombinations;
+}
+
+function countPlaceholderOptions(placeholder, seenPlaceholders) {
+    if (seenPlaceholders.has(placeholder)) {
+        throw new Error(`Circular reference detected for placeholder '{${placeholder}}'`);
+    }
+
+    seenPlaceholders.add(placeholder);
+
+    const values = categories[placeholder];
+    if (!values) {
+        throw new Error(`Category '${placeholder}' not defined.`);
+    }
+
+    let totalOptions = 0;
+
+    for (let value of values) {
+        const optionsCount = countValueOptions(value, new Set(seenPlaceholders));
+        totalOptions += optionsCount;
+    }
+
+    seenPlaceholders.delete(placeholder);
+
+    return totalOptions;
+}
+
+function countValueOptions(value, seenPlaceholders) {
+    // Find all placeholders in the value
+    const regex = /{(\w+)}/g;
+    let match;
+    let placeholders = new Set();
+    while ((match = regex.exec(value)) !== null) {
+        placeholders.add(match[1]);
+    }
+
+    // If no placeholders, return 1
+    if (placeholders.size === 0) {
+        return 1;
+    }
+
+    let totalCombinations = 1;
+
+    for (let placeholder of placeholders) {
+        const optionsCount = countPlaceholderOptions(placeholder, seenPlaceholders);
+        totalCombinations *= optionsCount;
+    }
+
+    return totalCombinations;
 }
 
 function* generatePrompts(dynamicPrompt) {
-    function cartesian(...arrays) {
-        if (arrays.length === 0) return [];
-        return arrays.reduce((acc, curr) => {
-            return acc.flatMap(a => curr.map(b => [].concat(a, b)));
-        }, [[]]);
+    // Base case: if no placeholders, yield the prompt
+    if (!/{\w+}/.test(dynamicPrompt)) {
+        yield dynamicPrompt;
+        return;
     }
 
-    let placeholders = dynamicPrompt.match(/{(\w+)}/g).map(p => p.replace(/[{}]/g, ''));
-    let validPlaceholders = placeholders.filter(p => categories[p]);
-    let categoryValues = validPlaceholders.map(p => categories[p]);
-    let combinations = cartesian(...categoryValues);
+    // Find the first placeholder in the prompt
+    const regex = /{(\w+)}/g;
+    const match = regex.exec(dynamicPrompt);
 
-    for (let combination of combinations) {
-        let prompt = dynamicPrompt;
-        validPlaceholders.forEach((placeholder, i) => {
-            prompt = prompt.replace(`{${placeholder}}`, combination[i]);
-        });
-        yield prompt;
+    if (!match) {
+        yield dynamicPrompt;
+        return;
+    }
+
+    const placeholder = match[1];
+
+    const values = categories[placeholder];
+    if (!values) {
+        throw new Error(`Category '${placeholder}' not defined.`);
+    }
+
+    for (const value of values) {
+        // Replace all occurrences of the placeholder with the value
+        const newPrompt = dynamicPrompt.replace(new RegExp(`{${placeholder}}`, 'g'), value);
+        // Recursively generate prompts for the new prompt
+        yield* generatePrompts(newPrompt);
     }
 }
 
@@ -383,7 +454,9 @@ function selectRandomPrompt() {
   if (downloadModels){
       getModels(promptData);
   }
-  console.warn(JSON.stringify(promptData));
+    if (DEBUG){
+        console.warn(JSON.stringify(promptData));
+    }
   return promptData;
 }
 
@@ -404,19 +477,24 @@ function getModels(promptData){
     pipeline.downloadBuiltins(models);
 }
 
-// Resolves whether LoRAs are filenames or
+// Resolves LoRAs to filename
 function resolveLoras(loras){
     const FILESUFFIX = ".ckpt";
+    const myLoras = [];
     for (let i = 0; i < loras.length; i++) {
-        if (!loras[i].file.endsWith(FILESUFFIX)){
-            let myfile = pipeline.findLoRAByName(loras[i].file).file;
-            if (DEBUG){
-                console.log(`Filename ${loras[i].file} resolved to ${JSON.stringify(myfile)}`);
+        let myLora = loras[i];
+        let myname = myLora.file;
+        if (!myname.endsWith(FILESUFFIX)){
+                let myfile = pipeline.findLoRAByName(myname).file;
+                // Assign resolved name
+                myLora.file = myfile;
+                myLoras.push(myLora);
+                if (DEBUG){
+                   console.log(`Filename ${myname} resolved to ${myfile}`);
+                }
             }
-            loras[i].file = myfile;
         }
-    }
-    return loras;
+    return myLoras;
 }
 
 // Function to extract and validate category names and their requested item count or range from the uiPrompt
@@ -455,7 +533,7 @@ function isPromptValid(uiPrompt, categories) {
 }
 
 //get prompt each iteration
-function getPrompt () {
+function getDynamicPrompt () {
     let promptData = {};
     if (useUiPrompt) {
         console.log("Using UI Prompt");
@@ -482,10 +560,12 @@ function render (promptData, batchCount){
     // set generated prompt
     let generatedPrompt = replaceWildcards(promptData.prompt, categories);
     let neg;
-    let finalConfiguration = {};
+    let finalConfiguration = Object.create(pipeline.configuration);
     // Set seed according to user selection
     let mySeed = getSeed(pipeline.configuration.seed);
-    console.log(JSON.stringify(UICONFIG));
+    if (DEBUG){
+        console.log(JSON.stringify(finalConfiguration));
+    }
     
     if (useUiPrompt){
        finalConfiguration = UICONFIG;
@@ -497,15 +577,21 @@ function render (promptData, batchCount){
             //Apply configuration changes, if any
             finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
             finalConfiguration.loras = promptData.configuration.loras;
-            console.log(finalConfiguration.model);
+            if (DEBUG){
+                console.log(finalConfiguration.model);
+            }
         }
     }
     // Batch > 1 is no bueno
     finalConfiguration.batchSize = 1;
     finalConfiguration.seed = mySeed;
-    //Clear canvas
+    
     canvas.clear();
-    console.warn(JSON.stringify(finalConfiguration));
+    
+    if(DEBUG){
+        console.warn(JSON.stringify(finalConfiguration));
+    }
+    
     pipeline.run({
         configuration: finalConfiguration,
         prompt: generatedPrompt,
@@ -514,13 +600,47 @@ function render (promptData, batchCount){
     //Output render time elapsed
     timer(start);
     //Save Image if enabled
+    savetoImageDir(finalConfiguration, batchCount);
+}
+
+function savetoImageDir(config, batchCount){
     if(outputDir) {
-          // working around metadata bug by forcing our config onto the UI before saving
-          pipeline.configuration = finalConfiguration;
-          let savePath = `${outputDir}/${finalConfiguration.seed}_${Date.now()}_${batchCount}.png`
+          // worked around metadata bug by forcing our config onto the UI before saving
+          // but that didn't work consistently so trying something else
+          // Crazy thing is the metadata is borked with canvas.save, but fine
+          // if you reload the image in DT
+          const SamplerTypeReverse = Object.fromEntries(
+              Object.entries(SamplerType).map(([key, value]) => [value, key])
+          );
+          const seed = config.seed;
+          const model = new String(sanitize(config.model.replace('.ckpt'))).slice(0, 8);
+          const sampler = sanitize(SamplerTypeReverse[config.sampler]).slice(0, 8);
+          const steps = config.steps;
+          const time = getTimeString();
+          let savePath = `${outputDir}/${model}_${sampler}_${steps}_${time}_${batchCount}.png`
           console.log(`Saving to ${savePath}\n\n`);
           canvas.saveImage(savePath, true); // save the image currently on canvas to a file.
     }
+}
+
+function sanitize(text) {
+    // Replace characters that are not allowed in filenames with a hyphen
+    return text
+        .trim() // Remove leading/trailing whitespace
+        .toLowerCase() // Convert to lowercase for consistency
+        .replace(/[\/\\?%*:|"<>]/g, '-') // Replace invalid characters
+        .replace(/\s+/g, '_'); // Replace spaces with underscores
+}
+
+function getTimeString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}`;
 }
 
 function getSeed(oldSeed){
