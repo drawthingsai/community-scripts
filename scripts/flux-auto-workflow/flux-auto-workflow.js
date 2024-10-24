@@ -1,5 +1,5 @@
 //@api-1.0
-// v4.2
+// v4.3
 // Author: @czkoko
 // Automatic workflow for Flux, including text-to-image, batch image refine, outpainting, batch prompts, random prompt, etc.
 //
@@ -32,7 +32,7 @@ const customStyle = [
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const version = "v4.2";
+const version = "v4.3";
 var promptsSource = pipeline.prompts.prompt;
 
 const themePreview = [
@@ -65,7 +65,7 @@ const stylePreview = [
 ];
 
 const configuration = pipeline.configuration;
-const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "Dream Shaper", "SDXL", "SD3 Medium", "SD1"];
+const modelPresets = ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "Dream Shaper", "SDXL", "SD3 Medium", "SD3 Large", "SD3 Large Turbo", "SD1"];
 let customModelName = checkModel();
 if (customModelName != "Flux") {
   if (modelPresets.indexOf(customModelName) == -1) {
@@ -1634,7 +1634,7 @@ const fantasticScenes = [
 ];
 
 function getRandom(array) {
-  const randomIndex = Math.floor(Math.random() * array.length);
+  const randomIndex = Math.floor(Math.random() * Date.now() % array.length);
   return array[randomIndex];
 }
 
@@ -2026,7 +2026,7 @@ const userInputs = requestFromUser(
           `❖  Model Preset • ${n}`,
           " •   The appropriate preset will be automatically selected for the model. If the model is not recognized, please select the preset manually.",
           [
-            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "SDXL Turbo / Lightning", "SDXL", "SD3 Medium", "SD1"])
+            this.menu(i, ["Custom", "Flux Dev", "Flux Schnell", "Kolors", "SDXL Turbo / Lightning", "SDXL", "SD3 Medium", "SD3 Large", "SD3 Large Turbo", "SD1"])
           ]
         ),
         this.section(
@@ -2237,7 +2237,7 @@ if (workflow == 0) {
         } else {
           configuration.guidanceScale = 4.5;
         }
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
       } else if (mode == 1) {
         console.log(`🟠 Balance Mode ‣ ❶ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
         schnellLora = loras;
@@ -2249,7 +2249,7 @@ if (workflow == 0) {
         configuration.sampler = 15;
         configuration.shift = 1.0;
         configuration.steps = 4;
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
         console.log(`🟠 Balance Mode ‣ ❷ Refining the image    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
         if (detail == 0) {
           configuration.loras = [];
@@ -2267,7 +2267,7 @@ if (workflow == 0) {
           configuration.steps = 8;
         }
         configuration.controls = [];
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
       } else if (mode == 2) {
         console.log(`🔴 Quality Mode ‣ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
         configuration.controls = controls;
@@ -2285,7 +2285,7 @@ if (workflow == 0) {
           configuration.guidanceScale = 3.5;
           configuration.steps = 20;
         }
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
       }
     }
   }
@@ -2371,7 +2371,7 @@ function refine(info, srcPrompt) {
     configuration.strength = 0.8;
     configuration.steps = 5;
   }
-  pipeline.run({ configuration: configuration, prompt: p });
+  pipeline.run({ configuration: configuration, prompt: p, negativePrompt: null });
 }
 
 function outpainting(info, srcPrompt) {
@@ -2509,6 +2509,20 @@ function initCustomModel() {
       configuration.resolutionDependentShift = false;
       configuration.shift = devShift;
       break;
+    case "SD3 Large Turbo":
+      configuration.sampler = 1;
+      configuration.guidanceScale = 1.0;
+      configuration.steps = 4;
+      configuration.resolutionDependentShift = false;
+      configuration.shift = devShift;
+      break;
+    case "SD3 Large":
+      configuration.sampler = 15;
+      configuration.guidanceScale = 4.0;
+      configuration.steps = 20;
+      configuration.resolutionDependentShift = false;
+      configuration.shift = devShift;
+      break;
     case "SD1":
       configuration.sampler = 12;
       configuration.guidanceScale = 6.0;
@@ -2518,7 +2532,6 @@ function initCustomModel() {
         if (width > height) {
           configuration.width = maxSize;
           configuration.height = Math.round(Math.round((height / width) * maxSize) / 64) * 64;
-
         } else {
           configuration.height = maxSize;
           configuration.width = Math.round(Math.round((width / height) * maxSize) / 64) * 64;
@@ -2549,6 +2562,12 @@ function checkModel() {
   }
   if (model.includes("sd3_medium")) {
     return "SD3 Medium";
+  }
+  if (model.includes("sd3_large_turbo")) {
+    return "SD3 Large Turbo";
+  }
+  if (model.includes("sd3_large")) {
+    return "SD3 Large";
   }
   return model.split("_")[0];
 }
