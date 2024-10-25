@@ -42,9 +42,61 @@
 
 //Version
 const versionString = "v3.5.8";
-//Maximum iterations for Iterate Mode
+//Maximum iterations for Iterate Mode, this is a good value for everything
+//Macs with more resources can probably set this much higher
 const maxIter = 500;
+
+//Sure, you can turn this on if you like your console cluttered. :P
 const DEBUG = false;
+
+class DebugPrint {
+  static Level = Object.freeze({
+    INFO: 'INFO',
+    WARN: 'WARN',
+    ERROR: 'ERROR'
+  });
+
+  #debugMode; // Private field to store debug mode state
+
+  /**
+   * Constructor for DebugPrint
+   * @param {boolean} [debugMode=false] - Whether to enable debug printing by default
+   */
+  constructor(debugMode = false) {
+    this.#debugMode = debugMode;
+  }
+
+  /**
+   * Prints a message if debug mode is enabled
+   * @param {string} message - The message to print
+   * @param {DebugPrint.Level} [level=DebugPrint.Level.INFO] - The log level of the message
+   */
+  print(message, level = DebugPrint.Level.INFO) {
+    if (!Object.values(DebugPrint.Level).includes(level)) {
+      throw new Error(`Invalid log level: ${level}`);
+    }
+
+    if (this.#debugMode) {
+    switch (level) {
+        case DebugPrint.Level.INFO:
+            console.log(`${message}`);
+        break;
+        
+        case DebugPrint.Level.WARN:
+            console.warn(`${message}`);
+        break;
+        
+        case DebugPrint.Level.ERROR:
+            console.error(`${message}`);
+        break;
+            
+        }
+    }
+  }
+}
+
+// Initiate debug logger, set state to DEBUG;
+const debug = new DebugPrint(DEBUG);
 //store selected prompt data and UI config
 let userPrompt = '';
 let uiPrompt = '';
@@ -83,7 +135,7 @@ const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 const prompts = [
     {
-    prompt: "{colors:1-3} dominant {camera} shot of a {adjective} cyborg woman, {style}, {hairstyle} {haircolor} hair, {features}, {pose} in {weather} {time} {locale}",
+    prompt: "{colors:1-3} dominant {camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "FLUX.1 [schnell] (8-bit)",
     loras: [
@@ -93,7 +145,7 @@ const prompts = [
         {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
     },
     {
-    prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
+    prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "FLUX.1 [schnell] (8-bit)",
     loras: [
@@ -103,7 +155,7 @@ const prompts = [
         {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
     },
     {
-    prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
+    prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "RealVisXL v4.0",
     loras: [
@@ -120,6 +172,10 @@ const prompts = [
 
 // Categories definition
 const categories = {
+    cyborg: [
+    "{adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}",
+    "{adjective} cyborg woman, {hairstyle} {haircolor} hair, {features} wearing {style}"
+    ],
     time: [
     "morning",
     "noon",
@@ -271,6 +327,8 @@ const downloadModels = userSelection[0][5];
 if (iterateMode){
     console.log("Iterate Mode");
 }
+
+
 
 if (useUiPrompt) {
     const userSelection = requestFromUser("Dynamic Prompts: UI Prompt", okButton, function() {
@@ -460,10 +518,7 @@ function selectRandomPrompt() {
   if (downloadModels){
       getModels(promptData);
   }
-    if (DEBUG){
-        console.warn(JSON.stringify(promptData));
-    }
-  //throw new Error("BUTTS");
+    debug.print(JSON.stringify(promptData), DebugPrint.Level.WARN);
   return promptData;
 }
 
@@ -482,13 +537,18 @@ function getModels(promptData){
             models.push(lora);
         }
     }
-    //Initiate Download
-    pipeline.downloadBuiltins(models);
+    if (!pipeline.areModelsDownloaded(models)){
+        //Initiate Download
+        debug.print(`${JSON.stringify(models)} not clean, initiating download.`, DebugPrint.Level.WARN);
+        pipeline.downloadBuiltins(models);
+    } else {
+        debug.print(`${JSON.stringify(models)} clean, not initiating download.`, DebugPrint.Level.WARN);
+    }
 }
 
 // Resolves LoRAs to filename
 function resolveLoras(loras){
-    if (!loras){
+    if (typeof loras === 'undefined'){
         return loras;
     }
     const FILESUFFIX = ".ckpt";
@@ -496,15 +556,13 @@ function resolveLoras(loras){
     for (let i = 0; i < loras.length; i++) {
         let myLora = loras[i];
         let myname = myLora.file;
-        if (!myname.endsWith(FILESUFFIX) && myname){
+        if (!myname.endsWith(FILESUFFIX)){
                 let myfile = pipeline.findLoRAByName(myname).file;
                 // Assign resolved name
                 myLora.file = myfile;
-                myLoras.push(myLora);
-                if (DEBUG){
-                   console.log(`Filename ${myname} resolved to ${myfile}`);
-                }
+                debug.print(`Filename ${myname} resolved to ${myfile}`);
             }
+          myLoras.push(myLora);
         }
     return myLoras;
 }
@@ -575,9 +633,7 @@ function render (promptData, batchCount){
     let finalConfiguration = Object.create(pipeline.configuration);
     // Set seed according to user selection
     let mySeed = getSeed(pipeline.configuration.seed);
-    if (DEBUG){
-        console.log(JSON.stringify(finalConfiguration));
-    }
+    debug.print(JSON.stringify(finalConfiguration));
     
     if (useUiPrompt){
        finalConfiguration = UICONFIG;
@@ -589,9 +645,7 @@ function render (promptData, batchCount){
             //Apply configuration changes, if any
             finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
             finalConfiguration.loras = promptData.configuration.loras;
-            if (DEBUG){
-                console.log(finalConfiguration.model);
-            }
+            debug.print(finalConfiguration.model);
         }
     }
     // Batch > 1 is no bueno
@@ -600,9 +654,7 @@ function render (promptData, batchCount){
     
     canvas.clear();
     
-    if(DEBUG){
-        console.warn(JSON.stringify(finalConfiguration));
-    }
+    debug.print(JSON.stringify(finalConfiguration), DebugPrint.Level.WARN);
     
     pipeline.run({
         configuration: finalConfiguration,
