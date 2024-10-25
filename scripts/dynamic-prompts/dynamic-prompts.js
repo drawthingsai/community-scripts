@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.7
+// v3.5.8
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -95,13 +95,12 @@ const prompts = [
     {
     prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
-    model: "RealVisXL v4.0",
+    model: "FLUX.1 [schnell] (8-bit)",
     loras: [
-        { file: "Fix Hands Slider", weight: 0.3 },
-        { file: "Pixel Art XL v1.1", weight: 0.4 }
-    ],
+            { file: "AntiBlur v1.0 [dev]", weight: 0.4}
+            ],
     configuration:
-        {width:1024,height:1024,steps:28,sampler:0,guidanceScale:4.0}
+        {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
     },
     {
     prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
@@ -440,23 +439,31 @@ function selectRandomPrompt() {
   // Get the randomly selected prompt object
   const selectedPrompt = prompts[randomIndex];
   // Extract prompt string, LoRa filenames, and weights
-  let myprompt = selectedPrompt.prompt;
-  let myneg = selectedPrompt.negativePrompt;
-  let mymodel = selectedPrompt.model;
-  let myconfig = selectedPrompt.configuration;
+  const myprompt = selectedPrompt.prompt;
+  const myneg = selectedPrompt.negativePrompt;
+  const mymodel = selectedPrompt.model;
+  const loras = [];
+  let myconfig = {};
+  if (typeof selectedPrompt.configuration !== 'undefined'){
+      myconfig = selectedPrompt.configuration;
+  } else {
+      myconfig = {...UICONFIG};
+  }
   //Prepare LoRAs
   const myLoras = resolveLoras(selectedPrompt.loras);
-  const loras = myLoras.map(lora => ({ file: lora.file, weight: lora.weight }));
+  if (typeof myLoras !== 'undefined'){
+     myconfig.loras = myLoras.map(lora => ({ file: lora.file, weight: lora.weight }));
+  }
   myconfig.model = mymodel;
-  myconfig.loras = loras;
   // Store the promptData object
-  let promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
+  const promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
   if (downloadModels){
       getModels(promptData);
   }
     if (DEBUG){
         console.warn(JSON.stringify(promptData));
     }
+  //throw new Error("BUTTS");
   return promptData;
 }
 
@@ -464,14 +471,16 @@ function selectRandomPrompt() {
 function getModels(promptData){
     let models = [];
     //Model first
-    models.push(promptData.configuration.model);
-    //Initiate Download
-    pipeline.downloadBuiltins(models);
+    if (typeof promptData.configuration.model !== 'undefined'){
+        models.push(promptData.configuration.model);
+    }
    
     //Loras
-    for (let i = 0; i < promptData.configuration.loras.length; i++) {
-        let lora = promptData.configuration.loras[i].file;
-        models.push(lora);
+    if (typeof promptData.configuration.loras !== 'undefined'){
+        for (let i = 0; i < promptData.configuration.loras.length; i++) {
+            let lora = promptData.configuration.loras[i].file;
+            models.push(lora);
+        }
     }
     //Initiate Download
     pipeline.downloadBuiltins(models);
@@ -479,12 +488,15 @@ function getModels(promptData){
 
 // Resolves LoRAs to filename
 function resolveLoras(loras){
+    if (!loras){
+        return loras;
+    }
     const FILESUFFIX = ".ckpt";
     const myLoras = [];
     for (let i = 0; i < loras.length; i++) {
         let myLora = loras[i];
         let myname = myLora.file;
-        if (!myname.endsWith(FILESUFFIX)){
+        if (!myname.endsWith(FILESUFFIX) && myname){
                 let myfile = pipeline.findLoRAByName(myname).file;
                 // Assign resolved name
                 myLora.file = myfile;
@@ -613,8 +625,11 @@ function savetoImageDir(config, batchCount){
               Object.entries(SamplerType).map(([key, value]) => [value, key])
           );
           const seed = config.seed;
-          const model = new String(sanitize(config.model.replace('.ckpt'))).slice(0, 8);
-          const sampler = sanitize(SamplerTypeReverse[config.sampler]).slice(0, 8);
+          let model = "undefined";
+          if (typeof config.model !== 'undefined'){
+             model = sanitize(config.model.replace('.ckpt'));
+          }
+          const sampler = sanitize(SamplerTypeReverse[config.sampler]);
           const steps = config.steps;
           const time = getTimeString();
           let savePath = `${outputDir}/${model}_${sampler}_${steps}_${time}_${batchCount}.png`
@@ -624,12 +639,19 @@ function savetoImageDir(config, batchCount){
 }
 
 function sanitize(text) {
+    // Handle null case
+    if (typeof text === 'undefined'){
+        let undef = "undefined";
+        return undef;
+    }
+    const trunc = 16;
     // Replace characters that are not allowed in filenames with a hyphen
     return text
         .trim() // Remove leading/trailing whitespace
         .toLowerCase() // Convert to lowercase for consistency
-        .replace(/[\/\\?%*:|"<>]/g, '-') // Replace invalid characters
-        .replace(/\s+/g, '_'); // Replace spaces with underscores
+        .replace(new RegExp('[\/\\\\?%*:|"<>[]{}$#@&+;,.~()]', 'g'), '-') // Comprehensive now
+        .replace(/\s+/g, '_') // Replace spaces with underscores
+        .slice(0, trunc) // Truncate to trunc chars;
 }
 
 function getTimeString() {
