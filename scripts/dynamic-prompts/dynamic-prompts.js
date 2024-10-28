@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.6
+// v3.5.8
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -41,14 +41,67 @@
  */
 
 //Version
-const versionString = "v3.5.6"
-//Maximum iterations for Iterate Mode
-const maxIter = 500
-//store selected prompt/LoRA data
-let promptData;
+const versionString = "v3.5.8";
+//Maximum iterations for Iterate Mode, this is a good value for everything
+//Macs with more resources can probably set this much higher
+const maxIter = 500;
+
+//Sure, you can turn this on if you like your console cluttered. :P
+const DEBUG = false;
+
+class DebugPrint {
+  static Level = Object.freeze({
+    INFO: 'INFO',
+    WARN: 'WARN',
+    ERROR: 'ERROR'
+  });
+
+  #debugMode; // Private field to store debug mode state
+
+  /**
+   * Constructor for DebugPrint
+   * @param {boolean} [debugMode=false] - Whether to enable debug printing by default
+   */
+  constructor(debugMode = false) {
+    this.#debugMode = debugMode;
+  }
+
+  /**
+   * Prints a message if debug mode is enabled
+   * @param {string} message - The message to print
+   * @param {DebugPrint.Level} [level=DebugPrint.Level.INFO] - The log level of the message
+   */
+  print(message, level = DebugPrint.Level.INFO) {
+    if (!Object.values(DebugPrint.Level).includes(level)) {
+      throw new Error(`Invalid log level: ${level}`);
+    }
+
+    if (this.#debugMode) {
+    switch (level) {
+        case DebugPrint.Level.INFO:
+            console.log(`${message}`);
+        break;
+        
+        case DebugPrint.Level.WARN:
+            console.warn(`${message}`);
+        break;
+        
+        case DebugPrint.Level.ERROR:
+            console.error(`${message}`);
+        break;
+            
+        }
+    }
+  }
+}
+
+// Initiate debug logger, set state to DEBUG;
+const debug = new DebugPrint(DEBUG);
+//store selected prompt data and UI config
 let userPrompt = '';
 let uiPrompt = '';
-// Default example prompt for UI demonstrating category use
+const UICONFIG = pipeline.configuration;
+//Default example prompt for UI demonstrating category use
 const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 /* These are the prompts randomly selected from if UI Prompt isn't valid.
@@ -82,7 +135,7 @@ const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
 const prompts = [
     {
-    prompt: "{colors:1-3} dominant {camera} shot of a {adjective} cyborg woman, {style}, {hairstyle} {haircolor} hair, {features}, {pose} in {weather} {time} {locale}",
+    prompt: "{colors:1-3} dominant {camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "FLUX.1 [schnell] (8-bit)",
     loras: [
@@ -92,18 +145,17 @@ const prompts = [
         {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
     },
     {
-    prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
+    prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
-    model: "RealVisXL v4.0",
+    model: "FLUX.1 [schnell] (8-bit)",
     loras: [
-        { file: "Fix Hands Slider", weight: 0.3 },
-        { file: "Pixel Art XL v1.1", weight: 0.4 }
-    ],
+            { file: "AntiBlur v1.0 [dev]", weight: 0.4}
+            ],
     configuration:
-        {width:1024,height:1024,steps:28,sampler:0,guidanceScale:4.0}
+        {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
     },
     {
-    prompt: "{camera} shot of a {adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}, {pose} in {weather} {time} {locale}",
+    prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "RealVisXL v4.0",
     loras: [
@@ -120,6 +172,10 @@ const prompts = [
 
 // Categories definition
 const categories = {
+    cyborg: [
+    "{adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}",
+    "{adjective} cyborg woman, {hairstyle} {haircolor} hair, {features} wearing {style}"
+    ],
     time: [
     "morning",
     "noon",
@@ -272,6 +328,8 @@ if (iterateMode){
     console.log("Iterate Mode");
 }
 
+
+
 if (useUiPrompt) {
     const userSelection = requestFromUser("Dynamic Prompts: UI Prompt", okButton, function() {
         return [
@@ -289,10 +347,7 @@ if (useUiPrompt) {
     uiPrompt = userSelection[0][3][0];
 }
 
-
-// Get configuration
-const configuration = pipeline.configuration;
-const defaultLoras = pipeline.configuration.loras;
+// Store UI negative prompt for later
 const uiNegPrompt = pipeline.prompts.negativePrompt;
 
 if(useUiPrompt){
@@ -309,74 +364,129 @@ if(useUiPrompt){
 if (!iterateMode){
     for (let i = 0; i < batchCount; i++){
         let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
-        console.log(batchCountLog);
-        render(getPrompt());
-        //Save to custom location
-        customImageSave(pipeline, i);
+        console.warn(batchCountLog);
+        render(getDynamicPrompt(), i);
     }
 } else {
-    let dynprompt;
-    if (useUiPrompt){
-        dynPrompt = userPrompt;
-    } else {
-        dynPrompt = getPromptString(selectRandomPrompt());
-    }
+    const promptData = getDynamicPrompt();
+    const dynPrompt = promptData.prompt;
     p = computeTotalPromptCount(dynPrompt);
     if (p > maxIter){
-        console.log(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
-        console.log("Reduce the number of categories used in prompt.");
+        console.warn(`Max iterations of ${maxIter} exceeded: Prompt total combinations = ${p}\n`);
+        console.warn("Reduce the number of categories used in prompt.");
     } else {
         let k = 1;
         console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
         for (let generatedPrompt of generatePrompts(dynPrompt)) {
-            console.log(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
-            render(generatedPrompt);
-            //Save to custom location
-            customImageSave(pipeline, k);
+            let myConfig = promptData;
+            promptData.prompt = dynPrompt;
+            console.warn(`iterating render ${k} of ${p}\n${generatedPrompt}\n`);
+            render(generatedPrompt, k);
             k++;
         }
     }
 }
 
-function customImageSave(pipeline, batchCount){
-    if(outputDir) {
-          // Save File
-          let saveLocation = `${outputDir}/${pipeline.configuration.seed}_${Date.now()}_${batchCount}.png`
-          console.log(`Saving to ${saveLocation}\n\n`);
-          canvas.saveImage(saveLocation, true); // save the image currently on canvas to a file.
-        return saveLocation;
+function computeTotalPromptCount(dynamicPrompt) {
+    // Find all unique top-level placeholders in the prompt
+    const regex = /{(\w+)}/g;
+    let match;
+    let placeholders = new Set();
+    while ((match = regex.exec(dynamicPrompt)) !== null) {
+        placeholders.add(match[1]);
     }
+
+    // If no placeholders, return 1
+    if (placeholders.size === 0) {
+        return 1;
+    }
+
+    let totalCombinations = 1;
+
+    for (let placeholder of placeholders) {
+        const optionsCount = countPlaceholderOptions(placeholder, new Set());
+        totalCombinations *= optionsCount;
+    }
+
+    return totalCombinations;
 }
 
-function computeTotalPromptCount(dynamicPrompt) {
-    let placeholders = dynamicPrompt.match(/{(\w+)}/g).map(p => p.replace(/[{}]/g, ''));
-    let totalCombinationCount = 1;
-    for (let placeholder of placeholders) {
-        const valueCount = categories[placeholder].length; // Get the number of values in each category
-        totalCombinationCount *= valueCount; // Multiply the counts to calculate the maximum possible number of combinations
+function countPlaceholderOptions(placeholder, seenPlaceholders) {
+    if (seenPlaceholders.has(placeholder)) {
+        throw new Error(`Circular reference detected for placeholder '{${placeholder}}'`);
     }
-    return totalCombinationCount;
+
+    seenPlaceholders.add(placeholder);
+
+    const values = categories[placeholder];
+    if (!values) {
+        throw new Error(`Category '${placeholder}' not defined.`);
+    }
+
+    let totalOptions = 0;
+
+    for (let value of values) {
+        const optionsCount = countValueOptions(value, new Set(seenPlaceholders));
+        totalOptions += optionsCount;
+    }
+
+    seenPlaceholders.delete(placeholder);
+
+    return totalOptions;
+}
+
+function countValueOptions(value, seenPlaceholders) {
+    // Find all placeholders in the value
+    const regex = /{(\w+)}/g;
+    let match;
+    let placeholders = new Set();
+    while ((match = regex.exec(value)) !== null) {
+        placeholders.add(match[1]);
+    }
+
+    // If no placeholders, return 1
+    if (placeholders.size === 0) {
+        return 1;
+    }
+
+    let totalCombinations = 1;
+
+    for (let placeholder of placeholders) {
+        const optionsCount = countPlaceholderOptions(placeholder, seenPlaceholders);
+        totalCombinations *= optionsCount;
+    }
+
+    return totalCombinations;
 }
 
 function* generatePrompts(dynamicPrompt) {
-    function cartesian(...arrays) {
-        if (arrays.length === 0) return [];
-        return arrays.reduce((acc, curr) => {
-            return acc.flatMap(a => curr.map(b => [].concat(a, b)));
-        }, [[]]);
+    // Base case: if no placeholders, yield the prompt
+    if (!/{\w+}/.test(dynamicPrompt)) {
+        yield dynamicPrompt;
+        return;
     }
 
-    let placeholders = dynamicPrompt.match(/{(\w+)}/g).map(p => p.replace(/[{}]/g, ''));
-    let validPlaceholders = placeholders.filter(p => categories[p]);
-    let categoryValues = validPlaceholders.map(p => categories[p]);
-    let combinations = cartesian(...categoryValues);
+    // Find the first placeholder in the prompt
+    const regex = /{(\w+)}/g;
+    const match = regex.exec(dynamicPrompt);
 
-    for (let combination of combinations) {
-        let prompt = dynamicPrompt;
-        validPlaceholders.forEach((placeholder, i) => {
-            prompt = prompt.replace(`{${placeholder}}`, combination[i]);
-        });
-        yield prompt;
+    if (!match) {
+        yield dynamicPrompt;
+        return;
+    }
+
+    const placeholder = match[1];
+
+    const values = categories[placeholder];
+    if (!values) {
+        throw new Error(`Category '${placeholder}' not defined.`);
+    }
+
+    for (const value of values) {
+        // Replace all occurrences of the placeholder with the value
+        const newPrompt = dynamicPrompt.replace(new RegExp(`{${placeholder}}`, 'g'), value);
+        // Recursively generate prompts for the new prompt
+        yield* generatePrompts(newPrompt);
     }
 }
 
@@ -387,19 +497,28 @@ function selectRandomPrompt() {
   // Get the randomly selected prompt object
   const selectedPrompt = prompts[randomIndex];
   // Extract prompt string, LoRa filenames, and weights
-  let myprompt = selectedPrompt.prompt;
-  let myneg = selectedPrompt.negativePrompt;
-  let mymodel = selectedPrompt.model;
-  let myconfig = selectedPrompt.configuration;
-  const loras = selectedPrompt.loras.map(lora => ({ file: lora.file, weight: lora.weight }));
-  let myloras = getAssociatedLoRas(loras);
+  const myprompt = selectedPrompt.prompt;
+  const myneg = selectedPrompt.negativePrompt;
+  const mymodel = selectedPrompt.model;
+  const loras = [];
+  let myconfig = {};
+  if (typeof selectedPrompt.configuration !== 'undefined'){
+      myconfig = selectedPrompt.configuration;
+  } else {
+      myconfig = {...UICONFIG};
+  }
+  //Prepare LoRAs
+  const myLoras = resolveLoras(selectedPrompt.loras);
+  if (typeof myLoras !== 'undefined'){
+     myconfig.loras = myLoras.map(lora => ({ file: lora.file, weight: lora.weight }));
+  }
   myconfig.model = mymodel;
-  myconfig.loras=myloras;
   // Store the promptData object
-  let promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
+  const promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
   if (downloadModels){
       getModels(promptData);
   }
+    debug.print(JSON.stringify(promptData), DebugPrint.Level.WARN);
   return promptData;
 }
 
@@ -407,31 +526,45 @@ function selectRandomPrompt() {
 function getModels(promptData){
     let models = [];
     //Model first
-    models.push(promptData.configuration.model);
-    //Initiate Download
-    pipeline.downloadBuiltins(models);
+    if (typeof promptData.configuration.model !== 'undefined'){
+        models.push(promptData.configuration.model);
+    }
    
     //Loras
-    for (let i = 0; i < promptData.configuration.loras.length; i++) {
-        let lora = promptData.configuration.loras[i].file;
-        models.push(lora);
+    if (typeof promptData.configuration.loras !== 'undefined'){
+        for (let i = 0; i < promptData.configuration.loras.length; i++) {
+            let lora = promptData.configuration.loras[i].file;
+            models.push(lora);
+        }
     }
-    //Initiate Download
-    pipeline.downloadBuiltins(models);
+    if (!pipeline.areModelsDownloaded(models)){
+        //Initiate Download
+        debug.print(`${JSON.stringify(models)} not clean, initiating download.`, DebugPrint.Level.WARN);
+        pipeline.downloadBuiltins(models);
+    } else {
+        debug.print(`${JSON.stringify(models)} clean, not initiating download.`, DebugPrint.Level.WARN);
+    }
 }
 
-function loraNamestoFiles(loras){
+// Resolves LoRAs to filename
+function resolveLoras(loras){
+    if (typeof loras === 'undefined'){
+        return loras;
+    }
+    const FILESUFFIX = ".ckpt";
+    const myLoras = [];
     for (let i = 0; i < loras.length; i++) {
-        let loraname = loras[i].file;
-        let lorafile = pipeline.findLoRAByName(loraname);
-        loras[i]=lorafile;
-    }
-    return loras;
-}
-
-// Function to get the prompt string from the object returned by selectRandomPrompt
-function getPromptString(p) {
-  return p.prompt;
+        let myLora = loras[i];
+        let myname = myLora.file;
+        if (!myname.endsWith(FILESUFFIX)){
+                let myfile = pipeline.findLoRAByName(myname).file;
+                // Assign resolved name
+                myLora.file = myfile;
+                debug.print(`Filename ${myname} resolved to ${myfile}`);
+            }
+          myLoras.push(myLora);
+        }
+    return myLoras;
 }
 
 // Function to extract and validate category names and their requested item count or range from the uiPrompt
@@ -470,51 +603,15 @@ function isPromptValid(uiPrompt, categories) {
 }
 
 //get prompt each iteration
-function getPrompt () {
+function getDynamicPrompt () {
+    let promptData = {};
     if (useUiPrompt) {
         console.log("Using UI Prompt");
-        promptString = userPrompt;
+        promptData.prompt = userPrompt;
         } else {
         promptData = selectRandomPrompt();
-        //console.log(promptData);
-        promptString = getPromptString(promptData);
         }
-    return promptString
-}
-
-function getAssociatedLoRas(loras) {
-    if(!overrideModels){
-      let validLoras = setLoras(loras);
-      const mergedLoras = defaultLoras.concat(validLoras);
-      return mergedLoras
-    }else{
-      return defaultLoras
-    }
-}
-
-// is name in defaultLoras?
-function isDefaultLora(lora){
-    for (let i = 0; i < defaultLoras.length; i++) {
-        if (defaultLoras[i].file === lora.file){
-            return true;
-        } else{
-            return false;
-        }
-    }
-}
-
-
-// Only overwrite valid Loras from prompts
-function setLoras (myLoras){
-    let loras=[];
-    for (let i = 0; i < myLoras.length; i++) {
-        if (myLoras[i].file !== ''){
-            if(!isDefaultLora(myLoras[i])){
-                loras.push(myLoras[i]);
-            }
-        }
-    }
-    return loras
+    return promptData;
 }
 
 function timer (start){
@@ -527,36 +624,97 @@ function timer (start){
 }
 
 // Run pipeline
-function render (promptString){
+function render (promptData, batchCount){
+    // start timer
     let start = Date.now();
-    let editedString = replaceWildcards(promptString, categories);
+    // set generated prompt
+    let generatedPrompt = replaceWildcards(promptData.prompt, categories);
     let neg;
-    let myConfiguration = configuration;
-    let mySeed = configuration.seed;
-    myConfiguration.batchSize = 1;
-    // Set seed
-    myConfiguration.seed = getSeed(mySeed);
+    let finalConfiguration = Object.create(pipeline.configuration);
+    // Set seed according to user selection
+    let mySeed = getSeed(pipeline.configuration.seed);
+    debug.print(JSON.stringify(finalConfiguration));
     
     if (useUiPrompt){
+       finalConfiguration = UICONFIG;
+       finalConfiguration.loras = UICONFIG.loras;
        neg = uiNegPrompt;
     } else {
-       neg = promptData.negativePrompt;
+        neg = promptData.negativePrompt;
         if (!overrideModels){
-            myConfiguration.model = promptData.model;
             //Apply configuration changes, if any
-            myConfiguration = Object.assign(configuration, promptData.configuration);
-            myConfiguration.loras = loraNamestoFiles(promptData.configuration.loras);
+            finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
+            finalConfiguration.loras = promptData.configuration.loras;
+            debug.print(finalConfiguration.model);
         }
     }
-    //Clear canvas
+    // Batch > 1 is no bueno
+    finalConfiguration.batchSize = 1;
+    finalConfiguration.seed = mySeed;
+    
     canvas.clear();
+    
+    debug.print(JSON.stringify(finalConfiguration), DebugPrint.Level.WARN);
+    
     pipeline.run({
-        configuration: myConfiguration,
-        prompt: editedString,
+        configuration: finalConfiguration,
+        prompt: generatedPrompt,
         negativePrompt: neg
     });
     //Output render time elapsed
     timer(start);
+    //Save Image if enabled
+    savetoImageDir(finalConfiguration, batchCount);
+}
+
+function savetoImageDir(config, batchCount){
+    if(outputDir) {
+          // worked around metadata bug by forcing our config onto the UI before saving
+          // but that didn't work consistently so trying something else
+          // Crazy thing is the metadata is borked with canvas.save, but fine
+          // if you reload the image in DT
+          const SamplerTypeReverse = Object.fromEntries(
+              Object.entries(SamplerType).map(([key, value]) => [value, key])
+          );
+          const seed = config.seed;
+          let model = "undefined";
+          if (typeof config.model !== 'undefined'){
+             model = sanitize(config.model.replace('.ckpt'));
+          }
+          const sampler = sanitize(SamplerTypeReverse[config.sampler]);
+          const steps = config.steps;
+          const time = getTimeString();
+          let savePath = `${outputDir}/${model}_${sampler}_${steps}_${time}_${batchCount}.png`
+          console.log(`Saving to ${savePath}\n\n`);
+          canvas.saveImage(savePath, true); // save the image currently on canvas to a file.
+    }
+}
+
+function sanitize(text) {
+    // Handle null case
+    if (typeof text === 'undefined'){
+        let undef = "undefined";
+        return undef;
+    }
+    const trunc = 16;
+    // Replace characters that are not allowed in filenames with a hyphen
+    return text
+        .trim() // Remove leading/trailing whitespace
+        .toLowerCase() // Convert to lowercase for consistency
+        .replace(new RegExp('[\/\\\\?%*:|"<>[]{}$#@&+;,.~()]', 'g'), '-') // Comprehensive now
+        .replace(/\s+/g, '_') // Replace spaces with underscores
+        .slice(0, trunc) // Truncate to trunc chars;
+}
+
+function getTimeString() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}`;
 }
 
 function getSeed(oldSeed){
