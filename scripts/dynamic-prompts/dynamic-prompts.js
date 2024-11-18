@@ -1,7 +1,7 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.8
+// v3.5.9
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
@@ -41,7 +41,7 @@
  */
 
 //Version
-const versionString = "v3.5.8";
+const versionString = "v3.5.9";
 //Maximum iterations for Iterate Mode, this is a good value for everything
 //Macs with more resources can probably set this much higher
 const maxIter = 500;
@@ -362,11 +362,14 @@ if(useUiPrompt){
 
 // Main batch loop
 if (!iterateMode){
+    const bstart = Date.now();
+    const bmessage = "✔︎ Total render time ‣";
     for (let i = 0; i < batchCount; i++){
         let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
         console.warn(batchCountLog);
         render(getDynamicPrompt(), i);
     }
+    elapsed(bstart, message = bmessage);
 } else {
     const promptData = getDynamicPrompt();
     const dynPrompt = promptData.prompt;
@@ -377,6 +380,8 @@ if (!iterateMode){
     } else {
         let k = 1;
         console.log(`Iterating over dynamic prompt:\n '${dynPrompt}'\n Total combinations number ${p}.`);
+        const istart = Date.now();
+        const imessage = "✔︎ Total iteration time ‣";
         for (let generatedPrompt of generatePrompts(dynPrompt)) {
             let myConfig = promptData;
             promptData.prompt = dynPrompt;
@@ -384,6 +389,7 @@ if (!iterateMode){
             render(generatedPrompt, k);
             k++;
         }
+        elapsed(istart, message = imessage);
     }
 }
 
@@ -512,41 +518,26 @@ function selectRandomPrompt() {
   if (typeof myLoras !== 'undefined'){
      myconfig.loras = myLoras.map(lora => ({ file: lora.file, weight: lora.weight }));
   }
-  myconfig.model = mymodel;
+  myconfig.model = resolveModel(mymodel);
   // Store the promptData object
   const promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
-  if (downloadModels){
-      getModels(promptData);
-  }
-    debug.print(JSON.stringify(promptData), DebugPrint.Level.WARN);
+  debug.print(JSON.stringify(promptData), DebugPrint.Level.WARN);
   return promptData;
 }
 
-//Download models if necessary
-function getModels(promptData){
-    let models = [];
-    //Model first
-    if (typeof promptData.configuration.model !== 'undefined'){
-        models.push(promptData.configuration.model);
-    }
-   
-    //Loras
-    if (typeof promptData.configuration.loras !== 'undefined'){
-        for (let i = 0; i < promptData.configuration.loras.length; i++) {
-            let lora = promptData.configuration.loras[i].file;
-            models.push(lora);
-        }
-    }
-    if (!pipeline.areModelsDownloaded(models)){
-        //Initiate Download
-        debug.print(`${JSON.stringify(models)} not clean, initiating download.`, DebugPrint.Level.WARN);
-        pipeline.downloadBuiltins(models);
+function resolveModel(model){
+    if(downloadModels){
+        let myNameArray = [];
+        myNameArray.push(model);
+        pipeline.downloadBuiltins(myNameArray);
+        debug.print(`Model ${model} downloaded`);
     } else {
-        debug.print(`${JSON.stringify(models)} clean, not initiating download.`, DebugPrint.Level.WARN);
+        debug.print('Download models disabled.');
     }
+    return model;
 }
 
-// Resolves LoRAs to filename
+// Resolves LoRAs to filenames
 function resolveLoras(loras){
     if (typeof loras === 'undefined'){
         return loras;
@@ -557,13 +548,24 @@ function resolveLoras(loras){
         let myLora = loras[i];
         let myname = myLora.file;
         if (!myname.endsWith(FILESUFFIX)){
+            try{
                 let myfile = pipeline.findLoRAByName(myname).file;
                 // Assign resolved name
                 myLora.file = myfile;
-                debug.print(`Filename ${myname} resolved to ${myfile}`);
+                debug.print(`Filename ${myname} resolved to ${JSON.stringify(myfile)}`);
+            } catch (e){
+                debug.print(`${e} Is it downloaded?`);
+                if(downloadModels){
+                    let myNameArray = [];
+                    myNameArray.push(myname);
+                    myLora.file = pipeline.downloadBuiltins(myNameArray);
+                } else {
+                    myLora.file = myname;
+                }
             }
-          myLoras.push(myLora);
         }
+        myLoras.push(myLora);
+    }
     return myLoras;
 }
 
@@ -614,13 +616,16 @@ function getDynamicPrompt () {
     return promptData;
 }
 
-function timer (start){
+function elapsed (start, message = "✔︎ Render time ‣"){
     const end = Date.now();
     const duration = end - start;
-    const minutes = Math.floor(duration / 60000);
+    const hours = Math.floor(duration / 3600000);
+    const minutes = Math.floor((duration % 3600000) / 60000); // calculate the remaining minutes after subtracting the elapsed hours from the total duration
     let seconds = Math.floor((duration % 60000) / 1000);
-    seconds = seconds < 10 ? '0' + seconds : seconds;
-    console.log(`✔︎ Render time ‣ ${minutes}:${seconds}\n`);
+    const formattedHours = String(hours).padStart(2, '0');
+    const formattedMinutes = String(minutes).padStart(2, '0');
+    const formattedSeconds = String(seconds).padStart(2, '0');
+    console.log(`${message} ${formattedHours}:${formattedMinutes}:${formattedSeconds}\n`);
 }
 
 // Run pipeline
@@ -655,14 +660,13 @@ function render (promptData, batchCount){
     canvas.clear();
     
     debug.print(JSON.stringify(finalConfiguration), DebugPrint.Level.WARN);
-    
     pipeline.run({
         configuration: finalConfiguration,
         prompt: generatedPrompt,
         negativePrompt: neg
     });
     //Output render time elapsed
-    timer(start);
+    elapsed(start);
     //Save Image if enabled
     savetoImageDir(finalConfiguration, batchCount);
 }
