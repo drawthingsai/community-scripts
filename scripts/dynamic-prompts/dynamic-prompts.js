@@ -1,11 +1,11 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.9
+// v3.5.9.1
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
- * Documentation for "Dynamic Prompts" Script (Version 3.5.4) for "Draw Things"
+ * Documentation for "Dynamic Prompts" Script (Version 3.5.9.1) for "Draw Things"
  *
  * This script generates dynamic prompts for the "Draw Things" application. Customize it to enhance your creative experience.
  *
@@ -40,71 +40,10 @@
  *   To reduce the numbers, eliminate categories from your prompt.
  */
 
-//Version
-const versionString = "v3.5.9";
-//Maximum iterations for Iterate Mode, this is a good value for everything
-//Macs with more resources can probably set this much higher
-const maxIter = 500;
-
-//Sure, you can turn this on if you like your console cluttered. :P
-const DEBUG = false;
-
-class DebugPrint {
-  static Level = Object.freeze({
-    INFO: 'INFO',
-    WARN: 'WARN',
-    ERROR: 'ERROR'
-  });
-
-  #debugMode; // Private field to store debug mode state
-
-  /**
-   * Constructor for DebugPrint
-   * @param {boolean} [debugMode=false] - Whether to enable debug printing by default
-   */
-  constructor(debugMode = false) {
-    this.#debugMode = debugMode;
-  }
-
-  /**
-   * Prints a message if debug mode is enabled
-   * @param {string} message - The message to print
-   * @param {DebugPrint.Level} [level=DebugPrint.Level.INFO] - The log level of the message
-   */
-  print(message, level = DebugPrint.Level.INFO) {
-    if (!Object.values(DebugPrint.Level).includes(level)) {
-      throw new Error(`Invalid log level: ${level}`);
-    }
-
-    if (this.#debugMode) {
-    switch (level) {
-        case DebugPrint.Level.INFO:
-            console.log(`${message}`);
-        break;
-        
-        case DebugPrint.Level.WARN:
-            console.warn(`${message}`);
-        break;
-        
-        case DebugPrint.Level.ERROR:
-            console.error(`${message}`);
-        break;
-            
-        }
-    }
-  }
-}
-
-// Initiate debug logger, set state to DEBUG;
-const debug = new DebugPrint(DEBUG);
-//store selected prompt data and UI config
-let userPrompt = '';
-let uiPrompt = '';
-const UICONFIG = pipeline.configuration;
 //Default example prompt for UI demonstrating category use
 const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
 
-/* These are the prompts randomly selected from if UI Prompt isn't valid.
+/* Following are the prompts randomly selected from if UI Prompt mode isn't enabled.
    Modify prompts to provide dynamic prompts with LoRAs which will be randomly selected from if a valid dynamic prompt is not found in the UI.
  
    As of 3.0.1 there can be a 'configuration' object for each prompt which contains arbitrary settings which will be passed on to the pipeline at runtime.  These settings correspond to the possible values of pipeline.configuration
@@ -170,7 +109,7 @@ const prompts = [
   // Empty file will be ignored
 ];
 
-// Categories definition
+// Categories definition: This is where you add your dynamic categories.
 const categories = {
     cyborg: [
     "{adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}",
@@ -290,6 +229,68 @@ const categories = {
                 "silk",
                 ]
 };
+
+//Version
+const versionString = "v3.5.9.1";
+//Maximum iterations for Iterate Mode, this is a good value for everything
+//Macs with more resources can probably set this much higher
+const maxIter = 500;
+
+//Sure, you can turn this on if you like your console cluttered. :P
+const DEBUG = false;
+
+class DebugPrint {
+  static Level = Object.freeze({
+    INFO: 'INFO',
+    WARN: 'WARN',
+    ERROR: 'ERROR'
+  });
+
+  #debugMode; // Private field to store debug mode state
+
+  /**
+   * Constructor for DebugPrint
+   * @param {boolean} [debugMode=false] - Whether to enable debug printing by default
+   */
+  constructor(debugMode = false) {
+    this.#debugMode = debugMode;
+  }
+
+  /**
+   * Prints a message if debug mode is enabled
+   * @param {string} message - The message to print
+   * @param {DebugPrint.Level} [level=DebugPrint.Level.INFO] - The log level of the message
+   */
+  print(message, level = DebugPrint.Level.INFO) {
+    if (!Object.values(DebugPrint.Level).includes(level)) {
+      throw new Error(`Invalid log level: ${level}`);
+    }
+
+    if (this.#debugMode) {
+    switch (level) {
+        case DebugPrint.Level.INFO:
+            console.log(`${message}`);
+        break;
+        
+        case DebugPrint.Level.WARN:
+            console.warn(`${message}`);
+        break;
+        
+        case DebugPrint.Level.ERROR:
+            console.error(`${message}`);
+        break;
+            
+        }
+    }
+  }
+}
+
+// Initiate debug logger, set state to DEBUG;
+const debug = new DebugPrint(DEBUG);
+//store selected prompt data and UI config
+let userPrompt = '';
+let uiPrompt = '';
+const UICONFIG = pipeline.configuration;
 
 // UI
 const categoryNames = Object.keys(categories).join(', ');
@@ -547,6 +548,10 @@ function resolveLoras(loras){
     for (let i = 0; i < loras.length; i++) {
         let myLora = loras[i];
         let myname = myLora.file;
+        if (typeof myname === 'undefined'){
+            debug.print("Empty LoRA", DebugPrint.level.WARN);
+            continue;
+        }
         if (!myname.endsWith(FILESUFFIX)){
             try{
                 let myfile = pipeline.findLoRAByName(myname).file;
