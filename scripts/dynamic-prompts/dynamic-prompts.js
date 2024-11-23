@@ -1,11 +1,11 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.9.1
+// v3.5.9.2
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
- * Documentation for "Dynamic Prompts" Script (Version 3.5.9.1) for "Draw Things"
+ * Documentation for "Dynamic Prompts" Script (Version 3.5.9.2) for "Draw Things"
  *
  * This script generates dynamic prompts for the "Draw Things" application. Customize it to enhance your creative experience.
  *
@@ -231,14 +231,51 @@ const categories = {
 };
 
 //Version
-const versionString = "v3.5.9.1";
+const versionString = "v3.5.9.2";
 //Maximum iterations for Iterate Mode, this is a good value for everything
 //Macs with more resources can probably set this much higher
 const maxIter = 500;
 
-//Sure, you can turn this on if you like your console cluttered. :P
-const DEBUG = false;
+//store selected prompt data and UI config
+let userPrompt = '';
+let uiPrompt = '';
+const UICONFIG = pipeline.configuration;
 
+// UI
+const categoryNames = Object.keys(categories).join(', ');
+const seedOptions = ["Random","Increment","Static"];
+const okButton = "Start";
+const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
+const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
+                  " located in the script's 'const prompts' object.";
+
+const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
+  return [
+    this.section(header, aboutText, [
+      this.section("Seed Mode", "", [this.segmented(1, seedOptions),
+             this.slider(10, this.slider.fractional(0), 1, 2000, "batch count")]),
+      this.section("Output:", "Output rendered images to custom location", [
+        this.directory(`${filesystem.pictures.path}`)]),
+      this.switch(false, "Enter UI Prompt"),
+      this.switch(false, "Lock configuration"),
+      this.switch(false, "Iterate Mode"),
+      this.switch(true, "Download Models"),
+      this.switch(false, "Debug")
+    ])
+  ];
+});
+
+// Parse UI input
+const seedMode = userSelection[0][0][0];
+const batchCount = userSelection[0][0][1];
+const outputDir = userSelection[0][1][0];
+const useUiPrompt = userSelection[0][2];
+const overrideModels = userSelection[0][3];
+const iterateMode = userSelection[0][4];
+const downloadModels = userSelection[0][5];
+const DEBUG =  userSelection[0][6];
+
+//DEBUG CLASS
 class DebugPrint {
   static Level = Object.freeze({
     INFO: 'INFO',
@@ -287,49 +324,10 @@ class DebugPrint {
 
 // Initiate debug logger, set state to DEBUG;
 const debug = new DebugPrint(DEBUG);
-//store selected prompt data and UI config
-let userPrompt = '';
-let uiPrompt = '';
-const UICONFIG = pipeline.configuration;
-
-// UI
-const categoryNames = Object.keys(categories).join(', ');
-const seedOptions = ["Random","Increment","Static"];
-const okButton = "Start";
-const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
-const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
-                  " located in the script's 'const prompts' object.";
-
-const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
-  return [
-    this.section(header, aboutText, [
-      this.section("Seed Mode", "", [this.segmented(1, seedOptions),
-             this.slider(10, this.slider.fractional(0), 1, 2000, "batch count")]),
-      this.section("Output:", "Output rendered images to custom location", [
-        this.directory(`${filesystem.pictures.path}`)]),
-      this.switch(false, "Enter UI Prompt"),
-      this.switch(false, "Lock configuration"),
-      this.switch(false, "Iterate Mode"),
-      this.switch(true, "Download Models"),
-    ])
-  ];
-});
-
-// Parse UI input
-const seedMode = userSelection[0][0][0];
-const batchCount = userSelection[0][0][1];
-const outputDir = userSelection[0][1][0];
-const useUiPrompt = userSelection[0][2];
-const overrideModels = userSelection[0][3];
-const iterateMode = userSelection[0][4];
-const downloadModels = userSelection[0][5];
-
 
 if (iterateMode){
     console.log("Iterate Mode");
 }
-
-
 
 if (useUiPrompt) {
     const userSelection = requestFromUser("Dynamic Prompts: UI Prompt", okButton, function() {
@@ -541,6 +539,7 @@ function resolveModel(model){
 // Resolves LoRAs to filenames
 function resolveLoras(loras){
     if (typeof loras === 'undefined'){
+        debug.print("Undefined Loras");
         return loras;
     }
     const FILESUFFIX = ".ckpt";
@@ -549,7 +548,7 @@ function resolveLoras(loras){
         let myLora = loras[i];
         let myname = myLora.file;
         if (typeof myname === 'undefined'){
-            debug.print("Empty LoRA", DebugPrint.level.WARN);
+            debug.print("Empty LoRA", DebugPrint.Level.WARN);
             continue;
         }
         if (!myname.endsWith(FILESUFFIX)){
