@@ -1,7 +1,7 @@
 //@api-1.0
 //
 // "Scripts" is a way to enhance Draw Things experience with custom JavaScript snippets. Over time,
-// we will enhance Scripts with more APIs and do neccessary modifications on the said APIs, but we
+// we will enhance Scripts with more APIs and do necessary modifications on the said APIs, but we
 // will also keep the API stable. In particular, you can mark your script with a particular API
 // version and it will make sure we use the proper API toolchain to execute the script even in
 // the future some of the APIs changed.

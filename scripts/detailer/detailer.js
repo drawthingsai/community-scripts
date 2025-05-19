@@ -23,7 +23,7 @@ const NUMBER_OF_EXECUTIONS = 100;
 
 // Directory to grab images from to execute Detailer on instead of generating new ones.
 // This must be under the Pictures folder.
-const EXISTING_IMAGES_DIRECTORY = null // Exampe usage: "DrawThings/preDetailer"
+const EXISTING_IMAGES_DIRECTORY = null // Example usage: "DrawThings/preDetailer"
 
 // The prompt to give to the detailer. 
 // Leave null if you just want to take the prompt from the UI
