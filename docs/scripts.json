@@ -1,0 +1,167 @@
+[
+  {
+    "name": "Flux Auto Workflow",
+    "author": "czkoko",
+    "file": "flux-auto-workflow.js",
+    "description": "Automated workflow for Flux, including text-to-image, image refine, batch prompts, batch random prompts, etc.",
+    "tags": [
+      "image-to-image",
+      "text-to-image"
+    ]
+  },
+  {
+    "name": "Wildcards",
+    "author": "wetcircuit",
+    "file": "wildcards.js",
+    "description": "Generate a batch of images using inline wildcards to randomize elements within the prompt."
+  },
+  {
+    "name": "Detailer",
+    "author": "ClarkCheekyKent",
+    "file": "detailer.js",
+    "description": "Generates many images and zooms in to detail the faces on each image."
+  },
+  {
+    "name": "Single Detailer",
+    "author": "ClarkCheekyKent",
+    "file": "single-detailer.js",
+    "description": "Zooms in to detail faces on current image on the canvas."
+  },
+  {
+    "name": "Dynamic Prompts",
+    "author": "Zanshinmu",
+    "file": "dynamic-prompts.js",
+    "description": "Allows dynamic prompts features similar to sd-dynamic-prompts in Draw Things."
+  },
+  {
+    "name": "Edit Background",
+    "file": "edit-background.js",
+    "author": "Weiyan Lin",
+    "description": "Change input image background inspired by reference image",
+    "tags": [
+      "image-to-image",
+      "wz"
+    ],
+    "baseColor": "#F5D01D",
+    "images": [
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/woman-wearing-hat-after-sunset.png",
+        "tags": [
+          "id:woman",
+          "view:after"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/woman-wearing-hat-before.png",
+        "tags": [
+          "id:woman",
+          "view:before"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/cartoon-man-blue-suit-after-tropical.png",
+        "tags": [
+          "id:cartoon",
+          "view:after"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/cartoon-man-blue-suit-before.png",
+        "tags": [
+          "id:cartoon",
+          "view:before"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/product-after-bokeh.png",
+        "tags": [
+          "id:product",
+          "view:after"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/edit-background/assets/product-before.png",
+        "tags": [
+          "id:product",
+          "view:before"
+        ]
+      }
+    ],
+    "favicon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABICAMAAABiM0N1AAAAQlBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////8IX9KGAAAAFXRSTlMAQN8gEL+AYO8wcH+vn1DPkKBfj2+aASq3AAACeklEQVR4nO2YyYKDIAxADSCLW3U6/f9fHQ0oa1DbOTZHiQ/Irk3zlU9FGCVXUSA+oZi+fR3SSv4mBgKKY6l3TpNhEHX7VL8lzCb9LYwY3Gt6VlxsJp8W5h4NN8wuHu4iED6d3GUfl0mOwyBdUOweaUT1paAuFlwar3F6VJblRYmL3RUOr3EcSV+JgvHk8OjQ9uKBWGVHoTeNzBGZGm5YTQV1JcR73I7VlTCeWC3EuQvEk9xUVou+/4+2Gkud4460+m4iOG6Z9LwX6RLvp8KZs4AWncouwReSxIn8ahpWtD7gobTJtmWU/WBbyPTXne0b6QV60g9AxZ8lJRa1Fyv6kwQ1pvDSSCdqDFo7gg9qmaUlr8RzCLKNZd6X0LA6tJKqxLMH7f3Jp75Mi9OmocucA+TbnN8RK0FYUmolyII8JuoIQ3wCU8tUBLEipmm6OMimNOZEMDPAy0ubhkFyBOQGxud6LTe7k4HGOHd7a6Pxk5sfKKAxjbWuj78iaEdBBZOC0quZ3bYbCmqeEPHVVGpsLj1KRSmSCO7iC2XB/R5V7T6J+xtdCEiPqoCGxLqYIlmNDVAEKEuRLrZZjiJAWbIjuVhGHIoA4VpU2eY4HkKZaBDW59i2XKcRcMi9UmuD+x+K/1k7KoBcO8qf2zkkf4MAAeqXRrfJOnpMlmxHZUmyiafVLo4R+7QSoMQ+W8ffIaZ3cwvVL/ZAfjw7AFCy1a9A9CAngKl7HllIzn+cvW5IdfpTl1H6ZNbmKaq1TXBIMPLCZwTMrVNnQyd293M1uC30Yz4djv3BVmNzu2kQR8IAmHc/SCu59gV9QdfF/BeI+IR4Q7jqPvrn85Vd/gATUFCUgVdaiAAAAABJRU5ErkJggg=="
+  },
+  {
+    "name": "Wallpaper",
+    "author": "Gongster",
+    "file": "wallpaper.js",
+    "description": "Generate a wallpaper based on device screen size with a few provided editable prompts.",
+    "tags": [
+      "text-to-image",
+      "wz"
+    ],
+    "baseColor": "0x57B17A",
+    "images": [
+      {
+        "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/1.jpg",
+        "tags": [
+          "id:mountain"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/2.jpeg",
+        "tags": [
+          "id:ocean"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/3.jpeg",
+        "tags": [
+          "id:city1"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/wallpaper/assets/4.jpeg",
+        "tags": [
+          "id:city2"
+        ]
+      }
+    ],
+    "favicon": "data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABIBAMAAACnw650AAAAG1BMVEUAAAD////////////////////////////////rTT7CAAAACXRSTlMA/rebJRBsRd+IYbvdAAABRklEQVR4nO2VPU/DMBRFrcSwu+VrTEFijifWdGOECUbo0L1C/AAk+N8kvs+p30eijh1yh1TPPT1x4lfbuSXnm9090qH0VD6WzGWgXKN+z3VbQFUevEV9yHVjQX+oX6eglZzTxoDW8mGidbuWM7U5J6GKGlpthKoX9WMCqoSqFzUKclw1iJyGuGoQGRBTJZEFlaoksqBCBZEJHVUQmdCoIpGA/M8VWPTKJ73q59AVkHt7cfjpGlASuYtvZ6QKybhlt1HZJ79/mmOWnJivbrj6/RxT52VprW9pgWO4wQf6ii+wD78QATpQX23vugKipqOGHFvU6szckGOLWlAc//ukMqCjKKsMKBabCFQaKkWk0lBku1FSKYiLoFIQF0EloSBESWXsmQ2H1FilRVAp6JTN3jyATGjuAKqnDqCPcpITh+KDfJglZ5R/PoY5CcXic14AAAAASUVORK5CYII="
+  },
+  {
+    "name": "Creative Upscale",
+    "file": "creative-upscale.js",
+    "author": "Liu Liu",
+    "description": "Generate up to 4x upscaled image from the input with crisp details.",
+    "tags": [
+      "image-to-image",
+      "wz"
+    ],
+    "baseColor": "0x00CC82",
+    "images": [
+      {
+        "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/tree-after.jpg",
+        "tags": [
+          "id:tree",
+          "view:after"
+        ]
+      },
+      {
+        "url": "https://scripts.drawthings.ai/scripts/creative-upscale/assets/tree-before.jpeg",
+        "tags": [
+          "id:tree",
+          "view:before"
+        ]
+      }
+    ],
+    "favicon": "data:image/png;base64,data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEgAAABIBAMAAACnw650AAAAG1BMVEUAAAD////////////////////////////////rTT7CAAAACXRSTlMA/rebJRBsRd+IYbvdAAABRklEQVR4nO2VPU/DMBRFrcSwu+VrTEFijifWdGOECUbo0L1C/AAk+N8kvs+p30eijh1yh1TPPT1x4lfbuSXnm9090qH0VD6WzGWgXKN+z3VbQFUevEV9yHVjQX+oX6eglZzTxoDW8mGidbuWM7U5J6GKGlpthKoX9WMCqoSqFzUKclw1iJyGuGoQGRBTJZEFlaoksqBCBZEJHVUQmdCoIpGA/M8VWPTKJ73q59AVkHt7cfjpGlASuYtvZ6QKybhlt1HZJ79/mmOWnJivbrj6/RxT52VprW9pgWO4wQf6ii+wD78QATpQX23vugKipqOGHFvU6szckGOLWlAc//ukMqCjKKsMKBabCFQaKkWk0lBku1FSKYiLoFIQF0EloSBESWXsmQ2H1FilRVAp6JTN3jyATGjuAKqnDqCPcpITh+KDfJglZ5R/PoY5CcXic14AAAAASUVORK5CYII="
+  },
+  {
+    "name": "SD Ultimate Upscale",
+    "file": "sd-ultimate-upscale.js",
+    "author": "Gongster",
+    "description": "Generate high-quality, high-resolution images from low-resolution inputs, while preserving fine details and textures.",
+    "tags": [
+      "image-to-image"
+    ]
+  }
+]
