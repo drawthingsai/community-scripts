@@ -654,7 +654,9 @@ function render (promptData, batchCount){
         if (!overrideModels){
             //Apply configuration changes, if any
             finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
-            finalConfiguration.loras = promptData.configuration.loras;
+            if (promptData.configuration && promptData.configuration.loras) {
+               finalConfiguration.loras = promptData.configuration.loras;
+               }
             debug.print(finalConfiguration.model);
         }
     }
