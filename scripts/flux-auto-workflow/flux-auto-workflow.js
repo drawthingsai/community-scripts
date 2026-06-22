@@ -34,6 +34,7 @@ const customStyle = [
 
 const version = "v4.3";
 var promptsSource = pipeline.prompts.prompt;
+var negativePromptSource = pipeline.prompts.negativePrompt;
 
 const themePreview = [
   "data:image/png;base64,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",
@@ -1918,6 +1919,7 @@ if (batchCount > 20) {
 }
 
 var prompts = pipeline.prompts.prompt;
+var negativePrompt = ""; 
 if (workflow == 0 || workflow == 1) {
   const promptsInput = requestFromUser(
     `Flux Auto Workflow ${version}`,
@@ -1928,15 +1930,18 @@ if (workflow == 0 || workflow == 1) {
           "❖  Prompt Setting",
           " •   Support multiple prompts batch generation, a blank line between each prompt.\n •   Use ⬆︎ Shift + ↵ Enter to break line. iPadOS / iOS requires an external keyboard.",
           [
-            this.textField(promptsSource, " Write your prompts here.", true, 410),
+            this.textField(promptsSource, " Write your prompts here.", true, 300),
+            this.textField(negativePromptSource," Write your negative prompt here.", true, 50), 
             this.slider(batchCount, this.slider.fractional(0), 1, maxCount, "❖  Batch count of each prompt")
           ]
         )
       ];
     }
   );
+  // Grab all the inputs for use later. 
   prompts = promptsInput[0][0];
-  batchCount = promptsInput[0][1];
+  negativePrompt = promptsInput[0][1];
+  batchCount = promptsInput[0][2];
 }
 const promptsArray = prompts.split('\n\n').filter(prompts => prompts.trim() !== '');
 const promptsCount = promptsArray.length;
@@ -2237,7 +2242,7 @@ if (workflow == 0) {
         } else {
           configuration.guidanceScale = 4.5;
         }
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: negativePrompt });
       } else if (mode == 1) {
         console.log(`🟠 Balance Mode ‣ ❶ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
         schnellLora = loras;
@@ -2249,7 +2254,7 @@ if (workflow == 0) {
         configuration.sampler = 15;
         configuration.shift = 1.0;
         configuration.steps = 4;
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: negativePrompt }); 
         console.log(`🟠 Balance Mode ‣ ❷ Refining the image    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime} `);
         if (detail == 0) {
           configuration.loras = [];
@@ -2267,7 +2272,7 @@ if (workflow == 0) {
           configuration.steps = 8;
         }
         configuration.controls = [];
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: negativePrompt });  
       } else if (mode == 2) {
         console.log(`🔴 Quality Mode ‣ Running the Flux Dev    ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
         configuration.controls = controls;
@@ -2285,7 +2290,7 @@ if (workflow == 0) {
           configuration.guidanceScale = 3.5;
           configuration.steps = 20;
         }
-        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: null });
+        pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: negativePrompt });
       }
     }
   }
@@ -2296,7 +2301,7 @@ if (workflow == 0) {
       const completedBatches = batchCount * s + i + 1;
       const eTime = completedBatches > 1 ? estimateTime(start, completedBatches - 1, totalBatches) : ``;
       console.log(`🟢 Running the ${currentModel}   ⚙︎ Image batch progress ‣ ${completedBatches}/${totalBatches}${eTime}`);
-      pipeline.run({ configuration: configuration, prompt: promptsArray[s] });
+      pipeline.run({ configuration: configuration, prompt: promptsArray[s], negativePrompt: negativePrompt });  
     }
   }
 } else if (workflow == 2) {
