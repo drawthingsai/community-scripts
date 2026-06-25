@@ -1,79 +1,107 @@
 //@api-1.0
 // dynamic prompts
 // author: zanshinmu
-// v3.5.9.1
+// v3.7.1
 // Discord Thread for Dynamic Prompts:
 // https://discord.com/channels/1038516303666876436/1207467278426177736
 /**
- * Documentation for "Dynamic Prompts" Script (Version 3.5.9.1) for "Draw Things"
+ * Dynamic Prompts Script Documentation (Version 3.7.1) for Draw Things
  *
- * This script generates dynamic prompts for the "Draw Things" application. Customize it to enhance your creative experience.
+ * OVERVIEW:
+ * This script enables dynamic prompt generation in the Draw Things application.
+ * Users can customize the script to create diverse and inspiring prompts.
  *
- * Modifying Categories:
- * - Categories are thematic elements like 'Locale', 'Adjective', etc.
- * - To add a new category: Include it in the 'categories' object (e.g., "Futuristic": ["cybernetic", "AI-driven"]).
- * - To modify an existing category: Add or remove elements directly in the category's list.
+ * CORE FEATURES:
  *
- * Dynamic Prompt Strings:
- * - The Prompts string structures your generated prompts.
- * - Use curly braces {} to include category elements. Examples:
- *   - Single element: "{Locale}" might generate "neon-lit city."
- *   - Multiple elements: "{Adjective:2}" can give "rainy, bustling."
- *   - Random range: "{Object:1-3}" could return "hovercar" or "hovercar, android, neon sign."
+ * 1. Categories
+ *    - Thematic elements like 'Locale', 'Adjective', etc.
+ *    - Add new categories in 'categories' object:
+ *      Example: "Futuristic": ["cybernetic", "AI-driven"]
+ *    - Modify existing categories by editing their lists
  *
- * BatchCount:
- * - BatchCount sets the number of prompts to generate.
- * - Change its value with the slider to control output (e.g., `BatchCount = 15;` for fifteen prompts).
+ * 2. Dynamic Prompt Syntax
+ *    Use curly braces {} to include category elements:
+ *    - Single element: {Locale} → "neon-lit city"
+ *    - Multiple elements: {Adjective:2} → "rainy, bustling"
+ *    - Random range: {Object:1-3} → "hovercar" or "hovercar, android, neon sign"
  *
- * Customize your script to create diverse and inspiring prompts for "Draw Things."
+ * 3. Prompts Object
+ *    - Contains prompts randomly selected when UI Prompt mode is disabled
+ *    - Each prompt can have a configuration object with pipeline settings
+ *    - Example structure:
+ *      {
+ *        prompt: "wide shot of {weather} {locale}",
+ *        label: "Landscape Scene",      // Added in 3.6: friendly name
+ *        configuration: {
+ *          guidanceScale: [2, 4],      // Random value between 2-4
+ *          sampler: 1,                 // IMPORTANT: Must use number, not name
+ *          steps: 20
+ *        }
+ *      }
  *
- * User Interface:
- * - Use UI Prompt:
- *   Process the prompt in the UI box instead of selecting random prompts.
- 
- * - Lock configuration:
- *   When selecting random prompts, do not change configurations.
- 
- * - Iterate Mode:
- *   Iterated generation of all combinations of dynamic prompt.  Best used with UI Prompt.
- *   BatchCount is not used in Iterate mode. Iterate mode can create very large numbers.
- *   To reduce the numbers, eliminate categories from your prompt.
+ * 4. Configuration Settings
+ *    IMPORTANT: For sampler settings, you may use numbers or names
+ *    (see Sampler Types table below)
+ *
+ *    Numeric Values (3.6):
+ *    - Two numbers = random range
+ *      Example: guidanceScale:[2,4] → random between 2-4
+ *    - Three+ numbers = random selection
+ *      Example: guidanceScale:[2, 3, 3.2, 4] → picks one value
+ *
+ *    Other Settings:
+ *    - clipLText/openClipGText: Support wildcards if enabled
+ *    - label: Provides friendly name for prompts (added in 3.6)
+ *
+ * 5. User Interface Controls
+ *
+ *    Main Options:
+ *    - UI Prompt: Process prompts from UI box instead of random selection
+ *    - Lock Configuration: Prevents config changes, random selection only generates prompts
+ *    - Override Canvas: Customize canvas size, HRF, steps
+ *
+ *    Generation Settings:
+ *    - RenderCount: Controls number of prompts generated (adjust via slider)
+ *    - Iterate Mode:
+ *      • Generates all prompt combinations
+ *      • Best used with UI Prompt
+ *      • RenderCount ignored
+ *      • Can generate large numbers; reduce by limiting categories
+ *
+ *    System Options:
+ *    - Download Models: Auto-downloads referenced models (default: enabled)
+ *    - Debug Mode: Prints diagnostic information to console
+ *
+ * 6. Seed Modes
+ *    - Random: Generates new random seed
+ *    - Increment: Adds 1 to existing seed
+ *    - Static: Maintains same seed
+ *
+ * 7. Output Options
+ *    - Save rendered images to specified directory
+ *    - Note: 'Saved Generated Images' setting is separate
+ *    - Future updates will allow custom output filenames
+ *    - Not compatible with batch size > 1
+ *
+ * 8. Sampler Types
+ *    Use these numbers or the names in configuration
+ *
+ *    DPMPP_2M_KARRAS: 0       EULER_A: 1
+ *    DDIM: 2                  PLMS: 3
+ *    DPMPP_SDE_KARRAS: 4      UNI_PC: 5
+ *    LCM: 6                   EULER_A_SUBSTEP: 7
+ *    DPMPP_SDE_SUBSTEP: 8     TCD: 9
+ *    EULER_A_TRAILING: 10     DPMPP_SDE_TRAILING: 11
+ *    DPMPP_2M_AYS: 12        EULER_A_AYS: 13
+ *    DPMPP_SDE_AYS: 14       DPMPP_2M_TRAILING: 15
+ *    DDIM_TRAILING: 16
  */
-
 //Default example prompt for UI demonstrating category use
-const defaultPrompt = "wide-angle shot of {weather} {time} {locale}"
-
-/* Following are the prompts randomly selected from if UI Prompt mode isn't enabled.
-   Modify prompts to provide dynamic prompts with LoRAs which will be randomly selected from if a valid dynamic prompt is not found in the UI.
- 
-   As of 3.0.1 there can be a 'configuration' object for each prompt which contains arbitrary settings which will be passed on to the pipeline at runtime.  These settings correspond to the possible values of pipeline.configuration
- 
-   There is an important caveat: Sampler is tricky because it looks like a string with the sampler name but it's actually an integer from a lookup table, so you want to find the number that corresponds to the desired sampler and use that instead (without quotes).
- 
- Here is the current sampler lookup table:
- SamplerType = {
- DPMPP_2M_KARRAS: 0,
- EULER_A: 1,
- DDIM: 2,
- PLMS: 3,
- DPMPP_SDE_KARRAS: 4,
- UNI_PC: 5,
- LCM: 6,
- EULER_A_SUBSTEP: 7,
- DPMPP_SDE_SUBSTEP: 8,
- TCD: 9,
- EULER_A_TRAILING: 10,
- DPMPP_SDE_TRAILING: 11,
- DPMPP_2M_AYS: 12,
- EULER_A_AYS: 13,
- DPMPP_SDE_AYS: 14,
- DPMPP_2M_TRAILING: 15,
- DDIM_TRAILING: 16
-}
- */
-
+const defaultPrompt = "wide-angle shot of {weather} {time} {locale}";
+//Prompts object containing dynamic prompts and configurations
 const prompts = [
     {
+    label: "Schnell photo dynamic colors",
     prompt: "{colors:1-3} dominant {camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "FLUX.1 [schnell] (8-bit)",
@@ -81,9 +109,11 @@ const prompts = [
             { file: "AntiBlur v1.0 [dev]", weight: 0.4}
             ],
     configuration:
-        {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
+        {width:1152,height:896,steps:2,sampler:"EULER_A_TRAILING",guidanceScale:[2.5,4.5],separateClipL:true,
+            clipLText:"Photograph, sensual, professional {cliptones}",resolutionDependentShift:true}
     },
     {
+    label: "Schnell photo",
     prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "FLUX.1 [schnell] (8-bit)",
@@ -91,9 +121,11 @@ const prompts = [
             { file: "AntiBlur v1.0 [dev]", weight: 0.4}
             ],
     configuration:
-        {width:1152,height:896,steps:2,sampler:10,guidanceScale:2.5,clipLText:"Photograph, sensual, professional",resolutionDependentShift:true}
+        {width:1152,height:896,steps:2,sampler:"EULER_A_TRAILING",guidanceScale:[2.5,4.5],separateClipL:true,
+            clipLText:"Photograph, sensual, professional {cliptones}",resolutionDependentShift:true}
     },
     {
+    label: "RVXL4.0 photo",
     prompt: "{camera} shot of a {cyborg}, {pose} in {weather} {time} {locale}",
     negativePrompt: "NSFW, nude, blurry, 3d, drawing, anime",
     model: "RealVisXL v4.0",
@@ -102,7 +134,7 @@ const prompts = [
         { file: "Pixel Art XL v1.1", weight: 0.4 }
     ],
     configuration:
-        {width:1024,height:1024,steps:28,sampler:0,guidanceScale:4.0}
+        {width:1024,height:1024,steps:[28,20,32],sampler:"DPMPP_2M_KARRAS",guidanceScale:[2.5,4.5]}
     }
     
   // Add more prompt objects as needed
@@ -111,134 +143,220 @@ const prompts = [
 
 // Categories definition: This is where you add your dynamic categories.
 const categories = {
-    cyborg: [
+  "cyborg": [
     "{adjective} cyborg man, {hairstyle} {haircolor} hair, {features}, wearing {malestyle}",
     "{adjective} cyborg woman, {hairstyle} {haircolor} hair, {features} wearing {style}"
-    ],
-    time: [
+  ],
+  "time": [
     "morning",
     "noon",
     "night",
     "midnight",
     "sunset",
     "sunrise"
-    ],
-    camera: [
-        "full body",
-        "medium",
-        "close_up",
-        "establishing"
-    ],
-    locale: [
-        "cityscape",
-          "street",
-          "alley",
-          "marketplace",
-          "industrial zone",
-          "waterfront",
-          "forest",
-          "rooftop",
-          "bridge",
-          "park"
-     ],
-     weather: [
-        "rainy",
-        "smoggy",
-        "stormy",
-        "dusty"
-    ],
-    adjective: [
-        "beautiful",
-        "moody",
-        "cute",
-        "tired",
-        "injured",
-        "cyborg",
-        "muscular"
-    ],
-    style: [
-        "cyberpunk street", "dark gothic", "military armor", "elegant kimono", "eveningwear dress", "corpo uniform", "tech bodysuit"
-    ],
-    hairstyle: [
-        "long",
-        "medium",
-        "shaved",
-        "short",
-        "wet",
-        "punk"
-    ],
-    haircolor: [
-        "red",
-        "blonde",
-        "colored",
-        "brunette",
-        "natural",
-        "streaked"
-    ],
-    colors: [
-        "red",
-        "blue",
-        "green",
-        "yellow",
-        "orange",
-        "purple",
-        "pink",
-        "brown",
-        "black",
-        "white",
-        "gray",
-        "cyan",
-        "magenta",
-        "teal",
-        "olive",
-        "maroon",
-        "navy",
-        "lime",
-        "indigo",
-        "gold",
-        "silver",
-        "bronze",
-        "salmon",
-        "coral",
-        "turquoise",
-        "peach",
-        "lavender",
-        "emerald",
-        "ruby",
-        "sapphire"
-    ],
-    features: [
-        "{colors} glowing cyborg eyes",
-        "smoking",
-        "tech brella with {colors} glowing accents",
-        "cyborg arm",
-        "cyborg legs",
-        "optics implant",
-        "tech goggles"
-    ],
-    pose: [
-        "action pose",
-        "poses",
-        "model pose",
-        "relaxing",
-        "sitting"
-    ],
-    malestyle: [
-                "leather",
-                "denim",
-                "silk",
-                ]
+  ],
+  "camera": [
+    "full body",
+    "medium",
+    "close_up",
+    "establishing"
+  ],
+  "locale": [
+    "A neon-lit skyline with towering skyscrapers, holographic billboards flicker above rain-slicked streets where autonomous vehicles glide past crowds dressed in futuristic fashion.",
+    "A neon-lit street pulses amidst towering skyscrapers with holographic ads, flanked by enigmatic alleys where rogue androids gather.",
+    "A neon-lit alley pulses with holographic ads and shadowy figures navigating rain-drenched cobblestones beneath towering skyscrapers.",
+    "A neon-lit bazaar thrives with life, dominated by towering holographic billboards and bustling vendors selling futuristic gadgets amid the hum of hover vehicles and shadowy figures exchanging encrypted data.",
+    "An expansive cyberpunk metropolis illuminated by neon lights, featuring towering industrial edifices and bustling harbors shrouded in perpetual twilight.",
+    "A vibrant riverside vista with skyscrapers casting holographic ads onto an artificial waterway, enveloped by relentless rain, capturing the dynamic spirit of a bustling cyberpunk metropolis.",
+    "A sprawling cyberpunk metropolis bathes under the glow of neon lights, where towering skyscrapers and holographic billboards illuminate rain-drenched streets.",
+    "A neon-lit rooftop overlooks an urban sprawl, with skyscrapers boasting holographic ads and drones navigating through smoggy skies.",
+    "A neon-lit bridge spans over the rain-soaked metropolis, alive with holographic billboards and bustling autonomous vehicles.",
+    "A neon-drenched urban expanse where towering holographic billboards dominate rain-slicked streets, alive with augmented reality ads and robotic vendors beneath a sky teeming with drones.",
+    "A bustling neon-lit metropolis where skyscrapers glisten with holographic ads and rain-slick streets hum with hovercars navigating through crowded alleys.",
+    "A vibrant neon-lit metropolis where towering skyscrapers and digital billboards cast an electric glow over the bustling, gritty streets awash with advanced technology.",
+    "Under a rain-soaked neon-lit skyline, towering skyscrapers and digital advertisements illuminate bustling streets where autonomous vehicles navigate past rogue androids mingling with futuristic fashion crowds at the vibrant bazaar beneath holographic billboards.",
+    "'A neon-drenched avenue buzzes with life beneath skyscrapers adorned with digital displays, where augmented reality ads blend seamlessly among futuristic fashionistas and rain-slicked streets pulse under towering buildings illuminated by holographic billboards amidst autonomous vehicles navigating through crowds in cybernetic attire.'",
+    "A neon-lit plaza buzzes beneath towering skyscrapers, where holographic displays flicker over rain-slicked streets filled with autonomous vehicles and futuristic fashionistas.",
+    "A neon-soaked boulevard thrums beneath towering skyscrapers and flickering holographic displays, where autonomous vehicles glide past avant-garde fashion-clad crowds on rain-drenched streets pulsing with life under glowing billboards; sleek hovercars weave through the futuristic cityscape adorned by cybernetic pedestrians.",
+    "A neon-lit avenue beneath skyscrapers draped in digital displays pulses with energy, where augmented reality ads mingle among futuristic fashionistas on rain-slicked streets alive with the hum of autonomous vehicles weaving through crowds clad in cybernetic attire under a canopy of towering buildings and holographic billboards.",
+    "A neon-drenched boulevard pulses beneath towering skyscrapers, alive with flickering holographic displays and sleek autonomous vehicles gliding past avant-garde crowds, while rain-slicked streets hum under glowing billboards where hovercars weave through futuristic cityscapes teeming with cybernetic pedestrians.",
+    "A vibrant, rain-slicked skyline with towering skyscrapers and digital advertisements cast neon hues over bustling streets filled with autonomous vehicles; nearby illuminated alleys pulse beneath looming towers where rogue androids mingle among crowds dressed in futuristic fashion at a buzzing bazaar under holographic billboards.",
+    "Neon lights bathe the rain-slicked streets beneath skyscrapers adorned with digital billboards and autonomous vehicles weaving through crowds clad in futuristic fashion, while holographic displays flicker above sleek hovercars gliding past cybernetic pedestrians in avant-garde attire."
+  ],
+  "weather": [
+    "rainy",
+    "smoggy",
+    "stormy",
+    "dusty"
+  ],
+  "adjective": [
+    "beautiful",
+    "moody",
+    "cute",
+    "tired",
+    "injured",
+    "cyborg",
+    "muscular"
+  ],
+  "style": [
+    "cyberpunk street",
+    "dark gothic",
+    "military armor",
+    "elegant kimono",
+    "eveningwear dress",
+    "corpo uniform",
+    "tech bodysuit"
+  ],
+  "hairstyle": [
+    "long",
+    "medium",
+    "shaved",
+    "short",
+    "wet",
+    "punk"
+  ],
+  "haircolor": [
+    "red",
+    "blonde",
+    "colored",
+    "brunette",
+    "natural",
+    "streaked"
+  ],
+  "colors": [
+    "red",
+    "blue",
+    "green",
+    "yellow",
+    "orange",
+    "purple",
+    "pink",
+    "brown",
+    "black",
+    "white",
+    "gray",
+    "cyan",
+    "magenta",
+    "teal",
+    "olive",
+    "maroon",
+    "navy",
+    "lime",
+    "indigo",
+    "gold",
+    "silver",
+    "bronze",
+    "salmon",
+    "coral",
+    "turquoise",
+    "peach",
+    "lavender",
+    "emerald",
+    "ruby",
+    "sapphire"
+  ],
+  "features": [
+    "{colors} glowing cyborg eyes",
+    "smoking",
+    "tech brella with {colors} glowing accents",
+    "cyborg arm",
+    "cyborg legs",
+    "optics implant",
+    "tech goggles"
+  ],
+  "pose": [
+    "action pose",
+    "poses",
+    "model pose",
+    "relaxing",
+    "sitting"
+  ],
+  "malestyle": [
+    "leather",
+    "denim",
+    "silk"
+  ],
+  "cliptones": [
+    "Shrouded in perpetual twilight",
+    "Overtaken by an eerie, pulsing gloom",
+    "Bathed in the glow of ominous neon",
+    "A tapestry of light and cutting-edge innovation",
+    "Where steel and circuitry meet the sky",
+    "Pulsating with the rhythm of progress",
+    "Scarred by the remnants of a forgotten era",
+    "A labyrinth of rust and neglected dreams",
+    "Shadows dance upon crumbling facades",
+    "Electric with the buzz of underground resistance",
+    "Graffiti-scarred walls whisper tales of defiance",
+    "The underbelly of society, exposed and raw",
+    "Veiled in a mist of intrigue and mystery",
+    "Where neon illusions beckon the brave",
+    "Secrets hide in every shadowy alleyway",
+    "A kaleidoscope of chaos, sound, and fury",
+    "Sensory overload in a sea of humanity",
+    "The city's frenetic heartbeat is palpable",
+    "Echoes of abandonment in empty streets",
+    "Nature's slow reclaiming of forgotten zones",
+    "Silence hangs heavy, punctuated by the wind"
+  ]
 };
 
 //Version
-const versionString = "v3.5.9.1";
+const versionString = "v3.7.1";
 //Maximum iterations for Iterate Mode, this is a good value for everything
 //Macs with more resources can probably set this much higher
 const maxIter = 500;
 
-//Sure, you can turn this on if you like your console cluttered. :P
-const DEBUG = false;
+//store selected prompt data and UI config
+let userPrompt = '';
+let uiPrompt = '';
+const UICONFIG = pipeline.configuration;
 
+// UI
+const categoryNames = Object.keys(categories).join(', ');
+const seedOptions = ["Random","Increment","Static"];
+const batchOptions=["1","2","3","4"];
+const okButton = "Start";
+const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
+const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
+                  " located in the script's 'const prompts' object.";
+
+const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
+  return [
+    this.section(header, aboutText, [
+      this.section("Seed Mode", "", [this.segmented(1, seedOptions),
+      this.slider(10, this.slider.fractional(0), 1, 2000, "render count")]),
+      this.section("Batch Size", "", [this.segmented(0, batchOptions)]),
+      this.section("Output:", "Output rendered images to custom location", [
+        this.directory(`${filesystem.pictures.path}`)]),
+      this.switch(false, "Enter UI Prompt"),
+      this.switch(false, "Lock configuration"),
+      this.switch(false, "Override Canvas"),
+      this.switch(false, "Iterate Mode"),
+      this.switch(true, "Download Models"),
+      this.switch(false, "Debug")
+    ])
+  ];
+});
+
+// Parse UI input
+const seedMode = userSelection[0][0][0];
+const renderCount = userSelection[0][0][1];
+const batchCount = userSelection[0][1][0]+1;
+const outputDir = userSelection[0][2][0];
+const useUiPrompt = userSelection[0][3];
+const overrideModels = userSelection[0][4];
+const overrideCanvas = userSelection[0][5];
+const iterateMode = userSelection[0][6];
+const downloadModels = userSelection[0][7];
+const DEBUG = userSelection[0][8];
+
+//Throw error if batch size > 1 with save to directory
+if (batchCount > 1 && outputDir){
+    throw new Error("Batch size over 1 is incompatible with save to directory.");
+}
+
+//DEBUG CLASS
 class DebugPrint {
   static Level = Object.freeze({
     INFO: 'INFO',
@@ -287,49 +405,68 @@ class DebugPrint {
 
 // Initiate debug logger, set state to DEBUG;
 const debug = new DebugPrint(DEBUG);
-//store selected prompt data and UI config
-let userPrompt = '';
-let uiPrompt = '';
-const UICONFIG = pipeline.configuration;
-
-// UI
-const categoryNames = Object.keys(categories).join(', ');
-const seedOptions = ["Random","Increment","Static"];
-const okButton = "Start";
-const header = "Dynamic Prompts " + `${versionString}` + " by zanshinmu";
-const aboutText = "Selects randomly from " + `${prompts.length} dynamic prompts`+
-                  " located in the script's 'const prompts' object.";
-
-const userSelection = requestFromUser("Dynamic Prompts", okButton, function() {
-  return [
-    this.section(header, aboutText, [
-      this.section("Seed Mode", "", [this.segmented(1, seedOptions),
-             this.slider(10, this.slider.fractional(0), 1, 2000, "batch count")]),
-      this.section("Output:", "Output rendered images to custom location", [
-        this.directory(`${filesystem.pictures.path}`)]),
-      this.switch(false, "Enter UI Prompt"),
-      this.switch(false, "Lock configuration"),
-      this.switch(false, "Iterate Mode"),
-      this.switch(true, "Download Models"),
-    ])
-  ];
-});
-
-// Parse UI input
-const seedMode = userSelection[0][0][0];
-const batchCount = userSelection[0][0][1];
-const outputDir = userSelection[0][1][0];
-const useUiPrompt = userSelection[0][2];
-const overrideModels = userSelection[0][3];
-const iterateMode = userSelection[0][4];
-const downloadModels = userSelection[0][5];
-
 
 if (iterateMode){
     console.log("Iterate Mode");
 }
 
+// Data for Canvas Override
+const CANVAS_OVERRIDE = {
+  "canvas": [
+    {
+      "pass": "2",
+      "width": 768,
+      "height": 768
+    },
+    {
+      "pass": "1",
+      "width": 960,
+      "height": 768
+    }
+  ],
+  "config": {
+    "hrf": false,
+    "strength": 0.42,
+    "steps": 0
+  }
+};
 
+if (overrideCanvas) {
+     const userSelection = requestFromUser("Dynamic Prompts: Override Canvas", "Go!", function() {
+         return [
+                     this.section(
+                                  "Hi-Res Fix",
+                                  "Set 2nd pass resolution",
+                                  [
+                                  this.size(1280, 1024),
+                                  this.switch(false, "HRF"),
+                                  this.slider(.42, this.slider.percent, .01, 1, "strength"),
+                                  ]
+                                  ),
+                     this.section(
+                                  "1st pass resolution",
+                                  "Set first pass resoltion",
+                                  [
+                                  this.size(768, 768)
+                                  ]
+                                  ),
+                     this.section(
+                                  "Set rendering steps",
+                                  "Higher than 0 enables override",
+                                  [
+                                  this.slider(0, this.slider.fractional(0), 1, 150, "Steps")
+                                  ]
+                                  )
+                 ];
+     });
+    CANVAS_OVERRIDE["canvas"][1].width = userSelection[1][0].width;
+    CANVAS_OVERRIDE["canvas"][1].height = userSelection[1][0].height;
+    CANVAS_OVERRIDE["canvas"][0].width = userSelection[0][0].width;
+    CANVAS_OVERRIDE["canvas"][0].height = userSelection[0][0].height;
+    CANVAS_OVERRIDE["config"].hrf = userSelection[0][1];
+    CANVAS_OVERRIDE["config"].strength = userSelection[0][2];
+    CANVAS_OVERRIDE["config"].steps = userSelection[2][0];
+}
 
 if (useUiPrompt) {
     const userSelection = requestFromUser("Dynamic Prompts: UI Prompt", okButton, function() {
@@ -338,7 +475,7 @@ if (useUiPrompt) {
                 this.section("{category}","Replaces category with random item", []),
                 this.section("{category:2}","Replaces category with 2 random items", []),
                 this.section("{category:1-3}","Replaces category with 1 to 3 random items", []),
-            this.section("UI Prompt", "Modify the dynamic prompt to your desire", [
+                this.section("UI Prompt", "Modify the dynamic prompt to your desire", [
                 this.textField(defaultPrompt, pipeline.prompts.prompt, true, 80),
                 this.section("Available Categories", categoryNames, [])
                 ])
@@ -365,9 +502,9 @@ if(useUiPrompt){
 if (!iterateMode){
     const bstart = Date.now();
     const bmessage = "✔︎ Total render time ‣";
-    for (let i = 0; i < batchCount; i++){
-        let batchCountLog = `Rendering ${i + 1} of ${batchCount}`;
-        console.warn(batchCountLog);
+    for (let i = 0; i < renderCount; i++){
+        let renderCountLog = `Rendering ${i + 1} of ${renderCount}`;
+        console.warn(renderCountLog);
         render(getDynamicPrompt(), i);
     }
     elapsed(bstart, message = bmessage);
@@ -500,9 +637,13 @@ function* generatePrompts(dynamicPrompt) {
 function selectRandomPrompt() {
   // Generate a random index to select a random prompt
   const randomIndex = Math.floor(Math.random() * prompts.length);
-  console.log(`Selected dynamic prompt ${randomIndex} of ${prompts.length}`)
   // Get the randomly selected prompt object
   const selectedPrompt = prompts[randomIndex];
+  if (typeof selectedPrompt.label !== 'undefined'){
+      console.log(`Selected dynamic prompt ${randomIndex} of ${prompts.length}: '${selectedPrompt.label}'`);
+  } else {
+      console.log(`Selected dynamic prompt ${randomIndex} of ${prompts.length}`);
+  }
   // Extract prompt string, LoRa filenames, and weights
   const myprompt = selectedPrompt.prompt;
   const myneg = selectedPrompt.negativePrompt;
@@ -510,7 +651,7 @@ function selectRandomPrompt() {
   const loras = [];
   let myconfig = {};
   if (typeof selectedPrompt.configuration !== 'undefined'){
-      myconfig = selectedPrompt.configuration;
+      myconfig = processDynConfig(selectedPrompt.configuration);
   } else {
       myconfig = {...UICONFIG};
   }
@@ -524,6 +665,71 @@ function selectRandomPrompt() {
   const promptData = { prompt: myprompt, negativePrompt: myneg, configuration: myconfig };
   debug.print(JSON.stringify(promptData), DebugPrint.Level.WARN);
   return promptData;
+}
+
+function dynamicClipText(config){
+    if (typeof config.separateClipL !=='undefined' && config.separateClipL){
+        if (typeof config.clipLText !=='undefined'){
+            config.clipLText = replaceWildcards(config.clipLText, categories);
+            debug.print(`Dynamic ClipL: ${config.clipLText}\n`);
+        }
+    }
+    if (typeof config.separateOpenClipG !=='undefined' && config.separateOpenClipG){
+        if (typeof config.openClipGText !=='undefined'){
+            config.openClipGText = replaceWildcards(config.openClipGText, categories);
+            debug.print(`Dynamic ClipG: ${config.openClipGText}\n`);
+        }
+    }
+    return config;
+}
+
+function processDynConfig(config) {
+  // Loop through each key-value pair in the configuration object
+  for (const [key, value] of Object.entries(config)) {
+    if (Array.isArray(value) && value.every(isNumeric)) { // Check if the value is a numeric array
+      if (value.length === 2) { // Array with 2 elements: treat as range
+        const [min, max] = value;
+        
+        // Validation for numeric range
+        if (!isValidNumericRange(min, max)) {
+          debug.print(`Invalid numeric range for '${key}': [${min}, ${max}]`);
+          continue;
+        }
+        
+        // Generate random value within the range, preserving type (int/float)
+        const generatedValue = getRandomValueInRange(min, max);
+        config[key] = generatedValue; // Replace array with the generated random value
+      } else { // Array with 3 or more elements: select one randomly
+        if (!value.every(isNumeric)) {
+          debug.print(`Non-numeric values in array for '${key}': ${value}`);
+          continue;
+        }
+        
+        const selectedValue = value[Math.floor(Math.random() * value.length)];
+        config[key] = selectedValue; // Replace array with the selected random value
+      }
+    }
+  }
+  return dynamicClipText(config); // Return the modified configuration object
+}
+
+// Helper function to validate if a value is numeric (int or float)
+function isNumeric(value) {
+  return typeof value === 'number' && !isNaN(value);
+}
+
+// Helper function to validate a numeric range (ensures both ends are numeric and min <= max)
+function isValidNumericRange(min, max) {
+  return isNumeric(min) && isNumeric(max) && min <= max;
+}
+
+// Helper function to generate a random value within a range, preserving the type (int/float)
+function getRandomValueInRange(min, max) {
+  if (Number.isInteger(min) && Number.isInteger(max)) { // Both ends are integers
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  } else { // Floats involved, generate a random float within the range, capped at 2 decimals
+    return Math.round((Math.random() * (max - min) + min) * 100) / 100;
+  }
 }
 
 function resolveModel(model){
@@ -541,6 +747,7 @@ function resolveModel(model){
 // Resolves LoRAs to filenames
 function resolveLoras(loras){
     if (typeof loras === 'undefined'){
+        debug.print("Undefined Loras");
         return loras;
     }
     const FILESUFFIX = ".ckpt";
@@ -549,7 +756,7 @@ function resolveLoras(loras){
         let myLora = loras[i];
         let myname = myLora.file;
         if (typeof myname === 'undefined'){
-            debug.print("Empty LoRA", DebugPrint.level.WARN);
+            debug.print("Empty LoRA", DebugPrint.Level.WARN);
             continue;
         }
         if (!myname.endsWith(FILESUFFIX)){
@@ -634,7 +841,7 @@ function elapsed (start, message = "✔︎ Render time ‣"){
 }
 
 // Run pipeline
-function render (promptData, batchCount){
+function render (promptData, renderCount){
     // start timer
     let start = Date.now();
     // set generated prompt
@@ -655,12 +862,16 @@ function render (promptData, batchCount){
             //Apply configuration changes, if any
             finalConfiguration = Object.assign(UICONFIG, promptData.configuration);
             finalConfiguration.loras = promptData.configuration.loras;
+            finalConfiguration.sampler = resolveSampler(promptData.configuration.sampler);
             debug.print(finalConfiguration.model);
         }
     }
-    // Batch > 1 is no bueno
-    finalConfiguration.batchSize = 1;
+    finalConfiguration.batchSize = batchCount;
     finalConfiguration.seed = mySeed;
+    
+    if (overrideCanvas){
+        finalConfiguration = canvasOverride(finalConfiguration);
+    }
     
     canvas.clear();
     
@@ -673,30 +884,63 @@ function render (promptData, batchCount){
     //Output render time elapsed
     elapsed(start);
     //Save Image if enabled
-    savetoImageDir(finalConfiguration, batchCount);
+    savetoImageDir(finalConfiguration, renderCount);
 }
 
-function savetoImageDir(config, batchCount){
-    if(outputDir) {
-          // worked around metadata bug by forcing our config onto the UI before saving
-          // but that didn't work consistently so trying something else
-          // Crazy thing is the metadata is borked with canvas.save, but fine
-          // if you reload the image in DT
-          const SamplerTypeReverse = Object.fromEntries(
-              Object.entries(SamplerType).map(([key, value]) => [value, key])
-          );
-          const seed = config.seed;
-          let model = "undefined";
-          if (typeof config.model !== 'undefined'){
-             model = sanitize(config.model.replace('.ckpt'));
-          }
-          const sampler = sanitize(SamplerTypeReverse[config.sampler]);
-          const steps = config.steps;
-          const time = getTimeString();
-          let savePath = `${outputDir}/${model}_${sampler}_${steps}_${time}_${batchCount}.png`
-          console.log(`Saving to ${savePath}\n\n`);
-          canvas.saveImage(savePath, true); // save the image currently on canvas to a file.
+function canvasOverride(finalConfiguration){
+    if (CANVAS_OVERRIDE["config"].steps){
+        finalConfiguration.steps = CANVAS_OVERRIDE["config"].steps;
     }
+    finalConfiguration.hiresFixStrength = CANVAS_OVERRIDE["config"].strength;
+    finalConfiguration.hiresFix = CANVAS_OVERRIDE["config"].hrf;
+    finalConfiguration.height = CANVAS_OVERRIDE["canvas"][0].height;
+    finalConfiguration.width = CANVAS_OVERRIDE["canvas"][0].width;
+    finalConfiguration.hiresFixHeight = CANVAS_OVERRIDE["canvas"][1].height;
+    finalConfiguration.hiresFixWidth = CANVAS_OVERRIDE["canvas"][1].width;
+    debug.print(`Canvas Override: ${JSON.stringify(CANVAS_OVERRIDE)}\n`);
+    console.log("Canvas Override Active\n");
+    return finalConfiguration;
+}
+
+function savetoImageDir(config, renderCount){
+    if(outputDir && batchCount > 1) {
+            //BatchSize 1 is normal, save just the image
+            saveImage(config, renderCount);
+        }
+    // The workaround implementation was a failure
+}
+
+function resolveSampler(sampler){
+    if (Number.isInteger(sampler) && sampler >= 0 && sampler < Object.keys(SamplerType).length ) {
+            const samplerString = Object.keys(SamplerType).find(key => SamplerType[key] === sampler);
+            debug.print(`Sampler ${sampler} resolved to: ${samplerString}`);
+            return sampler; //
+        } else if (typeof sampler === 'string') {
+            // Handle string case
+            const index = SamplerType[sampler.toUpperCase()];
+            debug.print(`Sampler ${sampler} resolved to: ${index}`);
+            return index;
+        } else {
+            debug.print("Error: sampler not resolved");
+            return undefined;
+        }
+}
+
+function saveImage(config, renderCount){
+    const SamplerTypeReverse = Object.fromEntries(
+        Object.entries(SamplerType).map(([key, value]) => [value, key])
+    );
+    const seed = config.seed;
+    let model = "undefined";
+    if (typeof config.model !== 'undefined'){
+       model = sanitize(config.model.replace('.ckpt'));
+    }
+    const sampler = sanitize(SamplerTypeReverse[config.sampler]);
+    const steps = config.steps;
+    const time = getTimeString();
+    const savePath = `${outputDir}/${model}_${sampler}_${steps}_${time}_${renderCount}.png`
+    console.log(`Saving to ${savePath}\n\n`);
+    canvas.saveImage(savePath, true); // save the image currently on canvas to a file.
 }
 
 function sanitize(text) {
